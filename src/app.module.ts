@@ -1,6 +1,9 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { FinalModule } from './phases/final/final.module';
+import { GroupModule } from './phases/group/group.module';
+import { PhasesModule } from './phases/base/phases.module';
 
 @Module({
   imports: [
@@ -19,6 +22,9 @@ import { TypeOrmModule } from '@nestjs/typeorm';
         synchronize: false,
       }),
     }),
+    PhasesModule,
+    GroupModule,
+    FinalModule,
   ],
 })
 export class AppModule {}
