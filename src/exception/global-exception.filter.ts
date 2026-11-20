@@ -13,6 +13,7 @@ import { ErrorCase } from './error-case.enum';
 const STATUS_BY_CASE: Record<ErrorCase, HttpStatus> = {
   [ErrorCase.NOT_FOUND]: HttpStatus.NOT_FOUND,
   [ErrorCase.ALREADY_EXISTS]: HttpStatus.CONFLICT,
+  [ErrorCase.INVALID_STATE]: HttpStatus.CONFLICT,
   [ErrorCase.INVALID_OPERATION]: HttpStatus.BAD_REQUEST,
 };
 
