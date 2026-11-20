@@ -1,0 +1,77 @@
+import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { CreateFinalDto } from './dto/create-final.dto';
+import { FinalResponseDto } from './dto/final-response.dto';
+import { UpdateFinalDto } from './dto/update-final.dto';
+import { Final } from './entities/final.entity';
+import { FinalMapper } from './mappers/final.mapper';
+import { PhasesService } from '../base/phases.service';
+import { ApplicationException } from '../../exception/application.exception';
+import { ErrorCase } from '../../exception/error-case.enum';
+
+@Injectable()
+export class FinalService {
+  constructor(
+    @InjectRepository(Final)
+    private readonly finalsRepository: Repository<Final>,
+    private readonly finalMapper: FinalMapper,
+    private readonly phasesService: PhasesService,
+  ) {}
+
+  async create(dto: CreateFinalDto): Promise<FinalResponseDto> {
+    const entity = this.finalMapper.toEntity(dto);
+    const saved = await this.finalsRepository.save(entity);
+    return this.finalMapper.toResponseDto(saved);
+  }
+
+  async findAll(): Promise<FinalResponseDto[]> {
+    const finals = await this.finalsRepository.find({ order: { order: 'ASC' } });
+    return this.finalMapper.toResponseDtoList(finals);
+  }
+
+  async findOne(id: number): Promise<FinalResponseDto> {
+    const final = await this.finalsRepository.findOne({ where: { id } });
+    if (!final) {
+      throw new ApplicationException(
+        ErrorCase.NOT_FOUND,
+        `Final with id ${id} not found`,
+      );
+    }
+    return this.finalMapper.toResponseDto(final);
+  }
+
+  async update(id: number, dto: UpdateFinalDto): Promise<FinalResponseDto> {
+    const final = await this.finalsRepository.findOne({ where: { id } });
+    if (!final) {
+      throw new ApplicationException(
+        ErrorCase.NOT_FOUND,
+        `Final with id ${id} not found`,
+      );
+    }
+
+    const merged = this.finalMapper.mergeEntity(final, dto);
+    const saved = await this.finalsRepository.save(merged);
+    return this.finalMapper.toResponseDto(saved);
+  }
+
+  async remove(id: number): Promise<{ message: string }> {
+    const final = await this.finalsRepository.findOne({ where: { id } });
+    if (!final) {
+      throw new ApplicationException(
+        ErrorCase.NOT_FOUND,
+        `Final with id ${id} not found`,
+      );
+    }
+
+    if (await this.phasesService.hasMatches(id)) {
+      throw new ApplicationException(
+        ErrorCase.INVALID_OPERATION,
+        `Final #${id} has matches and cannot be deleted`,
+      );
+    }
+
+    await this.finalsRepository.remove(final);
+    return { message: `Final #${id} deleted successfully` };
+  }
+}
