@@ -19,7 +19,7 @@ historias de usuario. Aplica las skills `pruebas-api`, `api-rest` y
    Cada criterio de aceptación debe tener al menos un caso. Entrégala y
    **espera aprobación**; no generes la colección todavía.
 2. **Colección**: con la matriz aprobada, genera o actualiza
-   `postman/GestionDeportiva.postman_collection.json` y
+   `postman/MsSports.postman_collection.json` y
    `postman/Local.postman_environment.json`, en la carpeta de la historia.
 3. **Ejecución**: si se te pide y la API está corriendo, ejecuta Newman.
 4. **Reporte**: totales y detalle de cada fallo.

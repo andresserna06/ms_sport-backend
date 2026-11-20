@@ -9,7 +9,7 @@ description: Pruebas del proyecto - matriz de casos trazada a criterios de acept
 
 - **Integración (principal)**: Postman, peticiones reales a la API en ejecución.
   Es la evidencia de entrega y la única forma de probar las entidades sin frontend
-  (Deporte, Habilidad, Fase, Grupo).
+  (Sport, Skill, Phase, Group).
 - **Unitarias**: Jest (`*.spec.ts`) para mappers (obligatorio) y reglas de
   services con lógica no trivial (contratos solapados, tabla de posiciones).
 
@@ -37,11 +37,11 @@ Casos límite que no deben faltar en este proyecto:
 
 ## Colección Postman
 
-- Archivos: `postman/GestionDeportiva.postman_collection.json` (v2.1) y
+- Archivos: `postman/MsSports.postman_collection.json` (v2.1) y
   `postman/Local.postman_environment.json` (solo `baseUrl` y variables; sin secretos).
 - Carpetas por historia (`GD-01 Deportes`, `GC-02 Inscripciones`…), en orden de dependencias.
 - El nombre de cada request empieza con el ID del caso de la matriz.
-- Cada request tiene `pm.test` que valida al menos el código HTTP y, cuando
+- Scripts y nombres de `pm.test` en inglés. Cada request tiene `pm.test` que valida al menos el código HTTP y, cuando
   aplique, campos del cuerpo.
 - Los IDs creados se guardan con `pm.collectionVariables.set(...)` para los
   requests siguientes.
@@ -56,7 +56,7 @@ Casos límite que no deben faltar en este proyecto:
 Ejecución:
 
 ```bash
-newman run postman/GestionDeportiva.postman_collection.json -e postman/Local.postman_environment.json
+newman run postman/MsSports.postman_collection.json -e postman/Local.postman_environment.json
 ```
 
 ## Reporte

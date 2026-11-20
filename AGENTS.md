@@ -32,7 +32,7 @@ contradice este archivo o las skills, gana este archivo.
 ## Alcance de frontend
 
 - Entidades SOLO backend (sin pantallas; se prueban únicamente con Postman):
-  **Deporte, Habilidad, Fase, Grupo**.
+  **Deporte (`Sport`), Habilidad (`Skill`), Fase (`Phase`), Grupo (`Group`)**.
 - El resto de entidades del alcance tienen backend y frontend en React.
 - El trabajo de frontend se hace en el repositorio del frontend siguiendo su
   propio `AGENTS.md`; este archivo solo rige ms_sports.
@@ -62,7 +62,7 @@ y actúa estrictamente con ese rol durante la tarea.
 2. Implementación en modo plan primero; luego construir solo lo aprobado.
 3. `architect` revisa → se corrige solo lo reportado → `architect` vuelve a revisar.
 4. `tester` genera matriz → se aprueba → genera colección → se ejecuta con Newman.
-5. Revisión humana y pull request (ver `flujo-git`).
+5. Revisión del integrante antes de hacer commit y push (ver `flujo-git`).
 
 ## Reglas generales para cualquier agente
 
@@ -75,11 +75,16 @@ y actúa estrictamente con ese rol durante la tarea.
   comandos y qué colección usaste, y los resultados observados.
 - No cambies código productivo para que una prueba pase sin explicar por qué.
 - No crees endpoints exclusivos para pruebas.
-- En commits y pull requests no te agregues como coautor ni dejes firma de la
+- Nunca hagas commit ni push sin mostrar antes los cambios y recibir aprobación.
+- En los commits no te agregues como coautor ni dejes firma de la
   herramienta de IA (ni `Co-Authored-By:` ni "Generated with…"). Ver `flujo-git`.
 - Trabaja solo dentro del módulo de la historia asignada; si necesitas tocar un
   archivo compartido (app.module, entidades de otro módulo, configuración), avísalo.
-- Código, nombres de clases y rutas en español, siguiendo el diagrama de clases.
+- **Todo el código en inglés**: clases, métodos, variables, archivos, carpetas,
+  rutas, tablas, columnas, enums, comentarios y nombres de pruebas. Las entidades
+  del diagrama se traducen con el glosario de `modelo-relacional`; no inventes otra traducción.
+  Solo van en español los textos que ve el usuario final (mensajes de error y correos).
+  La documentación (`docs/`, especificaciones) y las respuestas al integrante, en español.
 
 ## Decisiones pendientes del grupo
 

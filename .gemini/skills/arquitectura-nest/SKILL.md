@@ -5,6 +5,14 @@ description: Arquitectura por capas en NestJS para este proyecto. Úsala al crea
 
 # Arquitectura por capas en NestJS
 
+## Idioma del código
+
+Todo el código va en inglés: clases, métodos, variables, archivos, carpetas,
+rutas, tablas, columnas, enums, comentarios y nombres de pruebas. Las entidades
+se nombran según el glosario de `modelo-relacional`.
+Solo van en español los textos que ve el usuario final: mensajes de error
+(`message`) y contenido de los correos.
+
 ## Flujo de dependencias
 
 ```
@@ -17,20 +25,21 @@ Ninguna capa salta a otra. El controller nunca habla con el ORM.
 
 ## Estructura de un módulo
 
-Un módulo de Nest por agregado del dominio (deportes, equipos, jugadores,
-habilidades, torneos, fases, partidos…). Las asociaciones viven en el módulo
-del dueño natural de la relación (ej. contratos jugador-equipo en `equipos`).
+Un módulo de Nest por agregado del dominio, con nombre en inglés (`sports`,
+`teams`, `players`, `skills`, `tournaments`, `phases`, `matches`…). Las
+asociaciones viven en el módulo del dueño natural de la relación (ej. contratos
+jugador-equipo en `teams`).
 
 ```
-src/<modulo>/
-├── <modulo>.module.ts
-├── controllers/   <entidad>.controller.ts
-├── services/      <entidad>.service.ts
-├── repositories/  <entidad>.repository.ts           (interfaz + token)
-│                  <entidad>.typeorm.repository.ts   (implementación con TypeORM)
-├── entities/      <entidad>.entity.ts               (modelo persistente)
-├── dtos/          crear-<entidad>.dto.ts, actualizar-<entidad>.dto.ts, <entidad>-respuesta.dto.ts
-└── mappers/       <entidad>.mapper.ts
+src/<module>/
+├── <module>.module.ts
+├── controllers/   <entity>.controller.ts
+├── services/      <entity>.service.ts
+├── repositories/  <entity>.repository.ts           (interfaz + token)
+│                  <entity>.typeorm.repository.ts   (implementación con TypeORM)
+├── entities/      <entity>.entity.ts               (modelo persistente)
+├── dtos/          create-<entity>.dto.ts, update-<entity>.dto.ts, <entity>-response.dto.ts
+└── mappers/       <entity>.mapper.ts
 ```
 
 ## Responsabilidades
@@ -55,7 +64,7 @@ src/<modulo>/
 - Se define una interfaz y se inyecta por token; el service depende de la interfaz,
   no de la implementación del ORM (principio D).
 - No contiene reglas de negocio; sí puede tener consultas específicas
-  (`existeNombre`, `tieneAsociaciones`, `contratosSolapados`).
+  (`existsByName`, `hasDependencies`, `findOverlappingContracts`).
 
 **Entity (modelo persistente)**
 - Solo estructura y relaciones (ver `modelo-relacional`). Nunca se devuelve al cliente.
@@ -70,7 +79,7 @@ src/<modulo>/
 **Mapper**
 - Funciones o clase sin estado: entidad → DTO de respuesta, DTO de entrada → entidad/datos.
 - Prohibido: reglas de negocio, consultas, dependencias HTTP, inyectar repositorios.
-- Debe tener pruebas unitarias con Jest (`<entidad>.mapper.spec.ts`).
+- Debe tener pruebas unitarias con Jest (`<entity>.mapper.spec.ts`).
 
 ## SOLID
 
@@ -82,29 +91,29 @@ src/<modulo>/
 Ejemplo de registro por token:
 
 ```ts
-// repositories/deporte.repository.ts
-export const DEPORTE_REPOSITORY = Symbol('DEPORTE_REPOSITORY');
-export interface DeporteRepository {
-  buscarPorId(id: number): Promise<Deporte | null>;
-  existeNombre(nombre: string, excluirId?: number): Promise<boolean>;
-  guardar(deporte: Deporte): Promise<Deporte>;
+// repositories/sport.repository.ts
+export const SPORT_REPOSITORY = Symbol('SPORT_REPOSITORY');
+export interface SportRepository {
+  findById(id: number): Promise<Sport | null>;
+  existsByName(name: string, excludeId?: number): Promise<boolean>;
+  save(sport: Sport): Promise<Sport>;
 }
 
-// repositories/deporte.typeorm.repository.ts
+// repositories/sport.typeorm.repository.ts
 @Injectable()
-export class DeporteTypeOrmRepository implements DeporteRepository {
-  constructor(@InjectRepository(Deporte) private readonly orm: Repository<Deporte>) {}
+export class SportTypeOrmRepository implements SportRepository {
+  constructor(@InjectRepository(Sport) private readonly orm: Repository<Sport>) {}
   // ...
 }
 
-// deportes.module.ts  (imports: [TypeOrmModule.forFeature([Deporte])])
+// sports.module.ts  (imports: [TypeOrmModule.forFeature([Sport])])
 providers: [
-  DeporteService,
-  { provide: DEPORTE_REPOSITORY, useClass: DeporteTypeOrmRepository },
+  SportService,
+  { provide: SPORT_REPOSITORY, useClass: SportTypeOrmRepository },
 ],
 
-// services/deporte.service.ts
-constructor(@Inject(DEPORTE_REPOSITORY) private readonly repo: DeporteRepository) {}
+// services/sport.service.ts
+constructor(@Inject(SPORT_REPOSITORY) private readonly repo: SportRepository) {}
 ```
 
 ## Dependencias entre módulos
@@ -116,7 +125,7 @@ constructor(@Inject(DEPORTE_REPOSITORY) private readonly repo: DeporteRepository
 ## Base de datos y migraciones
 
 - TypeORM + MySQL, `synchronize: false`. Todo cambio de esquema es una migración:
-  `npm run migration:generate -- src/migrations/<NombreEnPascalCase>` y luego `npm run migration:run`.
+  `npm run migration:generate -- src/migrations/<NameInPascalCase>` y luego `npm run migration:run`.
 - Revisar la migración generada antes de commitearla; nunca editar una migración ya subida a `main`.
 
 ## Configuración global (main.ts, ya existe parcialmente)
