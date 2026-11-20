@@ -1,8 +1,4 @@
-import {
-  ConflictException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateFinalDto } from './dto/create-final.dto';
@@ -11,6 +7,8 @@ import { UpdateFinalDto } from './dto/update-final.dto';
 import { Final } from './entities/final.entity';
 import { FinalMapper } from './mappers/final.mapper';
 import { PhasesService } from '../base/phases.service';
+import { ApplicationException } from '../../exception/application.exception';
+import { ErrorCase } from '../../exception/error-case.enum';
 
 @Injectable()
 export class FinalService {
@@ -35,7 +33,10 @@ export class FinalService {
   async findOne(id: number): Promise<FinalResponseDto> {
     const final = await this.finalsRepository.findOne({ where: { id } });
     if (!final) {
-      throw new NotFoundException(`Final with id ${id} not found`);
+      throw new ApplicationException(
+        ErrorCase.NOT_FOUND,
+        `Final with id ${id} not found`,
+      );
     }
     return this.finalMapper.toResponseDto(final);
   }
@@ -43,7 +44,10 @@ export class FinalService {
   async update(id: number, dto: UpdateFinalDto): Promise<FinalResponseDto> {
     const final = await this.finalsRepository.findOne({ where: { id } });
     if (!final) {
-      throw new NotFoundException(`Final with id ${id} not found`);
+      throw new ApplicationException(
+        ErrorCase.NOT_FOUND,
+        `Final with id ${id} not found`,
+      );
     }
 
     const merged = this.finalMapper.mergeEntity(final, dto);
@@ -54,11 +58,17 @@ export class FinalService {
   async remove(id: number): Promise<{ message: string }> {
     const final = await this.finalsRepository.findOne({ where: { id } });
     if (!final) {
-      throw new NotFoundException(`Final with id ${id} not found`);
+      throw new ApplicationException(
+        ErrorCase.NOT_FOUND,
+        `Final with id ${id} not found`,
+      );
     }
 
     if (await this.phasesService.hasMatches(id)) {
-      throw new ConflictException(`Final #${id} has matches and cannot be deleted`);
+      throw new ApplicationException(
+        ErrorCase.INVALID_OPERATION,
+        `Final #${id} has matches and cannot be deleted`,
+      );
     }
 
     await this.finalsRepository.remove(final);

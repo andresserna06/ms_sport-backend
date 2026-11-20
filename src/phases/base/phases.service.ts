@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Match } from '../../matches/entities/match.entity';
@@ -6,6 +6,8 @@ import { PhaseResponseDto } from './dto/phase-response.dto';
 import { Phase } from './entities/phase.entity';
 import { PhaseMapper } from './mappers/phase.mapper';
 import { PhasesRepository } from './repositories/phases.repository';
+import { ApplicationException } from '../../exception/application.exception';
+import { ErrorCase } from '../../exception/error-case.enum';
 
 @Injectable()
 export class PhasesService {
@@ -32,7 +34,10 @@ export class PhasesService {
       relations: { matches: true },
     });
     if (!phase) {
-      throw new NotFoundException(`Phase with id ${id} not found`);
+      throw new ApplicationException(
+        ErrorCase.NOT_FOUND,
+        `Phase with id ${id} not found`,
+      );
     }
     return this.phaseMapper.toResponseDto(phase);
   }

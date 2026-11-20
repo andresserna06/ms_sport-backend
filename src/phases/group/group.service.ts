@@ -1,8 +1,4 @@
-import {
-  ConflictException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateGroupDto } from './dto/create-group.dto';
@@ -11,6 +7,8 @@ import { UpdateGroupDto } from './dto/update-group.dto';
 import { Group } from './entities/group.entity';
 import { GroupMapper } from './mappers/group.mapper';
 import { PhasesService } from '../base/phases.service';
+import { ApplicationException } from '../../exception/application.exception';
+import { ErrorCase } from '../../exception/error-case.enum';
 
 @Injectable()
 export class GroupService {
@@ -35,7 +33,10 @@ export class GroupService {
   async findOne(id: number): Promise<GroupResponseDto> {
     const group = await this.groupsRepository.findOne({ where: { id } });
     if (!group) {
-      throw new NotFoundException(`Group with id ${id} not found`);
+      throw new ApplicationException(
+        ErrorCase.NOT_FOUND,
+        `Group with id ${id} not found`,
+      );
     }
     return this.groupMapper.toResponseDto(group);
   }
@@ -43,7 +44,10 @@ export class GroupService {
   async update(id: number, dto: UpdateGroupDto): Promise<GroupResponseDto> {
     const group = await this.groupsRepository.findOne({ where: { id } });
     if (!group) {
-      throw new NotFoundException(`Group with id ${id} not found`);
+      throw new ApplicationException(
+        ErrorCase.NOT_FOUND,
+        `Group with id ${id} not found`,
+      );
     }
 
     const merged = this.groupMapper.mergeEntity(group, dto);
@@ -54,11 +58,17 @@ export class GroupService {
   async remove(id: number): Promise<{ message: string }> {
     const group = await this.groupsRepository.findOne({ where: { id } });
     if (!group) {
-      throw new NotFoundException(`Group with id ${id} not found`);
+      throw new ApplicationException(
+        ErrorCase.NOT_FOUND,
+        `Group with id ${id} not found`,
+      );
     }
 
     if (await this.phasesService.hasMatches(id)) {
-      throw new ConflictException(`Group #${id} has matches and cannot be deleted`);
+      throw new ApplicationException(
+        ErrorCase.INVALID_OPERATION,
+        `Group #${id} has matches and cannot be deleted`,
+      );
     }
 
     await this.groupsRepository.remove(group);

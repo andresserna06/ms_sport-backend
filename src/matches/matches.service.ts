@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Phase } from '../phases/base/entities/phase.entity';
@@ -8,6 +8,8 @@ import { UpdateMatchDto } from './dto/update-match.dto';
 import { Match, MatchStatus } from './entities/match.entity';
 import { MatchMapper } from './mappers/match.mapper';
 import { MatchesRepository } from './repositories/matches.repository';
+import { ApplicationException } from '../exception/application.exception';
+import { ErrorCase } from '../exception/error-case.enum';
 
 @Injectable()
 export class MatchesService {
@@ -53,7 +55,8 @@ export class MatchesService {
     const match = await this.findMatch(id);
 
     if (match.status !== MatchStatus.SCHEDULED) {
-      throw new BadRequestException(
+      throw new ApplicationException(
+        ErrorCase.INVALID_OPERATION,
         `Match #${id} is ${match.status} and can no longer be updated`,
       );
     }
@@ -85,13 +88,23 @@ export class MatchesService {
       where: { id },
       relations: { phase: true },
     });
-    if (!match) throw new NotFoundException(`Match with id ${id} not found`);
+    if (!match) {
+      throw new ApplicationException(
+        ErrorCase.NOT_FOUND,
+        `Match with id ${id} not found`,
+      );
+    }
     return match;
   }
 
   private async findPhase(id: number): Promise<Phase> {
     const phase = await this.phasesRepository.findOneBy({ id });
-    if (!phase) throw new NotFoundException(`Phase with id ${id} not found`);
+    if (!phase) {
+      throw new ApplicationException(
+        ErrorCase.NOT_FOUND,
+        `Phase with id ${id} not found`,
+      );
+    }
     return phase;
   }
 
@@ -100,10 +113,16 @@ export class MatchesService {
 
     if (match.status === MatchStatus.FINISHED) {
       if (match.homeScore === null || match.awayScore === null) {
-        throw new BadRequestException('A finished match needs both scores');
+        throw new ApplicationException(
+          ErrorCase.INVALID_OPERATION,
+          'A finished match needs both scores',
+        );
       }
     } else if (hasScores) {
-      throw new BadRequestException('Scores can only be set when the match is FINISHED');
+      throw new ApplicationException(
+        ErrorCase.INVALID_OPERATION,
+        'Scores can only be set when the match is FINISHED',
+      );
     }
   }
 }
