@@ -26,6 +26,11 @@ Ejemplos: `feat(contratos): validate overlapping contracts`,
 
 Commits pequeños; no mezclar dos historias en un commit.
 
+**Autoría:** los commits y los pull requests son del integrante que los hace.
+Ningún agente se agrega como coautor ni deja firma: nada de líneas
+`Co-Authored-By:`, "Generated with…", "🤖" ni enlaces a la herramienta de IA,
+ni en el mensaje del commit ni en la descripción del PR.
+
 ## Archivos compartidos
 
 `app.module.ts`, configuración global, entidades de otros módulos y las

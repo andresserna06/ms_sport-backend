@@ -75,6 +75,8 @@ y actúa estrictamente con ese rol durante la tarea.
   comandos y qué colección usaste, y los resultados observados.
 - No cambies código productivo para que una prueba pase sin explicar por qué.
 - No crees endpoints exclusivos para pruebas.
+- En commits y pull requests no te agregues como coautor ni dejes firma de la
+  herramienta de IA (ni `Co-Authored-By:` ni "Generated with…"). Ver `flujo-git`.
 - Trabaja solo dentro del módulo de la historia asignada; si necesitas tocar un
   archivo compartido (app.module, entidades de otro módulo, configuración), avísalo.
 - Código, nombres de clases y rutas en español, siguiendo el diagrama de clases.
