@@ -1,4 +1,11 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
+import { Phase } from '../../phases/base/entities/phase.entity';
 
 export enum MatchStatus {
   SCHEDULED = 'SCHEDULED',
@@ -22,4 +29,12 @@ export class Match {
 
   @Column({ type: 'int', name: 'away_score', nullable: true })
   awayScore!: number | null;
+
+  @ManyToOne(() => Phase, (phase) => phase.matches, {
+    cascade: false,
+    nullable: false,
+    onDelete: 'RESTRICT',
+  })
+  @JoinColumn({ name: 'phase_id' })
+  phase!: Phase;
 }

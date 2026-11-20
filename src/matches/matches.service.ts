@@ -1,6 +1,7 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { Phase } from '../phases/base/entities/phase.entity';
 import { CreateMatchDto } from './dto/create-match.dto';
 import { MatchResponseDto } from './dto/match-response.dto';
 import { UpdateMatchDto } from './dto/update-match.dto';
@@ -13,39 +14,52 @@ export class MatchesService {
   constructor(
     @InjectRepository(Match)
     private readonly matchesRepository: Repository<Match>,
+    @InjectRepository(Phase)
+    private readonly phasesRepository: Repository<Phase>,
     private readonly customMatchesRepository: MatchesRepository,
     private readonly matchMapper: MatchMapper,
   ) {}
 
   async create(dto: CreateMatchDto): Promise<MatchResponseDto> {
-    const entity = this.matchMapper.toEntity(dto);
-    const saved = await this.matchesRepository.save(entity);
-    return this.matchMapper.toResponseDto(saved);
+    const phase = await this.findPhase(dto.phaseId);
+    const saved = await this.matchesRepository.save(
+      this.matchMapper.toEntity(dto, phase),
+    );
+    return this.findOne(saved.id);
   }
 
   async findAll(): Promise<MatchResponseDto[]> {
-    const matches = await this.matchesRepository.find({ order: { scheduledAt: 'ASC' } });
+    const matches = await this.matchesRepository.find({
+      relations: { phase: true },
+      order: { scheduledAt: 'ASC' },
+    });
     return this.matchMapper.toResponseDtoList(matches);
   }
 
   async findOne(id: number): Promise<MatchResponseDto> {
-    const match = await this.matchesRepository.findOne({ where: { id } });
-    if (!match) {
-      throw new NotFoundException(`Match with id ${id} not found`);
-    }
-    return this.matchMapper.toResponseDto(match);
+    return this.matchMapper.toResponseDto(await this.findMatch(id));
+  }
+
+  async findByPhase(phaseId: number): Promise<MatchResponseDto[]> {
+    await this.findPhase(phaseId);
+    const matches = await this.matchesRepository.find({
+      where: { phase: { id: phaseId } },
+      order: { scheduledAt: 'ASC' },
+    });
+    return this.matchMapper.toResponseDtoList(matches, phaseId);
   }
 
   async update(id: number, dto: UpdateMatchDto): Promise<MatchResponseDto> {
-    const match = await this.matchesRepository.findOne({ where: { id } });
-    if (!match) {
-      throw new NotFoundException(`Match with id ${id} not found`);
-    }
+    const match = await this.findMatch(id);
 
     if (match.status !== MatchStatus.SCHEDULED) {
       throw new BadRequestException(
         `Match #${id} is ${match.status} and can no longer be updated`,
       );
+    }
+
+    if (dto.phaseId !== undefined) {
+      match.phase = await this.findPhase(dto.phaseId);
     }
 
     const merged = this.matchMapper.mergeEntity(match, dto);
@@ -56,18 +70,29 @@ export class MatchesService {
   }
 
   async remove(id: number): Promise<{ message: string }> {
-    const match = await this.matchesRepository.findOne({ where: { id } });
-    if (!match) {
-      throw new NotFoundException(`Match with id ${id} not found`);
-    }
+    const match = await this.findMatch(id);
 
     await this.matchesRepository.remove(match);
     return { message: `Match #${id} deleted successfully` };
   }
 
   async getStatusReport(status: MatchStatus): Promise<MatchResponseDto[]> {
-    const rows = await this.customMatchesRepository.findByStatusReport(status);
-    return this.matchMapper.toResponseDtoList(rows);
+    return this.customMatchesRepository.findByStatusReport(status);
+  }
+
+  private async findMatch(id: number): Promise<Match> {
+    const match = await this.matchesRepository.findOne({
+      where: { id },
+      relations: { phase: true },
+    });
+    if (!match) throw new NotFoundException(`Match with id ${id} not found`);
+    return match;
+  }
+
+  private async findPhase(id: number): Promise<Phase> {
+    const phase = await this.phasesRepository.findOneBy({ id });
+    if (!phase) throw new NotFoundException(`Phase with id ${id} not found`);
+    return phase;
   }
 
   private validateResult(match: Match): void {

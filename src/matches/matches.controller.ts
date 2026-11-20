@@ -28,6 +28,11 @@ export class MatchesController {
     return this.matchesService.findAll();
   }
 
+  @Get('phase/:phaseId')
+  findByPhase(@Param('phaseId', ParseIntPipe) phaseId: number) {
+    return this.matchesService.findByPhase(phaseId);
+  }
+
   @Get('reports/status/:status')
   statusReport(@Param('status', new ParseEnumPipe(MatchStatus)) status: MatchStatus) {
     return this.matchesService.getStatusReport(status);

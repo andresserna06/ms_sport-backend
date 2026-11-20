@@ -1,3 +1,3 @@
-import { PhaseFieldsDto } from '../../base/dto/phase-fields.dto';
+import { PhaseRequestDto } from '../../base/dto/phase-request.dto';
 
-export class CreateGroupDto extends PhaseFieldsDto {}
+export class CreateGroupDto extends PhaseRequestDto {}

@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateFinalDto } from './dto/create-final.dto';
@@ -6,6 +10,7 @@ import { FinalResponseDto } from './dto/final-response.dto';
 import { UpdateFinalDto } from './dto/update-final.dto';
 import { Final } from './entities/final.entity';
 import { FinalMapper } from './mappers/final.mapper';
+import { PhasesService } from '../base/phases.service';
 
 @Injectable()
 export class FinalService {
@@ -13,6 +18,7 @@ export class FinalService {
     @InjectRepository(Final)
     private readonly finalsRepository: Repository<Final>,
     private readonly finalMapper: FinalMapper,
+    private readonly phasesService: PhasesService,
   ) {}
 
   async create(dto: CreateFinalDto): Promise<FinalResponseDto> {
@@ -49,6 +55,10 @@ export class FinalService {
     const final = await this.finalsRepository.findOne({ where: { id } });
     if (!final) {
       throw new NotFoundException(`Final with id ${id} not found`);
+    }
+
+    if (await this.phasesService.hasMatches(id)) {
+      throw new ConflictException(`Final #${id} has matches and cannot be deleted`);
     }
 
     await this.finalsRepository.remove(final);

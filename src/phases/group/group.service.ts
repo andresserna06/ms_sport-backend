@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateGroupDto } from './dto/create-group.dto';
@@ -6,6 +10,7 @@ import { GroupResponseDto } from './dto/group-response.dto';
 import { UpdateGroupDto } from './dto/update-group.dto';
 import { Group } from './entities/group.entity';
 import { GroupMapper } from './mappers/group.mapper';
+import { PhasesService } from '../base/phases.service';
 
 @Injectable()
 export class GroupService {
@@ -13,6 +18,7 @@ export class GroupService {
     @InjectRepository(Group)
     private readonly groupsRepository: Repository<Group>,
     private readonly groupMapper: GroupMapper,
+    private readonly phasesService: PhasesService,
   ) {}
 
   async create(dto: CreateGroupDto): Promise<GroupResponseDto> {
@@ -49,6 +55,10 @@ export class GroupService {
     const group = await this.groupsRepository.findOne({ where: { id } });
     if (!group) {
       throw new NotFoundException(`Group with id ${id} not found`);
+    }
+
+    if (await this.phasesService.hasMatches(id)) {
+      throw new ConflictException(`Group #${id} has matches and cannot be deleted`);
     }
 
     await this.groupsRepository.remove(group);

@@ -7,6 +7,11 @@ export class UpdateMatchDto {
   scheduledAt?: string;
 
   @IsOptional()
+  @IsInt()
+  @Min(1)
+  phaseId?: number;
+
+  @IsOptional()
   @IsEnum(MatchStatus)
   status?: MatchStatus;
 

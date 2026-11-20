@@ -1,9 +1,11 @@
 import {
   Column,
   Entity,
+  OneToMany,
   PrimaryGeneratedColumn,
   TableInheritance,
 } from 'typeorm';
+import { Match } from '../../../matches/entities/match.entity';
 
 @Entity('phases')
 @TableInheritance({ column: { type: 'varchar', name: 'phase_type', length: 10 } })
@@ -18,4 +20,7 @@ export abstract class Phase {
   order!: number;
 
   abstract readonly phaseType: 'GROUP' | 'FINAL';
+
+  @OneToMany(() => Match, (match) => match.phase, { cascade: false })
+  matches?: Match[];
 }

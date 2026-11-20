@@ -1,6 +1,6 @@
 import { IsInt, IsNotEmpty, IsString, MaxLength, Min } from 'class-validator';
 
-export class PhaseFieldsDto {
+export class PhaseRequestDto {
   @IsString()
   @IsNotEmpty()
   @MaxLength(100)
