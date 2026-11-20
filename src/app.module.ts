@@ -2,6 +2,9 @@ import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { MatchesModule } from './matches/matches.module';
+import { FinalModule } from './phases/final/final.module';
+import { GroupModule } from './phases/group/group.module';
+import { PhasesModule } from './phases/base/phases.module';
 
 @Module({
   imports: [
@@ -10,7 +13,7 @@ import { MatchesModule } from './matches/matches.module';
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
-        type: 'mysql',
+        type: 'mysql' as const,
         host: configService.get<string>('DB_HOST'),
         port: configService.get<number>('DB_PORT'),
         username: configService.get<string>('DB_USER'),
@@ -21,6 +24,9 @@ import { MatchesModule } from './matches/matches.module';
       }),
     }),
     MatchesModule,
+    PhasesModule,
+    GroupModule,
+    FinalModule,
   ],
 })
 export class AppModule {}
