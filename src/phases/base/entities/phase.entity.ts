@@ -17,6 +17,5 @@ export abstract class Phase {
   @Column({ type: 'int', name: 'phase_order' })
   order!: number;
 
-  @Column({ type: 'varchar', name: 'phase_type', length: 10 })
-  phaseType!: string;
+  abstract readonly phaseType: 'GROUP' | 'FINAL';
 }
