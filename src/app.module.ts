@@ -5,6 +5,7 @@ import { MatchesModule } from './matches/matches.module';
 import { FinalModule } from './phases/final/final.module';
 import { GroupModule } from './phases/group/group.module';
 import { PhasesModule } from './phases/base/phases.module';
+import { TournamentsModule } from './tournaments/tournaments.module';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { PhasesModule } from './phases/base/phases.module';
     PhasesModule,
     GroupModule,
     FinalModule,
+    TournamentsModule,
   ],
 })
 export class AppModule {}
