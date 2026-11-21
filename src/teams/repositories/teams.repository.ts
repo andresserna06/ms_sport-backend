@@ -2,7 +2,9 @@ import { Injectable } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 
-const TEAM_ASSOCIATIONS: { table: string; column: string }[] = [];
+const TEAM_ASSOCIATIONS: { table: string; column: string }[] = [
+  { table: 'player_contracts', column: 'team_id' },
+];
 
 @Injectable()
 export class TeamsRepository {
