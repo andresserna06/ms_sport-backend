@@ -24,4 +24,14 @@ export class UpdateMatchDto {
   @IsInt()
   @Min(0)
   awayScore?: number;
+
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  homeTeamId?: number;
+
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  awayTeamId?: number;
 }
