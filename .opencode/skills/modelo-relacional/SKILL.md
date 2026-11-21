@@ -53,7 +53,7 @@ Propiedades en camelCase en el código y snake_case en la base de datos.
 | PlayerContract | id, playerId, teamId, startDate, endDate (nullable) | ver reglas de solape en `reglas-dominio`. Es entidad propia, no tabla puente simple, porque guarda historial |
 | Skill | id, name, description | name único |
 | PlayerSkill | playerId, skillId | UNIQUE (playerId, skillId) |
-| Tournament | id, name, sportId, startDate, endDate, registrationDeadline, status, active | FK a Sport |
+| Tournament | id, name, sportId, startDate, enrollmentDeadline, active | FK a Sport (obligatoria); nombre único por deporte. `endDate` y `status` se agregan cuando GC-02/GC-06 los necesiten |
 | Registration | id, tournamentId, teamId, registeredAt | UNIQUE (tournamentId, teamId) |
 | Phase | id, tournamentId, name, sequence, type | UNIQUE (tournamentId, sequence) (`order` es palabra reservada) |
 | Group | id, phaseId, name | UNIQUE (phaseId, name) |

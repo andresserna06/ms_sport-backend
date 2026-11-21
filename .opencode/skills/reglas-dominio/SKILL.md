@@ -72,7 +72,7 @@ no se inventa: se pregunta.
 
 **Torneos (GC-01)**
 - Debe tener un deporte existente y activo.
-- `endDate >= startDate`; `registrationDeadline <= startDate`.
+- `enrollmentDeadline <= startDate` (aún no existe `endDate`).
 - Estados (Propuesta): `SCHEDULED → IN_PROGRESS → FINISHED`, más `CANCELLED`.
   Un torneo se considera **iniciado** cuando su estado es `IN_PROGRESS` o posterior.
 - Dependencias que impiden borrar: fases, inscripciones, partidos.
@@ -82,7 +82,7 @@ no se inventa: se pregunta.
 - El equipo debe estar asociado al deporte del torneo (vía Equipo–Deporte) → si no, 409.
 - Un equipo solo una vez por torneo → 409.
 - No se permiten inscripciones ni retiros si el torneo ya inició o si hoy es
-  posterior a `registrationDeadline` → 409.
+  posterior a `enrollmentDeadline` → 409.
 - (Propuesta) No se puede retirar un equipo que ya está asignado a un grupo o tiene partidos en el torneo → 409.
 
 **Fases (GC-03, GC-05)**
