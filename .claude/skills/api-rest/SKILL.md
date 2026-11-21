@@ -7,11 +7,13 @@ description: Convenciones REST del proyecto - rutas, métodos, códigos HTTP y f
 
 ## Convenciones de rutas
 
-- Recursos en español, plural y kebab-case: `/deportes`, `/habilidades`, `/torneos`.
+- Recursos en inglés, plural y kebab-case: `/sports`, `/skills`, `/tournaments`
+  (nombres según el glosario de `modelo-relacional`).
+- Propiedades del JSON en camelCase e inglés (`startDate`, `homeTeamId`).
 - IDs en la ruta validados con pipe (no numérico → 400).
 - Asociaciones como subrecursos del dueño de la relación.
-- Acciones que no son CRUD (desactivar, finalizar contrato) con `PATCH` sobre un subrecurso con nombre de verbo.
-- Filtros por query string: `?activo=true`, `?vigentes=true`, `?nombre=fut`.
+- Acciones que no son CRUD (desactivar, finalizar contrato) con `PATCH` sobre un subrecurso con verbo en inglés (`/deactivate`, `/end`).
+- Filtros por query string: `?active=true`, `?current=true`, `?name=fut`.
 
 ## Códigos de estado
 
@@ -47,7 +49,8 @@ replica con un filtro global de excepciones:
 Errores de validación de DTOs (400): objeto plano `{ "campo": "mensaje" }`,
 igual que ms_security, porque el frontend lo usa para marcar cada campo del formulario.
 
-`message` siempre en español y entendible por el usuario final.
+`message` es el único texto en español (lo lee el usuario final); las claves
+del JSON y los `errorCase` van en inglés.
 
 ## Respuestas
 
@@ -56,26 +59,26 @@ igual que ms_security, porque el frontend lo usa para marcar cada campo del form
   salvo en los endpoints de consulta agregada (perfil, desarrollo del torneo).
 - Fechas en ISO 8601.
 
-## Mapa de rutas propuesto (mantener sincronizado con Swagger)
+## Mapa de rutas propuesto
 
 | Historia | Rutas |
 |---|---|
-| GD-01 Deportes | `POST/GET /deportes`, `GET/PUT/DELETE /deportes/:id`, `PATCH /deportes/:id/desactivar`, `GET /deportes/:id/subdeportes` |
-| GD-02 Equipos | `POST/GET /equipos`, `GET/PUT/DELETE /equipos/:id`, `PATCH /equipos/:id/desactivar` |
-| GD-03 Equipo-Deporte | `POST/DELETE /equipos/:equipoId/deportes/:deporteId`, `GET /equipos/:id/deportes`, `GET /deportes/:id/equipos` |
-| GD-04 Jugadores | `POST/GET /jugadores`, `GET/PUT/DELETE /jugadores/:id`, `PATCH /jugadores/:id/desactivar` |
-| GD-05 Contratos | `POST /equipos/:equipoId/contratos` (body: jugadorId, fechaInicio, fechaFin?), `PATCH /contratos/:id/finalizar`, `GET /equipos/:id/jugadores?vigentes=true`, `GET /jugadores/:id/equipos` |
-| GD-06 Habilidades | `POST/GET /habilidades`, `GET/PUT/DELETE /habilidades/:id` |
-| GD-07 Habilidad-Jugador | `POST/DELETE /jugadores/:jugadorId/habilidades/:habilidadId`, `GET /jugadores/:id/habilidades`, `GET /habilidades/:id/jugadores` |
-| GD-08 Perfil | `GET /jugadores/:id/perfil`, búsqueda con `GET /jugadores?nombre=` |
-| GC-01 Torneos | `POST/GET /torneos`, `GET/PUT/DELETE /torneos/:id`, `PATCH /torneos/:id/desactivar` |
-| GC-02 Inscripciones | `POST /torneos/:torneoId/inscripciones` (body: equipoId), `DELETE /torneos/:torneoId/inscripciones/:equipoId`, `GET /torneos/:id/inscripciones`, `GET /equipos/:id/torneos` |
-| GC-03 Fases | `POST/GET /torneos/:torneoId/fases`, `GET/PUT/DELETE /fases/:id` |
-| GC-04 Grupos | `POST/GET /fases/:faseId/grupos`, `GET/PUT/DELETE /grupos/:id`, `POST/DELETE /grupos/:grupoId/equipos/:equipoId`, `GET /grupos/:id/equipos` |
-| GC-05 Fase final | Se crea con `POST /torneos/:torneoId/fases` (tipo FINAL); `GET/PUT/DELETE /fases/:id` |
-| GC-06 Partidos | `POST/GET /fases/:faseId/partidos`, `GET /partidos`, `GET/PUT/DELETE /partidos/:id` |
-| GC-07 Resultados y anotaciones | `PUT /partidos/:id/resultado`, `PATCH /partidos/:id/finalizar`, `POST/GET /partidos/:id/anotaciones`, `PUT/DELETE /anotaciones/:id` |
-| GC-08 Desarrollo | `GET /torneos/:id/desarrollo` |
+| GD-01 Deportes | `POST/GET /sports`, `GET/PUT/DELETE /sports/:id`, `PATCH /sports/:id/deactivate`, `GET /sports/:id/subsports` |
+| GD-02 Equipos | `POST/GET /teams`, `GET/PUT/DELETE /teams/:id`, `PATCH /teams/:id/deactivate` |
+| GD-03 Equipo-Deporte | `POST/DELETE /teams/:teamId/sports/:sportId`, `GET /teams/:id/sports`, `GET /sports/:id/teams` |
+| GD-04 Jugadores | `POST/GET /players`, `GET/PUT/DELETE /players/:id`, `PATCH /players/:id/deactivate` |
+| GD-05 Contratos | `POST /teams/:teamId/contracts` (body: playerId, startDate, endDate?), `PATCH /contracts/:id/end`, `GET /teams/:id/players?current=true`, `GET /players/:id/teams` |
+| GD-06 Habilidades | `POST/GET /skills`, `GET/PUT/DELETE /skills/:id` |
+| GD-07 Habilidad-Jugador | `POST/DELETE /players/:playerId/skills/:skillId`, `GET /players/:id/skills`, `GET /skills/:id/players` |
+| GD-08 Perfil | `GET /players/:id/profile`, búsqueda con `GET /players?name=` |
+| GC-01 Torneos | `POST/GET /tournaments`, `GET/PUT/DELETE /tournaments/:id`, `PATCH /tournaments/:id/deactivate` |
+| GC-02 Inscripciones | `POST /tournaments/:tournamentId/registrations` (body: teamId), `DELETE /tournaments/:tournamentId/registrations/:teamId`, `GET /tournaments/:id/registrations`, `GET /teams/:id/tournaments` |
+| GC-03 Fases | `GET /phases?tournamentId=`, `GET /phases/:id`; las fases se crean desde `/groups` o `/finals` con `tournamentId` |
+| GC-04 Grupos | `POST/GET /groups?tournamentId=`, `GET/PATCH/DELETE /groups/:id`, `POST/DELETE /groups/:groupId/teams/:teamId`, `GET /groups/:id/teams` |
+| GC-05 Fase final | `POST/GET /finals?tournamentId=`, `GET/PATCH/DELETE /finals/:id` (tipo `FINAL`) |
+| GC-06 Partidos | `POST/GET /phases/:phaseId/matches`, `GET /matches`, `GET/PUT/DELETE /matches/:id` |
+| GC-07 Resultados y anotaciones | `PUT /matches/:id/result`, `PATCH /matches/:id/finish`, `POST/GET /matches/:id/scoring-events`, `PUT/DELETE /scoring-events/:id` |
+| GC-08 Desarrollo | `GET /tournaments/:id/overview` |
 
 Si una historia necesita una ruta que no está aquí, propónla en la especificación
 antes de implementarla; no la inventes durante la implementación.

@@ -25,9 +25,8 @@ agente inventa otra. Si falta un término, se agrega aquí antes de usarlo.
 | Torneo | `Tournament` | `tournaments` |
 | Inscripción | `Registration` | `registrations` |
 | Fase | `Phase` | `phases` |
-| Grupo | `Group` | `competition_groups` (`group` es palabra reservada en MySQL) |
-| GrupoEquipo | `GroupTeam` | `group_teams` |
-| Final | `KnockoutPhase` (fase tipo `KNOCKOUT`) | dentro de `phases` |
+| Grupo | `Group` (fase tipo `GROUP`) | dentro de `phases` |
+| Final | `Final` (fase tipo `FINAL`) | dentro de `phases` |
 | Partido | `Match` | `matches` |
 | Anotación | `ScoringEvent` | `scoring_events` |
 | Escenario | `Venue` | `venues` |
@@ -38,7 +37,7 @@ agente inventa otra. Si falta un término, se agrega aquí antes de usarlo.
 Estados y tipos (enums en inglés, MAYÚSCULAS):
 - Torneo: `SCHEDULED`, `IN_PROGRESS`, `FINISHED`, `CANCELLED`.
 - Partido: `SCHEDULED`, `IN_PROGRESS`, `FINISHED`, `CANCELLED`.
-- Tipo de fase: `GROUP_STAGE` (fase de grupos), `KNOCKOUT` (fase final).
+- Tipo de fase: `GROUP` (fase de grupos), `FINAL` (fase final).
 
 ## Entidades del alcance
 
@@ -47,7 +46,7 @@ Propiedades en camelCase en el código y snake_case en la base de datos.
 | Entidad | Campos clave | Restricciones |
 |---|---|---|
 | Sport | id, name, description, active, parentSportId (nullable) | name único (sin distinguir mayúsculas, tras trim). Autorrelación 1:N (subdeportes) |
-| Team | id, name, city, foundedAt, active | name único |
+| Team | id, name, city, foundedAt, active, groupId (nullable) | name único; `groupId` FK a `phases.id` (`ON DELETE SET NULL`) |
 | TeamSport | teamId, sportId | PK o UNIQUE (teamId, sportId) |
 | Player | id, documentNumber, firstName, lastName, birthDate, active | documentNumber único |
 | PlayerContract | id, playerId, teamId, startDate, endDate (nullable) | ver reglas de solape en `reglas-dominio`. Es entidad propia, no tabla puente simple, porque guarda historial |
@@ -55,10 +54,9 @@ Propiedades en camelCase en el código y snake_case en la base de datos.
 | PlayerSkill | playerId, skillId | UNIQUE (playerId, skillId) |
 | Tournament | id, name, sportId, startDate, endDate, registrationDeadline, status, active | FK a Sport |
 | Registration | id, tournamentId, teamId, registeredAt | UNIQUE (tournamentId, teamId) |
-| Phase | id, tournamentId, name, sequence, type | UNIQUE (tournamentId, sequence) (`order` es palabra reservada) |
-| Group | id, phaseId, name | UNIQUE (phaseId, name) |
-| GroupTeam | groupId, teamId, phaseId | UNIQUE (groupId, teamId) y UNIQUE (phaseId, teamId) |
-| Match | id, phaseId, groupId (nullable), homeTeamId, awayTeamId, venueId (nullable), scheduledAt, status, homeScore, awayScore, round (nullable), bracketPosition (nullable) | CHECK homeTeamId <> awayTeamId |
+| Phase | id, tournamentId, name, order (`phase_order`), type (`GROUP`/`FINAL`) | FK a Tournament (`RESTRICT`); `name` único por torneo (validado en el service) |
+| Group | fase tipo `GROUP`; relación 1:N con `Team` vía `teams.group_id` | un equipo pertenece como máximo a un grupo |
+| Match | id, phaseId, homeTeamId, awayTeamId, venueId (nullable), scheduledAt, status, homeScore, awayScore, round (nullable), bracketPosition (nullable) | CHECK homeTeamId <> awayTeamId |
 | ScoringEvent | id, matchId, playerId, teamId, minute, type | FK a Match y Player |
 | Venue / SeatingZone / TournamentVenue | según diagrama | UNIQUE (tournamentId, venueId) en TournamentVenue |
 
@@ -67,10 +65,9 @@ Mínimas, solo para notificaciones: Fan (id, name, email), Ticket
 
 ## Correcciones respecto al diagrama original
 
-1. **Grupo–Equipo era 1:N** → pasa a **N:N con GroupTeam**. Un equipo juega
-   varios torneos, así que no puede pertenecer a un solo grupo de por vida.
-   `phaseId` se guarda en GroupTeam para poder imponer "un equipo en un solo
-   grupo por fase" con una restricción UNIQUE.
+1. **Grupo–Equipo se mantiene 1:N** como en el diagrama: un grupo contiene
+   varios equipos y la FK vive en `teams.group_id` (nullable, `ON DELETE SET NULL`).
+   Al eliminar un grupo, sus equipos quedan sin grupo; nunca se eliminan equipos.
 2. **Resultado del partido**: el diagrama no lo tenía. Se guarda en Match
    (`homeScore`, `awayScore`, `status`).
 3. **Fase final y llaves**: Match guarda `round` y `bracketPosition` para poder
@@ -78,17 +75,15 @@ Mínimas, solo para notificaciones: Fan (id, name, email), Ticket
 4. **Partido como clase asociación** de Equipo × Equipo: se implementa con dos
    FK (`homeTeamId`, `awayTeamId`) a Team.
 
-## Herencia Fase → Grupo / Final
+## Herencia Phase → Group / Final
 
-Nota de modelado: en el diagrama Grupo y Final heredan de Fase. En la historia
-GC-04, una fase de grupos *contiene* varios grupos. Se implementa así:
-
-- `phases` es la tabla principal con columna `type` (herencia en tabla única).
-- Una fase `GROUP_STAGE` tiene N registros en `competition_groups` (FK phase_id).
-- Una fase `KNOCKOUT` no tiene grupos; sus partidos usan `round` y `bracketPosition`.
-
-[PENDIENTE] Confirmar con el grupo que esta interpretación coincide con lo que
-espera el docente del diagrama.
+- `Phase` es abstracta, con herencia de tabla única: una sola tabla `phases`
+  y la columna `phase_type` (`GROUP` o `FINAL`) indica el tipo.
+- El orden se guarda en `phase_order` (propiedad `order` en el código).
+- Una fase de grupos se representa con varios `Group` del mismo torneo que
+  comparten el mismo `order` (ej. Grupo A y Grupo B, ambos con `order = 1`).
+- Cada ronda eliminatoria es un `Final` con su `order` (octavos, cuartos,
+  semifinal, final). Sus partidos usan `round` y `bracketPosition`.
 
 ## Reglas generales
 
@@ -100,6 +95,6 @@ espera el docente del diagrama.
   (Sport, Team, Player, Skill, Tournament). La validación de dependencias
   se hace en el service (ver `reglas-dominio`) y la FK debe ser `RESTRICT`.
 - Cascada permitida solo de un agregado hacia sus partes internas cuando la
-  regla lo permita (ej. eliminar un grupo elimina sus filas en GroupTeam, no los equipos).
+  regla lo permita (ej. eliminar un grupo deja `teams.group_id = NULL`, no elimina los equipos).
 - Los cambios de esquema se hacen con migraciones, nunca con sincronización automática.
 - Tablas en inglés, plural y snake_case; columnas en snake_case.

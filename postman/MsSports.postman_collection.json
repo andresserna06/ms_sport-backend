@@ -1,7 +1,7 @@
 {
   "info": {
-    "name": "GestionDeportiva - ms_sports",
-    "description": "Colección unificada de pruebas de integración y demo CRUD para ms_sports.",
+    "name": "MsSports - ms_sports",
+    "description": "Postman v2.1 integration collection for implemented ms_sports routes. Generated test records use unique run identifiers; set the environment token manually.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "auth": {
@@ -20,9 +20,11 @@
       "script": {
         "type": "text/javascript",
         "exec": [
-          "if (!pm.collectionVariables.get('runId')) {",
+          "const requestName = pm.info.requestName || '';",
+          "const startsAutomatedRun = requestName.startsWith('TC-GD06-01') || requestName.startsWith('TC-GD04-01');",
+          "if (!pm.collectionVariables.get('runId') || startsAutomatedRun) {",
           "  const now = Date.now();",
-          "  const runId = String(now).slice(-6);",
+          "  const runId = String(now);",
           "  const baseUserId = 100000 + (now % 800000);",
           "  pm.collectionVariables.set('runId', runId);",
           "  pm.collectionVariables.set('testUserId1', String(baseUserId));",
@@ -37,69 +39,6 @@
     {
       "name": "GD-06 Habilidades",
       "item": [
-        {
-          "name": "Demo CRUD (5 endpoints)",
-          "item": [
-            {
-              "name": "Crear habilidad",
-              "request": {
-                "method": "POST",
-                "header": [
-                  {
-                    "key": "Content-Type",
-                    "value": "application/json"
-                  }
-                ],
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"name\": \"Salto vertical\",\n  \"description\": \"Capacidad de impulso aéreo para bloqueos, rebotes y remates\"\n}"
-                },
-                "url": "{{baseUrl}}/skills"
-              }
-            },
-            {
-              "name": "Listar habilidades",
-              "request": {
-                "method": "GET",
-                "header": [],
-                "url": "{{baseUrl}}/skills"
-              }
-            },
-            {
-              "name": "Consultar habilidad por id",
-              "request": {
-                "method": "GET",
-                "header": [],
-                "url": "{{baseUrl}}/skills/5"
-              }
-            },
-            {
-              "name": "Actualizar habilidad",
-              "request": {
-                "method": "PUT",
-                "header": [
-                  {
-                    "key": "Content-Type",
-                    "value": "application/json"
-                  }
-                ],
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"name\": \"Salto vertical\",\n  \"description\": \"Capacidad de impulso y alcance aéreo en jugadas defensivas y ofensivas\"\n}"
-                },
-                "url": "{{baseUrl}}/skills/5"
-              }
-            },
-            {
-              "name": "Eliminar habilidad",
-              "request": {
-                "method": "DELETE",
-                "header": [],
-                "url": "{{baseUrl}}/skills/5"
-              }
-            }
-          ]
-        },
         {
           "name": "Pruebas automatizadas (22 casos)",
           "item": [
@@ -743,85 +682,6 @@
     {
       "name": "GD-04 Jugadores",
       "item": [
-        {
-          "name": "Demo CRUD (7 endpoints)",
-          "item": [
-            {
-              "name": "Crear jugador",
-              "request": {
-                "method": "POST",
-                "header": [
-                  {
-                    "key": "Content-Type",
-                    "value": "application/json"
-                  }
-                ],
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"userId\": 1,\n  \"document\": \"1053812345\",\n  \"position\": \"Delantero\",\n  \"jerseyNumber\": 9\n}"
-                },
-                "url": "{{baseUrl}}/players"
-              }
-            },
-            {
-              "name": "Listar jugadores activos",
-              "request": {
-                "method": "GET",
-                "header": [],
-                "url": "{{baseUrl}}/players"
-              }
-            },
-            {
-              "name": "Consultar jugador por id",
-              "request": {
-                "method": "GET",
-                "header": [],
-                "url": "{{baseUrl}}/players/1"
-              }
-            },
-            {
-              "name": "Actualizar jugador",
-              "request": {
-                "method": "PUT",
-                "header": [
-                  {
-                    "key": "Content-Type",
-                    "value": "application/json"
-                  }
-                ],
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"userId\": 1,\n  \"document\": \"1053812345\",\n  \"position\": \"Mediocampista\",\n  \"jerseyNumber\": 10\n}"
-                },
-                "url": "{{baseUrl}}/players/1"
-              }
-            },
-            {
-              "name": "Desactivar jugador",
-              "request": {
-                "method": "PATCH",
-                "header": [],
-                "url": "{{baseUrl}}/players/1/deactivate"
-              }
-            },
-            {
-              "name": "Activar jugador",
-              "request": {
-                "method": "PATCH",
-                "header": [],
-                "url": "{{baseUrl}}/players/1/activate"
-              }
-            },
-            {
-              "name": "Eliminar jugador",
-              "request": {
-                "method": "DELETE",
-                "header": [],
-                "url": "{{baseUrl}}/players/1"
-              }
-            }
-          ]
-        },
         {
           "name": "Pruebas automatizadas (24 casos)",
           "item": [
@@ -1529,52 +1389,6 @@
       "name": "GD-07 Habilidad-Jugador",
       "item": [
         {
-          "name": "Demo CRUD (4 endpoints)",
-          "item": [
-            {
-              "name": "Asignar habilidad a jugador",
-              "request": {
-                "method": "POST",
-                "header": [
-                  {
-                    "key": "Content-Type",
-                    "value": "application/json"
-                  }
-                ],
-                "url": "{{baseUrl}}/players/1/skills/5",
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"level\": 4\n}"
-                }
-              }
-            },
-            {
-              "name": "Consultar habilidades de un jugador",
-              "request": {
-                "method": "GET",
-                "header": [],
-                "url": "{{baseUrl}}/players/1/skills"
-              }
-            },
-            {
-              "name": "Consultar jugadores con una habilidad",
-              "request": {
-                "method": "GET",
-                "header": [],
-                "url": "{{baseUrl}}/skills/5/players"
-              }
-            },
-            {
-              "name": "Retirar habilidad de un jugador",
-              "request": {
-                "method": "DELETE",
-                "header": [],
-                "url": "{{baseUrl}}/players/1/skills/5"
-              }
-            }
-          ]
-        },
-        {
           "name": "Pruebas automatizadas (GD-07)",
           "event": [
             {
@@ -2219,52 +2033,6 @@
       "name": "GD-05 Contratos",
       "item": [
         {
-          "name": "Demo CRUD (4 endpoints)",
-          "item": [
-            {
-              "name": "Asignar jugador a equipo (crear contrato)",
-              "request": {
-                "method": "POST",
-                "header": [
-                  {
-                    "key": "Content-Type",
-                    "value": "application/json"
-                  }
-                ],
-                "url": "{{baseUrl}}/teams/1/contracts",
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"playerId\": 1,\n  \"startDate\": \"2026-01-01\",\n  \"endDate\": \"2026-12-31\"\n}"
-                }
-              }
-            },
-            {
-              "name": "Consultar jugadores vigentes de un equipo",
-              "request": {
-                "method": "GET",
-                "header": [],
-                "url": "{{baseUrl}}/teams/1/players?current=true"
-              }
-            },
-            {
-              "name": "Consultar historial de equipos de un jugador",
-              "request": {
-                "method": "GET",
-                "header": [],
-                "url": "{{baseUrl}}/players/1/teams"
-              }
-            },
-            {
-              "name": "Finalizar contrato (retirar jugador)",
-              "request": {
-                "method": "PATCH",
-                "header": [],
-                "url": "{{baseUrl}}/contracts/1/end"
-              }
-            }
-          ]
-        },
-        {
           "name": "Pruebas automatizadas (GD-05)",
           "event": [
             {
@@ -2858,6 +2626,520 @@
                       "pm.collectionVariables.unset('pcUserId2');"
                     ]
                   }
+                }
+              ]
+            },
+            {
+              "name": "GD-02 Equipos",
+              "item": [
+                {
+                  "name": "TC-GD02-01 Create first team",
+                  "request": {
+                    "method": "POST",
+                    "header": [{"key": "Content-Type", "value": "application/json"}],
+                    "body": {"mode": "raw", "raw": "{\"name\":\"Postman Team A {{teamRunId}}\",\"city\":\"Test City\",\"contactEmail\":\"team-a-{{teamRunId}}@example.com\",\"foundedYear\":2000}"},
+                    "url": "{{baseUrl}}/teams"
+                  },
+                  "event": [
+                    {
+                      "listen": "prerequest",
+                      "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                          "pm.collectionVariables.set('teamRunId', String(Date.now()));"
+                        ]
+                      }
+                    },
+                    {
+                      "listen": "test",
+                      "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                          "pm.test('Status 201 Created', () => pm.response.to.have.status(201));",
+                          "const body = pm.response.json();",
+                          "pm.test('Response has team fields', () => { pm.expect(body.id).to.be.a('number'); pm.expect(body.active).to.eql(true); });",
+                          "pm.collectionVariables.set('teamId1', body.id);",
+                          "pm.collectionVariables.set('teamName1', body.name);"
+                        ]
+                      }
+                    }
+                  ]
+                },
+                {
+                  "name": "TC-GD02-02 Create second team",
+                  "request": {
+                    "method": "POST",
+                    "header": [{"key": "Content-Type", "value": "application/json"}],
+                    "body": {"mode": "raw", "raw": "{\"name\":\"Postman Team B {{teamRunId}}\",\"city\":\"Test City\",\"contactEmail\":\"team-b-{{teamRunId}}@example.com\"}"},
+                    "url": "{{baseUrl}}/teams"
+                  },
+                  "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": ["pm.test('Status 201 Created', () => pm.response.to.have.status(201));", "const body = pm.response.json();", "pm.test('Response has team id', () => pm.expect(body.id).to.be.a('number'));", "pm.collectionVariables.set('teamId2', body.id);"]}}]
+                },
+                {
+                  "name": "TC-GD02-03 Reject invalid team body",
+                  "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\"name\":\"\",\"city\":\"Test City\",\"contactEmail\":\"bad-email\"}"}, "url": "{{baseUrl}}/teams"},
+                  "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": ["pm.test('Status 400 Bad Request', () => pm.response.to.have.status(400));"]}}]
+                },
+                {
+                  "name": "TC-GD02-04 Reject duplicate team name",
+                  "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\"name\":\"{{teamName1}}\",\"city\":\"Test City\",\"contactEmail\":\"duplicate-{{teamRunId}}@example.com\"}"}, "url": "{{baseUrl}}/teams"},
+                  "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": ["pm.test('Status 409 Conflict', () => pm.response.to.have.status(409));"]}}]
+                },
+                {
+                  "name": "TC-GD02-05 List teams",
+                  "request": {"method": "GET", "header": [], "url": "{{baseUrl}}/teams"},
+                  "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": ["pm.test('Status 200 OK', () => pm.response.to.have.status(200));", "pm.test('Response is an array', () => pm.expect(pm.response.json()).to.be.an('array'));"]}}]
+                },
+                {
+                  "name": "TC-GD02-06 Get team details",
+                  "request": {"method": "GET", "header": [], "url": "{{baseUrl}}/teams/{{teamId1}}"},
+                  "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": ["pm.test('Status 200 OK', () => pm.response.to.have.status(200));", "pm.test('Response matches the created team', () => pm.expect(pm.response.json().id).to.eql(Number(pm.collectionVariables.get('teamId1'))));"]}}]
+                },
+                {
+                  "name": "TC-GD02-07 Reject non-numeric team id",
+                  "request": {"method": "GET", "header": [], "url": "{{baseUrl}}/teams/abc"},
+                  "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": ["pm.test('Status 400 Bad Request', () => pm.response.to.have.status(400));"]}}]
+                },
+                {
+                  "name": "TC-GD02-08 Return not found for missing team",
+                  "request": {"method": "GET", "header": [], "url": "{{baseUrl}}/teams/999999"},
+                  "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": ["pm.test('Status 404 Not Found', () => pm.response.to.have.status(404));"]}}]
+                },
+                {
+                  "name": "TC-GD02-09 Update team",
+                  "request": {"method": "PATCH", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\"city\":\"Updated City\"}"}, "url": "{{baseUrl}}/teams/{{teamId1}}"},
+                  "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": ["pm.test('Status 200 OK', () => pm.response.to.have.status(200));", "pm.test('City is updated', () => pm.expect(pm.response.json().city).to.eql('Updated City'));"]}}]
+                },
+                {
+                  "name": "TC-GD02-10 Deactivate team",
+                  "request": {"method": "PATCH", "header": [], "url": "{{baseUrl}}/teams/{{teamId1}}/deactivate"},
+                  "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": ["pm.test('Status 200 OK', () => pm.response.to.have.status(200));", "pm.test('Team is inactive', () => pm.expect(pm.response.json().active).to.eql(false));"]}}]
+                },
+                {
+                  "name": "TC-GD02-11 List inactive teams",
+                  "request": {"method": "GET", "header": [], "url": "{{baseUrl}}/teams?active=false"},
+                  "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": ["pm.test('Status 200 OK', () => pm.response.to.have.status(200));", "pm.test('Inactive team is included', () => pm.expect(pm.response.json().some((team) => team.id === Number(pm.collectionVariables.get('teamId1')))).to.eql(true));"]}}]
+                },
+                {
+                  "name": "TC-GD02-12 Reject invalid active filter",
+                  "request": {"method": "GET", "header": [], "url": "{{baseUrl}}/teams?active=invalid"},
+                  "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": ["pm.test('Status 400 Bad Request', () => pm.response.to.have.status(400));"]}}]
+                },
+                {
+                  "name": "TC-GD02-13 Reactivate team",
+                  "request": {"method": "PATCH", "header": [], "url": "{{baseUrl}}/teams/{{teamId1}}/activate"},
+                  "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": ["pm.test('Status 200 OK', () => pm.response.to.have.status(200));", "pm.test('Team is active', () => pm.expect(pm.response.json().active).to.eql(true));"]}}]
+                },
+                {
+                  "name": "TC-GD02-14 Get active teams by city report",
+                  "request": {"method": "GET", "header": [], "url": "{{baseUrl}}/teams/reports/active-by-city"},
+                  "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": ["pm.test('Status 200 OK', () => pm.response.to.have.status(200));", "pm.test('Report is an array', () => pm.expect(pm.response.json()).to.be.an('array'));"]}}]
+                }
+              ]
+            },
+            {
+              "name": "GC-01 Torneos",
+              "item": [
+                {
+                  "name": "TC-GC01-01 Create tournament",
+                  "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\"name\":\"Postman Tournament {{tournamentRunId}}\",\"startDate\":\"{{tournamentStart}}\",\"enrollmentDeadline\":\"{{tournamentDeadline}}\"}"}, "url": "{{baseUrl}}/tournaments"},
+                  "event": [
+                    {"listen": "prerequest", "script": {"type": "text/javascript", "exec": ["const suffix = String(Date.now());", "const start = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000);", "const deadline = new Date(start.getTime() - 2 * 24 * 60 * 60 * 1000);", "pm.collectionVariables.set('tournamentRunId', suffix);", "pm.collectionVariables.set('tournamentStart', start.toISOString().slice(0, 10));", "pm.collectionVariables.set('tournamentDeadline', deadline.toISOString().slice(0, 10));"]}},
+                    {"listen": "test", "script": {"type": "text/javascript", "exec": ["pm.test('Status 201 Created', () => pm.response.to.have.status(201));", "const body = pm.response.json();", "pm.test('Response has tournament fields', () => { pm.expect(body.id).to.be.a('number'); pm.expect(body.startDate).to.eql(pm.collectionVariables.get('tournamentStart')); });", "pm.collectionVariables.set('tournamentId', body.id);"]}}
+                  ]
+                },
+                {
+                  "name": "TC-GC01-02 Reject enrollment deadline after start",
+                  "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\"name\":\"Invalid Dates {{tournamentRunId}}\",\"startDate\":\"2030-01-01\",\"enrollmentDeadline\":\"2030-01-02\"}"}, "url": "{{baseUrl}}/tournaments"},
+                  "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": ["pm.test('Status 400 Bad Request', () => pm.response.to.have.status(400));"]}}]
+                },
+                {
+                  "name": "TC-GC01-03 List tournaments",
+                  "request": {"method": "GET", "header": [], "url": "{{baseUrl}}/tournaments"},
+                  "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": ["pm.test('Status 200 OK', () => pm.response.to.have.status(200));", "pm.test('Response is an array', () => pm.expect(pm.response.json()).to.be.an('array'));"]}}]
+                },
+                {
+                  "name": "TC-GC01-04 Get tournament details",
+                  "request": {"method": "GET", "header": [], "url": "{{baseUrl}}/tournaments/{{tournamentId}}"},
+                  "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": ["pm.test('Status 200 OK', () => pm.response.to.have.status(200));", "pm.test('Response matches the created tournament', () => pm.expect(pm.response.json().id).to.eql(Number(pm.collectionVariables.get('tournamentId'))));"]}}]
+                },
+                {
+                  "name": "TC-GC01-05 Reject non-numeric tournament id",
+                  "request": {"method": "GET", "header": [], "url": "{{baseUrl}}/tournaments/abc"},
+                  "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": ["pm.test('Status 400 Bad Request', () => pm.response.to.have.status(400));"]}}]
+                },
+                {
+                  "name": "TC-GC01-06 Return not found for missing tournament",
+                  "request": {"method": "GET", "header": [], "url": "{{baseUrl}}/tournaments/999999"},
+                  "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": ["pm.test('Status 404 Not Found', () => pm.response.to.have.status(404));"]}}]
+                },
+                {
+                  "name": "TC-GC01-07 Update tournament",
+                  "request": {"method": "PATCH", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\"name\":\"Updated Tournament {{tournamentRunId}}\"}"}, "url": "{{baseUrl}}/tournaments/{{tournamentId}}"},
+                  "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": ["pm.test('Status 200 OK', () => pm.response.to.have.status(200));", "pm.test('Tournament name is updated', () => pm.expect(pm.response.json().name).to.eql('Updated Tournament ' + pm.collectionVariables.get('tournamentRunId')));"]}}]
+                },
+                {
+                  "name": "TC-GC01-08 Get open enrollment report",
+                  "request": {"method": "GET", "header": [], "url": "{{baseUrl}}/tournaments/reports/open-enrollment"},
+                  "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": ["pm.test('Status 200 OK', () => pm.response.to.have.status(200));", "pm.test('Report is an array', () => pm.expect(pm.response.json()).to.be.an('array'));"]}}]
+                }
+              ]
+            },
+            {
+              "name": "GC-04 Grupos",
+              "item": [
+                {
+                  "name": "TC-GC04-01 Create group",
+                  "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\"name\":\"Postman Group {{groupRunId}}\",\"order\":1,\"tournamentId\":{{tournamentId}}}"}, "url": "{{baseUrl}}/groups"},
+                  "event": [
+                    {"listen": "prerequest", "script": {"type": "text/javascript", "exec": ["pm.collectionVariables.set('groupRunId', String(Date.now()));"]}},
+                    {"listen": "test", "script": {"type": "text/javascript", "exec": ["pm.test('Status 201 Created', () => pm.response.to.have.status(201));", "const body = pm.response.json();", "pm.test('Response identifies a group phase', () => { pm.expect(body.id).to.be.a('number'); pm.expect(body.phaseType).to.eql('GROUP'); });", "pm.collectionVariables.set('groupId', body.id);", "pm.collectionVariables.set('groupName', body.name);"]}}
+                  ]
+                },
+                {
+                  "name": "TC-GC04-02 Reject invalid group body",
+                  "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\"name\":\"Invalid Group\",\"order\":0,\"tournamentId\":{{tournamentId}}}"}, "url": "{{baseUrl}}/groups"},
+                  "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": ["pm.test('Status 400 Bad Request', () => pm.response.to.have.status(400));"]}}]
+                },
+                {
+                  "name": "TC-GC04-03 Reject group with missing tournament",
+                  "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\"name\":\"Missing Tournament Group\",\"order\":1,\"tournamentId\":999999}"}, "url": "{{baseUrl}}/groups"},
+                  "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": ["pm.test('Status 404 Not Found', () => pm.response.to.have.status(404));"]}}]
+                },
+                {
+                  "name": "TC-GC04-04 Reject duplicate phase name",
+                  "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\"name\":\"{{groupName}}\",\"order\":2,\"tournamentId\":{{tournamentId}}}"}, "url": "{{baseUrl}}/groups"},
+                  "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": ["pm.test('Status 409 Conflict', () => pm.response.to.have.status(409));"]}}]
+                },
+                {
+                  "name": "TC-GC04-05 Create second group",
+                  "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\"name\":\"Second Group {{groupRunId}}\",\"order\":1,\"tournamentId\":{{tournamentId}}}"}, "url": "{{baseUrl}}/groups"},
+                  "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": ["pm.test('Status 201 Created', () => pm.response.to.have.status(201));", "pm.collectionVariables.set('groupId2', pm.response.json().id);"]}}]
+                },
+                {
+                  "name": "TC-GC04-06 List groups by tournament",
+                  "request": {"method": "GET", "header": [], "url": "{{baseUrl}}/groups?tournamentId={{tournamentId}}"},
+                  "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": ["pm.test('Status 200 OK', () => pm.response.to.have.status(200));", "pm.test('Both created groups are returned', () => pm.expect(pm.response.json().length).to.be.at.least(2));"]}}]
+                },
+                {
+                  "name": "TC-GC04-07 Get group details",
+                  "request": {"method": "GET", "header": [], "url": "{{baseUrl}}/groups/{{groupId}}"},
+                  "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": ["pm.test('Status 200 OK', () => pm.response.to.have.status(200));", "pm.test('Response identifies the group', () => pm.expect(pm.response.json().id).to.eql(Number(pm.collectionVariables.get('groupId'))));"]}}]
+                },
+                {
+                  "name": "TC-GC04-07a Return not found for missing group",
+                  "request": {"method": "GET", "header": [], "url": "{{baseUrl}}/groups/999999"},
+                  "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": ["pm.test('Status 404 Not Found', () => pm.response.to.have.status(404));"]}}]
+                },
+                {
+                  "name": "TC-GC04-08 Reject non-numeric group id",
+                  "request": {"method": "GET", "header": [], "url": "{{baseUrl}}/groups/abc"},
+                  "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": ["pm.test('Status 400 Bad Request', () => pm.response.to.have.status(400));"]}}]
+                },
+                {
+                  "name": "TC-GC04-09 Update group",
+                  "request": {"method": "PATCH", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\"order\":2}"}, "url": "{{baseUrl}}/groups/{{groupId}}"},
+                  "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": ["pm.test('Status 200 OK', () => pm.response.to.have.status(200));", "pm.test('Group order is updated', () => pm.expect(pm.response.json().order).to.eql(2));"]}}]
+                },
+                {
+                  "name": "TC-GC04-10 Assign first team to group",
+                  "request": {"method": "POST", "header": [], "url": "{{baseUrl}}/groups/{{groupId}}/teams/{{teamId1}}"},
+                  "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": ["pm.test('Status 201 Created', () => pm.response.to.have.status(201));"]}}]
+                },
+                {
+                  "name": "TC-GC04-10a Return not found for missing group in assignment",
+                  "request": {"method": "POST", "header": [], "url": "{{baseUrl}}/groups/999999/teams/{{teamId1}}"},
+                  "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": ["pm.test('Status 404 Not Found', () => pm.response.to.have.status(404));"]}}]
+                },
+                {
+                  "name": "TC-GC04-10b Return not found for missing team in assignment",
+                  "request": {"method": "POST", "header": [], "url": "{{baseUrl}}/groups/{{groupId}}/teams/999999"},
+                  "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": ["pm.test('Status 404 Not Found', () => pm.response.to.have.status(404));"]}}]
+                },
+                {
+                  "name": "TC-GC04-11 Assign second team to same group",
+                  "request": {"method": "POST", "header": [], "url": "{{baseUrl}}/groups/{{groupId}}/teams/{{teamId2}}"},
+                  "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": ["pm.test('Status 201 Created', () => pm.response.to.have.status(201));"]}}]
+                },
+                {
+                  "name": "TC-GC04-12 Reject duplicate team assignment",
+                  "request": {"method": "POST", "header": [], "url": "{{baseUrl}}/groups/{{groupId}}/teams/{{teamId1}}"},
+                  "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": ["pm.test('Status 409 Conflict', () => pm.response.to.have.status(409));"]}}]
+                },
+                {
+                  "name": "TC-GC04-13 Reject team assigned to another group",
+                  "request": {"method": "POST", "header": [], "url": "{{baseUrl}}/groups/{{groupId2}}/teams/{{teamId1}}"},
+                  "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": ["pm.test('Status 409 Conflict', () => pm.response.to.have.status(409));"]}}]
+                },
+                {
+                  "name": "TC-GC04-14 Get teams in group",
+                  "request": {"method": "GET", "header": [], "url": "{{baseUrl}}/groups/{{groupId}}/teams"},
+                  "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": ["pm.test('Status 200 OK', () => pm.response.to.have.status(200));", "pm.test('Both teams are returned', () => pm.expect(pm.response.json().length).to.eql(2));"]}}]
+                },
+                {
+                  "name": "TC-GC04-15 Remove second team from group",
+                  "request": {"method": "DELETE", "header": [], "url": "{{baseUrl}}/groups/{{groupId}}/teams/{{teamId2}}"},
+                  "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": ["pm.test('Status 204 No Content', () => pm.response.to.have.status(204));"]}}]
+                },
+                {
+                  "name": "TC-GC04-15a Return an empty list for a group without teams",
+                  "request": {"method": "GET", "header": [], "url": "{{baseUrl}}/groups/{{groupId2}}/teams"},
+                  "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": ["pm.test('Status 200 OK', () => pm.response.to.have.status(200));", "pm.test('Response is an empty array', () => pm.expect(pm.response.json()).to.eql([]));"]}}]
+                },
+                {
+                  "name": "TC-GC04-15b Return not found for missing group team list",
+                  "request": {"method": "GET", "header": [], "url": "{{baseUrl}}/groups/999999/teams"},
+                  "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": ["pm.test('Status 404 Not Found', () => pm.response.to.have.status(404));"]}}]
+                },
+                {
+                  "name": "TC-GC04-16 Reject removing a team not in the group",
+                  "request": {"method": "DELETE", "header": [], "url": "{{baseUrl}}/groups/{{groupId}}/teams/{{teamId2}}"},
+                  "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": ["pm.test('Status 409 Conflict', () => pm.response.to.have.status(409));"]}}]
+                },
+                {
+                  "name": "TC-GC04-16a Deactivate second team",
+                  "request": {"method": "PATCH", "header": [], "url": "{{baseUrl}}/teams/{{teamId2}}/deactivate"},
+                  "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": ["pm.test('Status 200 OK', () => pm.response.to.have.status(200));"]}}]
+                },
+                {
+                  "name": "TC-GC04-16b Reject assigning an inactive team",
+                  "request": {"method": "POST", "header": [], "url": "{{baseUrl}}/groups/{{groupId}}/teams/{{teamId2}}"},
+                  "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": ["pm.test('Status 409 Conflict', () => pm.response.to.have.status(409));"]}}]
+                },
+                {
+                  "name": "TC-GC04-16c Reactivate second team",
+                  "request": {"method": "PATCH", "header": [], "url": "{{baseUrl}}/teams/{{teamId2}}/activate"},
+                  "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": ["pm.test('Status 200 OK', () => pm.response.to.have.status(200));"]}}]
+                },
+                {
+                  "name": "TC-GC04-17 Verify removed team still exists",
+                  "request": {"method": "GET", "header": [], "url": "{{baseUrl}}/teams/{{teamId2}}"},
+                  "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": ["pm.test('Status 200 OK', () => pm.response.to.have.status(200));"]}}]
+                }
+              ]
+            },
+            {
+              "name": "GC-05 Fases finales",
+              "item": [
+                {
+                  "name": "TC-GC05-01 Create final phase",
+                  "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\"name\":\"Final {{tournamentRunId}}\",\"order\":2,\"tournamentId\":{{tournamentId}}}"}, "url": "{{baseUrl}}/finals"},
+                  "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": ["pm.test('Status 201 Created', () => pm.response.to.have.status(201));", "const body = pm.response.json();", "pm.test('Response identifies a final phase', () => { pm.expect(body.id).to.be.a('number'); pm.expect(body.phaseType).to.eql('FINAL'); });", "pm.collectionVariables.set('finalId', body.id);", "pm.collectionVariables.set('finalName', body.name);"]}}]
+                },
+                {
+                  "name": "TC-GC05-02 Reject duplicate phase name across phase types",
+                  "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\"name\":\"{{groupName}}\",\"order\":3,\"tournamentId\":{{tournamentId}}}"}, "url": "{{baseUrl}}/finals"},
+                  "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": ["pm.test('Status 409 Conflict', () => pm.response.to.have.status(409));"]}}]
+                },
+                {
+                  "name": "TC-GC05-03 Reject invalid final phase body",
+                  "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\"name\":\"Invalid Final\",\"order\":0,\"tournamentId\":{{tournamentId}}}"}, "url": "{{baseUrl}}/finals"},
+                  "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": ["pm.test('Status 400 Bad Request', () => pm.response.to.have.status(400));"]}}]
+                },
+                {
+                  "name": "TC-GC05-03a Return not found for missing tournament",
+                  "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\"name\":\"Missing Tournament Final\",\"order\":1,\"tournamentId\":999999}"}, "url": "{{baseUrl}}/finals"},
+                  "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": ["pm.test('Status 404 Not Found', () => pm.response.to.have.status(404));"]}}]
+                },
+                {
+                  "name": "TC-GC05-04 List finals by tournament",
+                  "request": {"method": "GET", "header": [], "url": "{{baseUrl}}/finals?tournamentId={{tournamentId}}"},
+                  "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": ["pm.test('Status 200 OK', () => pm.response.to.have.status(200));", "pm.test('Created final is returned', () => pm.expect(pm.response.json().some((phase) => phase.id === Number(pm.collectionVariables.get('finalId')))).to.eql(true));"]}}]
+                },
+                {
+                  "name": "TC-GC05-05 Get final details",
+                  "request": {"method": "GET", "header": [], "url": "{{baseUrl}}/finals/{{finalId}}"},
+                  "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": ["pm.test('Status 200 OK', () => pm.response.to.have.status(200));", "pm.test('Response identifies the final', () => pm.expect(pm.response.json().phaseType).to.eql('FINAL'));"]}}]
+                },
+                {
+                  "name": "TC-GC05-06 Reject non-numeric final id",
+                  "request": {"method": "GET", "header": [], "url": "{{baseUrl}}/finals/abc"},
+                  "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": ["pm.test('Status 400 Bad Request', () => pm.response.to.have.status(400));"]}}]
+                },
+                {
+                  "name": "TC-GC05-06a Return not found for missing final",
+                  "request": {"method": "GET", "header": [], "url": "{{baseUrl}}/finals/999999"},
+                  "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": ["pm.test('Status 404 Not Found', () => pm.response.to.have.status(404));"]}}]
+                },
+                {
+                  "name": "TC-GC05-07 Update final phase",
+                  "request": {"method": "PATCH", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\"order\":3}"}, "url": "{{baseUrl}}/finals/{{finalId}}"},
+                  "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": ["pm.test('Status 200 OK', () => pm.response.to.have.status(200));", "pm.test('Final order is updated', () => pm.expect(pm.response.json().order).to.eql(3));"]}}]
+                }
+              ]
+            },
+            {
+              "name": "GC-03 Fases",
+              "item": [
+                {
+                  "name": "TC-GC03-01 List phases by tournament",
+                  "request": {"method": "GET", "header": [], "url": "{{baseUrl}}/phases?tournamentId={{tournamentId}}"},
+                  "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": ["pm.test('Status 200 OK', () => pm.response.to.have.status(200));", "const phases = pm.response.json();", "pm.test('Group and final phases are included', () => { pm.expect(phases.some((phase) => phase.id === Number(pm.collectionVariables.get('groupId')))).to.eql(true); pm.expect(phases.some((phase) => phase.id === Number(pm.collectionVariables.get('finalId')))).to.eql(true); });"]}}]
+                },
+                {
+                  "name": "TC-GC03-02 Get phase details",
+                  "request": {"method": "GET", "header": [], "url": "{{baseUrl}}/phases/{{groupId}}"},
+                  "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": ["pm.test('Status 200 OK', () => pm.response.to.have.status(200));", "pm.test('Response identifies the group phase', () => pm.expect(pm.response.json().phaseType).to.eql('GROUP'));"]}}]
+                },
+                {
+                  "name": "TC-GC03-03 Reject non-numeric phase id",
+                  "request": {"method": "GET", "header": [], "url": "{{baseUrl}}/phases/abc"},
+                  "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": ["pm.test('Status 400 Bad Request', () => pm.response.to.have.status(400));"]}}]
+                },
+                {
+                  "name": "TC-GC03-04 Return not found for missing phase",
+                  "request": {"method": "GET", "header": [], "url": "{{baseUrl}}/phases/999999"},
+                  "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": ["pm.test('Status 404 Not Found', () => pm.response.to.have.status(404));"]}}]
+                },
+                {
+                  "name": "TC-GC03-05 Get phase counts by type report",
+                  "request": {"method": "GET", "header": [], "url": "{{baseUrl}}/phases/reports/count-by-type"},
+                  "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": ["pm.test('Status 200 OK', () => pm.response.to.have.status(200));", "pm.test('Report is an array', () => pm.expect(pm.response.json()).to.be.an('array'));"]}}]
+                }
+              ]
+            },
+            {
+              "name": "GC-06 Partidos",
+              "item": [
+                {
+                  "name": "TC-GC06-01 Create scheduled group match",
+                  "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\"scheduledAt\":\"2030-06-15T16:00:00.000Z\",\"phaseId\":{{groupId}}}"}, "url": "{{baseUrl}}/matches"},
+                  "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": ["pm.test('Status 201 Created', () => pm.response.to.have.status(201));", "const body = pm.response.json();", "pm.test('Match is scheduled in the requested phase', () => { pm.expect(body.status).to.eql('SCHEDULED'); pm.expect(body.phaseId).to.eql(Number(pm.collectionVariables.get('groupId'))); });", "pm.collectionVariables.set('matchId', body.id);"]}}]
+                },
+                {
+                  "name": "TC-GC06-02 Reject invalid scheduled date",
+                  "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\"scheduledAt\":\"not-a-date\",\"phaseId\":{{groupId}}}"}, "url": "{{baseUrl}}/matches"},
+                  "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": ["pm.test('Status 400 Bad Request', () => pm.response.to.have.status(400));"]}}]
+                },
+                {
+                  "name": "TC-GC06-03 Return not found for missing phase",
+                  "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\"scheduledAt\":\"2030-06-15T16:00:00.000Z\",\"phaseId\":999999}"}, "url": "{{baseUrl}}/matches"},
+                  "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": ["pm.test('Status 404 Not Found', () => pm.response.to.have.status(404));"]}}]
+                },
+                {
+                  "name": "TC-GC06-04 Create scheduled final match",
+                  "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\"scheduledAt\":\"2030-06-16T16:00:00.000Z\",\"phaseId\":{{finalId}}}"}, "url": "{{baseUrl}}/matches"},
+                  "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": ["pm.test('Status 201 Created', () => pm.response.to.have.status(201));", "pm.collectionVariables.set('finalMatchId', pm.response.json().id);"]}}]
+                },
+                {
+                  "name": "TC-GC06-05 List matches",
+                  "request": {"method": "GET", "header": [], "url": "{{baseUrl}}/matches"},
+                  "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": ["pm.test('Status 200 OK', () => pm.response.to.have.status(200));", "pm.test('Response is an array', () => pm.expect(pm.response.json()).to.be.an('array'));"]}}]
+                },
+                {
+                  "name": "TC-GC06-06 List matches by phase",
+                  "request": {"method": "GET", "header": [], "url": "{{baseUrl}}/matches/phase/{{groupId}}"},
+                  "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": ["pm.test('Status 200 OK', () => pm.response.to.have.status(200));", "pm.test('Group match is included', () => pm.expect(pm.response.json().some((match) => match.id === Number(pm.collectionVariables.get('matchId')))).to.eql(true));"]}}]
+                },
+                {
+                  "name": "TC-GC06-07 Reject non-numeric phase id in match query",
+                  "request": {"method": "GET", "header": [], "url": "{{baseUrl}}/matches/phase/abc"},
+                  "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": ["pm.test('Status 400 Bad Request', () => pm.response.to.have.status(400));"]}}]
+                },
+                {
+                  "name": "TC-GC06-08 Get scheduled match report",
+                  "request": {"method": "GET", "header": [], "url": "{{baseUrl}}/matches/reports/status/SCHEDULED"},
+                  "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": ["pm.test('Status 200 OK', () => pm.response.to.have.status(200));", "pm.test('Report is an array', () => pm.expect(pm.response.json()).to.be.an('array'));"]}}]
+                },
+                {
+                  "name": "TC-GC06-09 Reject unsupported match status",
+                  "request": {"method": "GET", "header": [], "url": "{{baseUrl}}/matches/reports/status/UNKNOWN"},
+                  "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": ["pm.test('Status 400 Bad Request', () => pm.response.to.have.status(400));"]}}]
+                },
+                {
+                  "name": "TC-GC06-10 Get match details",
+                  "request": {"method": "GET", "header": [], "url": "{{baseUrl}}/matches/{{matchId}}"},
+                  "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": ["pm.test('Status 200 OK', () => pm.response.to.have.status(200));", "pm.test('Response identifies the match', () => pm.expect(pm.response.json().id).to.eql(Number(pm.collectionVariables.get('matchId'))));"]}}]
+                },
+                {
+                  "name": "TC-GC06-11 Reject non-numeric match id",
+                  "request": {"method": "GET", "header": [], "url": "{{baseUrl}}/matches/abc"},
+                  "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": ["pm.test('Status 400 Bad Request', () => pm.response.to.have.status(400));"]}}]
+                },
+                {
+                  "name": "TC-GC06-12 Return not found for missing match",
+                  "request": {"method": "GET", "header": [], "url": "{{baseUrl}}/matches/999999"},
+                  "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": ["pm.test('Status 404 Not Found', () => pm.response.to.have.status(404));"]}}]
+                },
+                {
+                  "name": "TC-GC06-13 Update scheduled match",
+                  "request": {"method": "PATCH", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\"scheduledAt\":\"2030-06-17T17:00:00.000Z\"}"}, "url": "{{baseUrl}}/matches/{{matchId}}"},
+                  "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": ["pm.test('Status 200 OK', () => pm.response.to.have.status(200));"]}}]
+                },
+                {
+                  "name": "TC-GC06-14 Reject score while match is scheduled",
+                  "request": {"method": "PATCH", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\"homeScore\":1}"}, "url": "{{baseUrl}}/matches/{{finalMatchId}}"},
+                  "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": ["pm.test('Status 400 Bad Request', () => pm.response.to.have.status(400));"]}}]
+                },
+                {
+                  "name": "TC-GC06-15 Finish match with both scores",
+                  "request": {"method": "PATCH", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\"status\":\"FINISHED\",\"homeScore\":2,\"awayScore\":1}"}, "url": "{{baseUrl}}/matches/{{matchId}}"},
+                  "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": ["pm.test('Status 200 OK', () => pm.response.to.have.status(200));", "pm.test('Match is finished with scores', () => { const body = pm.response.json(); pm.expect(body.status).to.eql('FINISHED'); pm.expect(body.homeScore).to.eql(2); pm.expect(body.awayScore).to.eql(1); });"]}}]
+                },
+                {
+                  "name": "TC-GC06-16 Reject update after match is finished",
+                  "request": {"method": "PATCH", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\"scheduledAt\":\"2030-06-18T18:00:00.000Z\"}"}, "url": "{{baseUrl}}/matches/{{matchId}}"},
+                  "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": ["pm.test('Status 400 Bad Request', () => pm.response.to.have.status(400));"]}}]
+                },
+                {
+                  "name": "TC-GC06-17 Prevent deleting group with matches",
+                  "request": {"method": "DELETE", "header": [], "url": "{{baseUrl}}/groups/{{groupId}}"},
+                  "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": ["pm.test('Status 409 Conflict', () => pm.response.to.have.status(409));"]}}]
+                },
+                {
+                  "name": "TC-GC06-18 Prevent deleting final with matches",
+                  "request": {"method": "DELETE", "header": [], "url": "{{baseUrl}}/finals/{{finalId}}"},
+                  "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": ["pm.test('Status 409 Conflict', () => pm.response.to.have.status(409));"]}}]
+                },
+                {
+                  "name": "TC-GC06-19 Delete final match",
+                  "request": {"method": "DELETE", "header": [], "url": "{{baseUrl}}/matches/{{finalMatchId}}"},
+                  "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": ["pm.test('Status 200 OK', () => pm.response.to.have.status(200));"]}}]
+                },
+                {
+                  "name": "TC-GC06-20 Delete group match",
+                  "request": {"method": "DELETE", "header": [], "url": "{{baseUrl}}/matches/{{matchId}}"},
+                  "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": ["pm.test('Status 200 OK', () => pm.response.to.have.status(200));"]}}]
+                },
+                {
+                  "name": "TC-GC06-21 Confirm team remains in group before deleting it",
+                  "request": {"method": "GET", "header": [], "url": "{{baseUrl}}/groups/{{groupId}}/teams"},
+                  "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": ["pm.test('Status 200 OK', () => pm.response.to.have.status(200));", "pm.test('Group still contains its team', () => pm.expect(pm.response.json().some((team) => team.id === Number(pm.collectionVariables.get('teamId1')))).to.eql(true));"]}}]
+                },
+                {
+                  "name": "TC-GC06-22 Delete groups after matches are removed",
+                  "request": {"method": "DELETE", "header": [], "url": "{{baseUrl}}/groups/{{groupId}}"},
+                  "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": ["pm.test('Status 200 OK', () => pm.response.to.have.status(200));"]}}]
+                },
+                {
+                  "name": "TC-GC06-23 Delete second group",
+                  "request": {"method": "DELETE", "header": [], "url": "{{baseUrl}}/groups/{{groupId2}}"},
+                  "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": ["pm.test('Status 200 OK', () => pm.response.to.have.status(200));"]}}]
+                },
+                {
+                  "name": "TC-GC06-24 Delete final phase after matches are removed",
+                  "request": {"method": "DELETE", "header": [], "url": "{{baseUrl}}/finals/{{finalId}}"},
+                  "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": ["pm.test('Status 200 OK', () => pm.response.to.have.status(200));"]}}]
+                },
+                {
+                  "name": "TC-GC06-25 Verify team survives group deletion",
+                  "request": {"method": "GET", "header": [], "url": "{{baseUrl}}/teams/{{teamId1}}"},
+                  "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": ["pm.test('Status 200 OK', () => pm.response.to.have.status(200));"]}}]
+                },
+                {
+                  "name": "TC-GC06-26 Delete test teams",
+                  "request": {"method": "DELETE", "header": [], "url": "{{baseUrl}}/teams/{{teamId1}}"},
+                  "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": ["pm.test('Status 200 OK', () => pm.response.to.have.status(200));"]}}]
+                },
+                {
+                  "name": "TC-GC06-27 Delete second test team",
+                  "request": {"method": "DELETE", "header": [], "url": "{{baseUrl}}/teams/{{teamId2}}"},
+                  "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": ["pm.test('Status 200 OK', () => pm.response.to.have.status(200));"]}}]
+                },
+                {
+                  "name": "TC-GC06-28 Delete test tournament after dependent phases",
+                  "request": {"method": "DELETE", "header": [], "url": "{{baseUrl}}/tournaments/{{tournamentId}}"},
+                  "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": ["pm.test('Status 200 OK', () => pm.response.to.have.status(200));"]}}]
                 }
               ]
             }

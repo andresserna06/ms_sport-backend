@@ -73,9 +73,9 @@ del JSON y los `errorCase` van en inglés.
 | GD-08 Perfil | `GET /players/:id/profile`, búsqueda con `GET /players?name=` |
 | GC-01 Torneos | `POST/GET /tournaments`, `GET/PUT/DELETE /tournaments/:id`, `PATCH /tournaments/:id/deactivate` |
 | GC-02 Inscripciones | `POST /tournaments/:tournamentId/registrations` (body: teamId), `DELETE /tournaments/:tournamentId/registrations/:teamId`, `GET /tournaments/:id/registrations`, `GET /teams/:id/tournaments` |
-| GC-03 Fases | `POST/GET /tournaments/:tournamentId/phases`, `GET/PUT/DELETE /phases/:id` |
-| GC-04 Grupos | `POST/GET /phases/:phaseId/groups`, `GET/PUT/DELETE /groups/:id`, `POST/DELETE /groups/:groupId/teams/:teamId`, `GET /groups/:id/teams` |
-| GC-05 Fase final | Se crea con `POST /tournaments/:tournamentId/phases` (type `KNOCKOUT`); `GET/PUT/DELETE /phases/:id` |
+| GC-03 Fases | `GET /phases?tournamentId=`, `GET /phases/:id`; las fases se crean desde `/groups` o `/finals` con `tournamentId` |
+| GC-04 Grupos | `POST/GET /groups?tournamentId=`, `GET/PATCH/DELETE /groups/:id`, `POST/DELETE /groups/:groupId/teams/:teamId`, `GET /groups/:id/teams` |
+| GC-05 Fase final | `POST/GET /finals?tournamentId=`, `GET/PATCH/DELETE /finals/:id` (tipo `FINAL`) |
 | GC-06 Partidos | `POST/GET /phases/:phaseId/matches`, `GET /matches`, `GET/PUT/DELETE /matches/:id` |
 | GC-07 Resultados y anotaciones | `PUT /matches/:id/result`, `PATCH /matches/:id/finish`, `POST/GET /matches/:id/scoring-events`, `PUT/DELETE /scoring-events/:id` |
 | GC-08 Desarrollo | `GET /tournaments/:id/overview` |

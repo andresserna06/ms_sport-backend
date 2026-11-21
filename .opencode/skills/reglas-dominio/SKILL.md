@@ -83,24 +83,34 @@ no se inventa: se pregunta.
 - Un equipo solo una vez por torneo → 409.
 - No se permiten inscripciones ni retiros si el torneo ya inició o si hoy es
   posterior a `registrationDeadline` → 409.
-- (Propuesta) No se puede retirar un equipo que ya está asignado a un grupo o tiene partidos en el torneo → 409.
+- No se puede retirar un equipo que ya está asignado a un grupo o tiene partidos
+  en el torneo → 409. Para retirarlo sin partidos, primero se le quita el grupo.
 
 **Fases (GC-03, GC-05)**
-- Cada fase pertenece a un único torneo, con `sequence` (orden) único dentro del torneo.
-- `type` es `GROUP_STAGE` (grupos) o `KNOCKOUT` (fase final). No se cambia el tipo si la fase ya tiene grupos o partidos.
-- No se elimina una fase con grupos o partidos → 409. Eliminar una fase nunca elimina el torneo.
+- Una fase es un `Group` o un `Final` (herencia de `Phase`). Cada fase pertenece
+  a un único torneo existente y tiene `sequence` (orden).
+- Los grupos de una misma fase de grupos comparten `sequence`. El `name` es único
+  dentro del torneo → 409.
+- El tipo (`GROUP` o `FINAL`) se define al crear la fase (`/groups` o `/finals`) y
+  no se puede cambiar.
+- No se elimina una fase con partidos → 409. Eliminar una fase nunca elimina el torneo.
 - Modificar una fase no afecta a las demás fases.
 
 **Grupos (GC-04)**
-- Solo se crean dentro de fases tipo `GROUP_STAGE` → si no, 409.
-- Para asignar un equipo a un grupo, el equipo debe estar inscrito en el torneo de esa fase → 409.
-- Un equipo no puede estar dos veces en el mismo grupo ni en dos grupos de la misma fase → 409.
-- Eliminar un grupo elimina sus asignaciones, no los equipos. No se elimina si tiene partidos → 409.
+- Un grupo pertenece a un torneo existente.
+- Para asignar un equipo a un grupo, el equipo debe estar inscrito en el torneo del
+  grupo → 409. [PENDIENTE: se valida cuando exista HU-GC-02 (`Registration`).]
+- Un equipo tiene un solo grupo a la vez (`teams.group_id`). Si ya tiene grupo, no se
+  sobrescribe → 409; primero se le quita el grupo.
+- (Propuesta) No se quita un equipo de un grupo si ya jugó partidos en él → 409.
+- Eliminar un grupo deja a sus equipos sin grupo; no elimina los equipos. No se
+  elimina si tiene partidos → 409.
+- Solo `GroupService` lee o escribe la relación Group–Team.
 
 **Partidos (GC-06)**
 - La fase existe; local y visitante son distintos (→ 400) y ambos inscritos en el torneo (→ 409).
-- En fase de grupos, ambos equipos pertenecen al mismo grupo y el partido guarda `groupId`.
-- En fase final, el partido guarda `round` y `bracketPosition`.
+- En fase de grupos (`Group`), ambos equipos tienen `groupId` igual al `phaseId` del partido (→ 409).
+- En fase final (`Final`), el partido guarda `round` y `bracketPosition`.
 - El escenario es opcional; si se envía, debe existir (Propuesta: y estar asociado al torneo).
 - Estados: `SCHEDULED → IN_PROGRESS → FINISHED`, más `CANCELLED`.
 - Solo se modifica si está `SCHEDULED`. Solo se elimina si está `SCHEDULED` y
