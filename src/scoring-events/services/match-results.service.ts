@@ -10,8 +10,8 @@ import {
 } from '../../notifications/ports/match-notifier.port';
 import { PlayerContractService } from '../../player-contracts/services/player-contract.service';
 import { PlayerService } from '../../players/services/player.service';
-import { TeamResponseDto } from '../../teams/dto/team-response.dto';
-import { TeamsService } from '../../teams/teams.service';
+import { TeamResponseDto } from '../../teams/dtos/team-response.dto';
+import { TeamsService } from '../../teams/services/teams.service';
 import { CreateScoringEventDto } from '../dtos/create-scoring-event.dto';
 import { FinishMatchDto } from '../dtos/finish-match.dto';
 import { ScoringEventResponseDto } from '../dtos/scoring-event-response.dto';

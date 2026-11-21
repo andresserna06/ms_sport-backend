@@ -19,6 +19,7 @@ export enum MatchStatus {
 }
 
 @Entity('matches')
+@Index('IDX_matches_phase_id', ['phase'])
 @Check(
   'CHK_matches_distinct_teams',
   'home_team_id IS NULL OR away_team_id IS NULL OR home_team_id <> away_team_id',
@@ -60,6 +61,9 @@ export class Match {
     nullable: false,
     onDelete: 'RESTRICT',
   })
-  @JoinColumn({ name: 'phase_id' })
+  @JoinColumn({
+    name: 'phase_id',
+    foreignKeyConstraintName: 'FK_matches_phase',
+  })
   phase!: Relation<Phase>;
 }

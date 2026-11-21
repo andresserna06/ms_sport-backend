@@ -7,6 +7,7 @@ import { GroupModule } from './phases/group/group.module';
 import { PhasesModule } from './phases/base/phases.module';
 import { TournamentsModule } from './tournaments/tournaments.module';
 import { TeamsModule } from './teams/teams.module';
+import { SportsModule } from './sports/sports.module';
 import { SkillsModule } from './skills/skills.module';
 import { PlayersModule } from './players/players.module';
 import { PlayerSkillsModule } from './player-skills/player-skills.module';
@@ -30,7 +31,8 @@ import { RegistrationsModule } from './registrations/registrations.module';
         password: configService.get<string>('DB_PASS'),
         database: configService.get<string>('DB_NAME'),
         entities: [__dirname + '/**/*.entity{.ts,.js}'],
-        synchronize: false, 
+        // Schema changes are applied only through migrations (src/migrations).
+        synchronize: false,
       }),
     }),
     MatchesModule,
@@ -39,6 +41,7 @@ import { RegistrationsModule } from './registrations/registrations.module';
     FinalModule,
     TournamentsModule,
     TeamsModule,
+    SportsModule,
     SkillsModule,
     PlayersModule,
     PlayerSkillsModule,

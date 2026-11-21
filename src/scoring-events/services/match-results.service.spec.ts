@@ -5,7 +5,7 @@ import { MatchesService } from '../../matches/matches.service';
 import { MatchNotifier } from '../../notifications/ports/match-notifier.port';
 import { PlayerContractService } from '../../player-contracts/services/player-contract.service';
 import { PlayerService } from '../../players/services/player.service';
-import { TeamsService } from '../../teams/teams.service';
+import { TeamsService } from '../../teams/services/teams.service';
 import { ScoringEvent } from '../entities/scoring-event.entity';
 import { ScoringEventMapper } from '../mappers/scoring-event.mapper';
 import { ScoringEventRepository } from '../repositories/scoring-event.repository';

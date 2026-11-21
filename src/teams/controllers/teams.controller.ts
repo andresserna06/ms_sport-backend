@@ -3,16 +3,16 @@ import {
   Controller,
   Delete,
   Get,
-  Param,
-  ParseBoolPipe,
-  ParseIntPipe,
   Patch,
   Post,
   Query,
 } from '@nestjs/common';
-import { CreateTeamDto } from './dto/create-team.dto';
-import { UpdateTeamDto } from './dto/update-team.dto';
-import { TeamsService } from './teams.service';
+import { IdParam } from '../../common/decorators/id-param.decorator';
+import { idParamPipe } from '../../common/pipes/id-param.pipe';
+import { CreateTeamDto } from '../dtos/create-team.dto';
+import { ListTeamsQueryDto } from '../dtos/list-teams-query.dto';
+import { UpdateTeamDto } from '../dtos/update-team.dto';
+import { TeamsService } from '../services/teams.service';
 
 @Controller('teams')
 export class TeamsController {
@@ -24,10 +24,8 @@ export class TeamsController {
   }
 
   @Get()
-  findAll(
-    @Query('active', new ParseBoolPipe({ optional: true })) active?: boolean,
-  ) {
-    return this.teamsService.findAll(active);
+  findAll(@Query() query: ListTeamsQueryDto) {
+    return this.teamsService.findAll(query.active);
   }
 
   @Get('reports/active-by-city')
@@ -36,27 +34,27 @@ export class TeamsController {
   }
 
   @Get(':id')
-  findOne(@Param('id', ParseIntPipe) id: number) {
+  findOne(@IdParam(idParamPipe()) id: number) {
     return this.teamsService.findOne(id);
   }
 
   @Patch(':id')
-  update(@Param('id', ParseIntPipe) id: number, @Body() dto: UpdateTeamDto) {
+  update(@IdParam(idParamPipe()) id: number, @Body() dto: UpdateTeamDto) {
     return this.teamsService.update(id, dto);
   }
 
   @Patch(':id/deactivate')
-  deactivate(@Param('id', ParseIntPipe) id: number) {
+  deactivate(@IdParam(idParamPipe()) id: number) {
     return this.teamsService.deactivate(id);
   }
 
   @Patch(':id/activate')
-  activate(@Param('id', ParseIntPipe) id: number) {
+  activate(@IdParam(idParamPipe()) id: number) {
     return this.teamsService.activate(id);
   }
 
   @Delete(':id')
-  remove(@Param('id', ParseIntPipe) id: number) {
+  remove(@IdParam(idParamPipe()) id: number) {
     return this.teamsService.remove(id);
   }
 }

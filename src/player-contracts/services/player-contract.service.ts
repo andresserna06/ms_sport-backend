@@ -2,8 +2,8 @@ import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { ApplicationException } from '../../exception/application.exception';
 import { ErrorCase } from '../../exception/error-case.enum';
 import { PlayerService } from '../../players/services/player.service';
-import { TeamResponseDto } from '../../teams/dto/team-response.dto';
-import { TeamsService } from '../../teams/teams.service';
+import { TeamResponseDto } from '../../teams/dtos/team-response.dto';
+import { TeamsService } from '../../teams/services/teams.service';
 import { CreatePlayerContractDto } from '../dtos/create-player-contract.dto';
 import { FindContractsQueryDto } from '../dtos/find-contracts-query.dto';
 import {

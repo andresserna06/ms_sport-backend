@@ -9,6 +9,7 @@ import {
 import { Response } from 'express';
 import { ApplicationException } from './application.exception';
 import { ErrorCase } from './error-case.enum';
+import { ValidationException } from './validation.exception';
 
 const STATUS_BY_CASE: Record<ErrorCase, HttpStatus> = {
   [ErrorCase.NOT_FOUND]: HttpStatus.NOT_FOUND,
@@ -32,19 +33,22 @@ export class GlobalExceptionFilter implements ExceptionFilter {
       return;
     }
 
+    if (exception instanceof ValidationException) {
+      response.status(HttpStatus.BAD_REQUEST).json(exception.fields);
+      return;
+    }
+
     if (exception instanceof HttpException) {
-      const status = exception.getStatus();
       const payload = exception.getResponse();
       const message =
         typeof payload === 'string'
           ? payload
-          : ((payload as { message?: string | string[] }).message ?? exception.message);
-      const errorCase =
-        status === HttpStatus.BAD_REQUEST && Array.isArray(message)
-          ? 'VALIDATION_ERROR'
-          : 'HTTP_ERROR';
+          : ((payload as { message?: string | string[] }).message ??
+            exception.message);
 
-      response.status(status).json({ errorCase, message });
+      response
+        .status(exception.getStatus())
+        .json({ errorCase: 'HTTP_ERROR', message });
       return;
     }
 

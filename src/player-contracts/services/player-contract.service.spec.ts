@@ -4,7 +4,7 @@ import { ErrorCase } from '../../exception/error-case.enum';
 import { Player } from '../../players/entities/player.entity';
 import { PlayerService } from '../../players/services/player.service';
 import { Team } from '../../teams/entities/team.entity';
-import { TeamsService } from '../../teams/teams.service';
+import { TeamsService } from '../../teams/services/teams.service';
 import { PlayerContract } from '../entities/player-contract.entity';
 import { PlayerContractMapper } from '../mappers/player-contract.mapper';
 import { PlayerContractRepository } from '../repositories/player-contract.repository';

@@ -5,7 +5,7 @@ import { Phase } from '../phases/base/entities/phase.entity';
 import { PhasesService } from '../phases/base/phases.service';
 import { GroupService } from '../phases/group/group.service';
 import { RegistrationsService } from '../registrations/registrations.service';
-import { TeamsService } from '../teams/teams.service';
+import { TeamsService } from '../teams/services/teams.service';
 import { CreateMatchDto } from './dto/create-match.dto';
 import { MatchResponseDto } from './dto/match-response.dto';
 import { UpdateMatchDto } from './dto/update-match.dto';

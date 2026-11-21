@@ -1,21 +1,24 @@
 import {
   Column,
   Entity,
+  Index,
   JoinColumn,
   ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
+  type Relation,
 } from 'typeorm';
-import type { Relation } from 'typeorm';
 import { Group } from '../../phases/group/entities/group.entity';
 import { Registration } from '../../registrations/entities/registration.entity';
+import { TeamSport } from '../../team-sports/entities/team-sport.entity';
 
 @Entity('teams')
+@Index('UQ_teams_name', ['name'], { unique: true })
 export class Team {
   @PrimaryGeneratedColumn()
   id!: number;
 
-  @Column({ length: 120, unique: true })
+  @Column({ length: 120 })
   name!: string;
 
   @Column({ length: 100 })
@@ -39,4 +42,7 @@ export class Team {
 
   @OneToMany(() => Registration, (registration) => registration.team)
   registrations?: Relation<Registration[]>;
+
+  @OneToMany(() => TeamSport, (teamSport) => teamSport.team)
+  teamSports!: Relation<TeamSport>[];
 }
