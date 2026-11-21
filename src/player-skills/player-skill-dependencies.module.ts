@@ -1,11 +1,14 @@
 import { Module } from '@nestjs/common';
-import { PLAYER_DEPENDENCIES_CHECKER } from '../players/repositories/player-dependencies.port';
 import { SKILL_DEPENDENCIES_CHECKER } from '../skills/repositories/skill-dependencies.port';
 import { PlayerSkillsPersistenceModule } from './player-skills-persistence.module';
 import {
   PlayerSkillPlayerDependenciesAdapter,
   PlayerSkillSkillDependenciesAdapter,
 } from './repositories/player-skill-dependencies.adapter';
+
+export const PLAYER_SKILL_DEPENDENCY_CHECKER = Symbol(
+  'PLAYER_SKILL_DEPENDENCY_CHECKER',
+);
 
 @Module({
   imports: [PlayerSkillsPersistenceModule],
@@ -15,10 +18,10 @@ import {
       useClass: PlayerSkillSkillDependenciesAdapter,
     },
     {
-      provide: PLAYER_DEPENDENCIES_CHECKER,
+      provide: PLAYER_SKILL_DEPENDENCY_CHECKER,
       useClass: PlayerSkillPlayerDependenciesAdapter,
     },
   ],
-  exports: [SKILL_DEPENDENCIES_CHECKER, PLAYER_DEPENDENCIES_CHECKER],
+  exports: [SKILL_DEPENDENCIES_CHECKER, PLAYER_SKILL_DEPENDENCY_CHECKER],
 })
 export class PlayerSkillDependenciesModule {}
