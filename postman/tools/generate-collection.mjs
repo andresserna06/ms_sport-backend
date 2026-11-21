@@ -62,7 +62,7 @@ function prelude() {
   const fixture = (name) => runIt((function* () {
     const r = yield call('GET', `/sports?all=true&name=${enc(name)}`);
     const f = (r.json || []).find((s) => s.name === name);
-    if (!f) throw new Error(`fixture ${name} not found: run "node postman/fixtures/seed.mjs" first`);
+    if (!f) throw new Error(`fixture ${name} not found: run "npm run seed" first`);
     return f;
   })());
   // ----- assertions -----
@@ -368,11 +368,11 @@ delCase('E-06', 'Raiz cuyo unico hijo esta inactivo', async () => { const R = aw
 delCase('E-07', 'Eliminar inexistente', none, () => bizErr(404, 'NOT_FOUND'), '2147483647');
 delCase('E-08', 'Eliminar con id no numerico', none, () => bizErr(400, 'INVALID_OPERATION'), 'abc');
 delCase('E-09', 'Segundo DELETE del mismo id', async () => { const R = await mk(N('E09 Hoja')); await step('first delete', del(R.id), 204); return { R }; }, () => bizErr(404, 'NOT_FOUND'));
-delCase('E-10', 'Deporte con equipo asociado (fixture QA-FIX-EQUIPO)', async () => ({ R: await fixture('QA-FIX-EQUIPO') }),
+delCase('E-10', 'Deporte con equipo asociado (fixture Tenis)', async () => ({ R: await fixture('Tenis') }),
   async (X) => { bizErr(409, 'INVALID_STATE', '1 equipo asociado'); const g = await get(X.R.id); pm.test('sport still exists', () => pm.expect(g.code).to.eql(200)); });
-delCase('E-11', 'Deporte con torneos (fixture QA-FIX-TORNEO)', async () => ({ R: await fixture('QA-FIX-TORNEO') }),
+delCase('E-11', 'Deporte con torneos (fixture Atletismo)', async () => ({ R: await fixture('Atletismo') }),
   async (X) => { bizErr(409, 'INVALID_STATE', '3 torneos'); const g = await get(X.R.id); pm.test('sport still exists', () => pm.expect(g.code).to.eql(200)); });
-delCase('E-12', 'Subdeportes, equipo y torneos a la vez (fixture QA-FIX-MIXTO)', async () => ({ R: await fixture('QA-FIX-MIXTO') }),
+delCase('E-12', 'Subdeportes, equipo y torneos a la vez (fixture Baloncesto)', async () => ({ R: await fixture('Baloncesto') }),
   async (X) => { bizErr(409, 'INVALID_STATE', ['2 subdeportes', '1 equipo asociado', '3 torneos']); const s = await call('GET', `/sports/${X.R.id}/subsports?all=true`); pm.test('sport and its 2 children still exist', () => pm.expect(s.json).to.have.lengthOf(2)); });
 
 // =========================================================================
@@ -441,7 +441,7 @@ runIt((function* () {
 const collection = {
   info: {
     name: 'MsSports',
-    description: 'HU-GD-01 Gestionar deportes. Run order: node postman/fixtures/seed.mjs, newman, node postman/fixtures/teardown.mjs. See docs/pruebas/HU-GD-01-matriz.md.',
+    description: 'HU-GD-01 Gestionar deportes. Run order: npm run seed, newman, node postman/fixtures/teardown.mjs. See docs/pruebas/HU-GD-01-matriz.md.',
     schema: 'https://schema.getpostman.com/json/collection/v2.1.0/collection.json',
   },
   event: [wrap('prerequest', "if (!pm.collectionVariables.get('runId')) { pm.collectionVariables.set('runId', String(Date.now())); }")],

@@ -3,8 +3,11 @@ import {
   Controller,
   Delete,
   Get,
+  HttpCode,
+  HttpStatus,
   Patch,
   Post,
+  Put,
   Query,
 } from '@nestjs/common';
 import { IdParam } from '../../common/decorators/id-param.decorator';
@@ -38,7 +41,7 @@ export class TeamsController {
     return this.teamsService.findOne(id);
   }
 
-  @Patch(':id')
+  @Put(':id')
   update(@IdParam(idParamPipe()) id: number, @Body() dto: UpdateTeamDto) {
     return this.teamsService.update(id, dto);
   }
@@ -54,6 +57,7 @@ export class TeamsController {
   }
 
   @Delete(':id')
+  @HttpCode(HttpStatus.NO_CONTENT)
   remove(@IdParam(idParamPipe()) id: number) {
     return this.teamsService.remove(id);
   }

@@ -42,7 +42,9 @@ describe('CreateTeamDto / UpdateTeamDto', () => {
 
   it.each(['name', 'city'])('rejects a %s with only spaces', async (field) => {
     const message =
-      field === 'name' ? 'El nombre es obligatorio' : 'La ciudad es obligatoria';
+      field === 'name'
+        ? 'El nombre es obligatorio'
+        : 'La ciudad es obligatoria';
 
     await expectFields(body({ ...validTeam, [field]: '   ' }), {
       [field]: message,
@@ -77,13 +79,27 @@ describe('CreateTeamDto / UpdateTeamDto', () => {
     ).resolves.toBeDefined();
   });
 
-  it('UpdateTeamDto accepts a partial body but still trims and validates', async () => {
-    await expect(body({ city: ' Cali ' }, UpdateTeamDto)).resolves.toMatchObject({
-      city: 'Cali',
-    });
-    await expectFields(body({ name: '   ' }, UpdateTeamDto), {
+  it('UpdateTeamDto is a full replacement: it requires every mandatory field', async () => {
+    await expectFields(body({ city: 'Cali' }, UpdateTeamDto), {
       name: 'El nombre es obligatorio',
+      contactEmail: 'El correo de contacto es obligatorio',
     });
+  });
+
+  it('UpdateTeamDto rejects null instead of failing later', async () => {
+    await expectFields(
+      body({ ...validTeam, name: null, contactEmail: null }, UpdateTeamDto),
+      {
+        name: 'El nombre es obligatorio',
+        contactEmail: 'El correo de contacto es obligatorio',
+      },
+    );
+  });
+
+  it('UpdateTeamDto trims and accepts a valid body', async () => {
+    await expect(
+      body({ ...validTeam, city: ' Cali ' }, UpdateTeamDto),
+    ).resolves.toMatchObject({ city: 'Cali' });
   });
 });
 

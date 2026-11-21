@@ -47,7 +47,7 @@ Propiedades en camelCase en el código y snake_case en la base de datos.
 | Entidad | Campos clave | Restricciones |
 |---|---|---|
 | Sport | id, name, description, active, parentSportId (nullable) | name único (sin distinguir mayúsculas, tras trim). Autorrelación 1:N (subdeportes) |
-| Team | id, name, city, foundedAt, active | name único |
+| Team | id, name, city, contactEmail, foundedYear, active | name único |
 | TeamSport | teamId, sportId | PK o UNIQUE (teamId, sportId) |
 | Player | id, documentNumber, firstName, lastName, birthDate, active | documentNumber único |
 | PlayerContract | id, playerId, teamId, startDate, endDate (nullable) | ver reglas de solape en `reglas-dominio`. Es entidad propia, no tabla puente simple, porque guarda historial |
