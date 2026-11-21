@@ -1,7 +1,7 @@
 {
   "info": {
     "name": "GestionDeportiva - ms_sports",
-    "description": "Colección de pruebas de integración para ms_sports (HU-GD-06 Skills).",
+    "description": "Colección unificada de pruebas de integración y demo CRUD para ms_sports.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "auth": {
@@ -21,7 +21,13 @@
         "type": "text/javascript",
         "exec": [
           "if (!pm.collectionVariables.get('runId')) {",
-          "  pm.collectionVariables.set('runId', String(Date.now()));",
+          "  const now = Date.now();",
+          "  const runId = String(now).slice(-6);",
+          "  const baseUserId = 100000 + (now % 800000);",
+          "  pm.collectionVariables.set('runId', runId);",
+          "  pm.collectionVariables.set('testUserId1', String(baseUserId));",
+          "  pm.collectionVariables.set('testUserId2', String(baseUserId + 1));",
+          "  pm.collectionVariables.set('testUserId3', String(baseUserId + 2));",
           "}"
         ]
       }
@@ -39,7 +45,10 @@
               "request": {
                 "method": "POST",
                 "header": [
-                  { "key": "Content-Type", "value": "application/json" }
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
                 ],
                 "body": {
                   "mode": "raw",
@@ -69,7 +78,10 @@
               "request": {
                 "method": "PUT",
                 "header": [
-                  { "key": "Content-Type", "value": "application/json" }
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
                 ],
                 "body": {
                   "mode": "raw",
@@ -93,608 +105,1423 @@
           "item": [
             {
               "name": "TC-GD06-01 Crear habilidad (éxito con trim)",
-          "request": {
-            "method": "POST",
-            "header": [
-              { "key": "Content-Type", "value": "application/json" }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"name\": \"  Velocidad-{{runId}}  \",\n  \"description\": \"  Capacidad de desplazamiento rápido en cancha  \"\n}"
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"  Velocidad-{{runId}}  \",\n  \"description\": \"  Capacidad de desplazamiento rápido en cancha  \"\n}"
+                },
+                "url": "{{baseUrl}}/skills"
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 201 Created', function () {",
+                      "  pm.response.to.have.status(201);",
+                      "});",
+                      "const body = pm.response.json();",
+                      "const expectedName = `Velocidad-${pm.collectionVariables.get('runId')}`;",
+                      "pm.test('Devuelve DTO con id y campos recortados', function () {",
+                      "  pm.expect(body.id).to.be.a('number');",
+                      "  pm.expect(body.name).to.eql(expectedName);",
+                      "  pm.expect(body.description).to.eql('Capacidad de desplazamiento rápido en cancha');",
+                      "});",
+                      "pm.collectionVariables.set('skillId', body.id);",
+                      "pm.collectionVariables.set('skillName', body.name);"
+                    ]
+                  }
+                }
+              ]
             },
-            "url": "{{baseUrl}}/skills"
-          },
-          "event": [
             {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test('Status 201 Created', function () {",
-                  "  pm.response.to.have.status(201);",
-                  "});",
-                  "const body = pm.response.json();",
-                  "const expectedName = `Velocidad-${pm.collectionVariables.get('runId')}`;",
-                  "pm.test('Devuelve DTO con id y campos recortados', function () {",
-                  "  pm.expect(body.id).to.be.a('number');",
-                  "  pm.expect(body.name).to.eql(expectedName);",
-                  "  pm.expect(body.description).to.eql('Capacidad de desplazamiento rápido en cancha');",
-                  "});",
-                  "pm.collectionVariables.set('skillId', body.id);",
-                  "pm.collectionVariables.set('skillName', body.name);"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "TC-GD06-02 Crear segunda habilidad (para prueba de duplicado en PUT)",
-          "request": {
-            "method": "POST",
-            "header": [
-              { "key": "Content-Type", "value": "application/json" }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"name\": \"Resistencia-{{runId}}\",\n  \"description\": \"Capacidad física sostenida durante el partido\"\n}"
+              "name": "TC-GD06-02 Crear segunda habilidad (para prueba de duplicado en PUT)",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Resistencia-{{runId}}\",\n  \"description\": \"Capacidad física sostenida durante el partido\"\n}"
+                },
+                "url": "{{baseUrl}}/skills"
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 201 Created', function () {",
+                      "  pm.response.to.have.status(201);",
+                      "});",
+                      "const body = pm.response.json();",
+                      "pm.test('Devuelve id y nombre esperado', function () {",
+                      "  pm.expect(body.id).to.be.a('number');",
+                      "  pm.expect(body.name).to.eql(`Resistencia-${pm.collectionVariables.get('runId')}`);",
+                      "});",
+                      "pm.collectionVariables.set('skillId2', body.id);",
+                      "pm.collectionVariables.set('skillName2', body.name);",
+                      "pm.collectionVariables.set('skillName2Upper', body.name.toUpperCase());"
+                    ]
+                  }
+                }
+              ]
             },
-            "url": "{{baseUrl}}/skills"
-          },
-          "event": [
             {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test('Status 201 Created', function () {",
-                  "  pm.response.to.have.status(201);",
-                  "});",
-                  "const body = pm.response.json();",
-                  "pm.test('Devuelve id y nombre esperado', function () {",
-                  "  pm.expect(body.id).to.be.a('number');",
-                  "  pm.expect(body.name).to.eql(`Resistencia-${pm.collectionVariables.get('runId')}`);",
-                  "});",
-                  "pm.collectionVariables.set('skillId2', body.id);",
-                  "pm.collectionVariables.set('skillName2', body.name);",
-                  "pm.collectionVariables.set('skillName2Upper', body.name.toUpperCase());"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "TC-GD06-03 Crear habilidad con nombre solo espacios (400)",
-          "request": {
-            "method": "POST",
-            "header": [
-              { "key": "Content-Type", "value": "application/json" }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"name\": \"   \",\n  \"description\": \"Descripción válida\"\n}"
+              "name": "TC-GD06-03 Crear habilidad con nombre solo espacios (400)",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"   \",\n  \"description\": \"Descripción válida\"\n}"
+                },
+                "url": "{{baseUrl}}/skills"
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 400 Bad Request', function () {",
+                      "  pm.response.to.have.status(400);",
+                      "});",
+                      "const body = pm.response.json();",
+                      "pm.test('Error de validación', function () {",
+                      "  pm.expect(body.errorCase).to.eql('VALIDATION_ERROR');",
+                      "});"
+                    ]
+                  }
+                }
+              ]
             },
-            "url": "{{baseUrl}}/skills"
-          },
-          "event": [
             {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test('Status 400 Bad Request', function () {",
-                  "  pm.response.to.have.status(400);",
-                  "});",
-                  "const body = pm.response.json();",
-                  "pm.test('Error de validación', function () {",
-                  "  pm.expect(body.errorCase).to.eql('VALIDATION_ERROR');",
-                  "});"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "TC-GD06-04 Crear habilidad con descripción solo espacios (400)",
-          "request": {
-            "method": "POST",
-            "header": [
-              { "key": "Content-Type", "value": "application/json" }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"name\": \"Potencia-{{runId}}\",\n  \"description\": \"   \"\n}"
+              "name": "TC-GD06-04 Crear habilidad con descripción solo espacios (400)",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Potencia-{{runId}}\",\n  \"description\": \"   \"\n}"
+                },
+                "url": "{{baseUrl}}/skills"
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 400 Bad Request', function () {",
+                      "  pm.response.to.have.status(400);",
+                      "});",
+                      "const body = pm.response.json();",
+                      "pm.test('Error de validación', function () {",
+                      "  pm.expect(body.errorCase).to.eql('VALIDATION_ERROR');",
+                      "});"
+                    ]
+                  }
+                }
+              ]
             },
-            "url": "{{baseUrl}}/skills"
-          },
-          "event": [
             {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test('Status 400 Bad Request', function () {",
-                  "  pm.response.to.have.status(400);",
-                  "});",
-                  "const body = pm.response.json();",
-                  "pm.test('Error de validación', function () {",
-                  "  pm.expect(body.errorCase).to.eql('VALIDATION_ERROR');",
-                  "});"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "TC-GD06-05 Crear habilidad con campo extra no permitido (400)",
-          "request": {
-            "method": "POST",
-            "header": [
-              { "key": "Content-Type", "value": "application/json" }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"name\": \"Agilidad-{{runId}}\",\n  \"description\": \"Capacidad de cambio de dirección\",\n  \"campoExtra\": true\n}"
+              "name": "TC-GD06-05 Crear habilidad con campo extra no permitido (400)",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Agilidad-{{runId}}\",\n  \"description\": \"Capacidad de cambio de dirección\",\n  \"campoExtra\": true\n}"
+                },
+                "url": "{{baseUrl}}/skills"
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 400 Bad Request', function () {",
+                      "  pm.response.to.have.status(400);",
+                      "});",
+                      "const body = pm.response.json();",
+                      "pm.test('Rechaza campos no permitidos', function () {",
+                      "  pm.expect(body.errorCase).to.eql('VALIDATION_ERROR');",
+                      "});"
+                    ]
+                  }
+                }
+              ]
             },
-            "url": "{{baseUrl}}/skills"
-          },
-          "event": [
             {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test('Status 400 Bad Request', function () {",
-                  "  pm.response.to.have.status(400);",
-                  "});",
-                  "const body = pm.response.json();",
-                  "pm.test('Rechaza campos no permitidos', function () {",
-                  "  pm.expect(body.errorCase).to.eql('VALIDATION_ERROR');",
-                  "});"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "TC-GD06-06 Crear habilidad duplicada con distinta mayúscula y espacios (409)",
-          "request": {
-            "method": "POST",
-            "header": [
-              { "key": "Content-Type", "value": "application/json" }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"name\": \"  VELOCIDAD-{{runId}}  \",\n  \"description\": \"Otra descripción distinta\"\n}"
+              "name": "TC-GD06-06 Crear habilidad duplicada con distinta mayúscula y espacios (409)",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"  VELOCIDAD-{{runId}}  \",\n  \"description\": \"Otra descripción distinta\"\n}"
+                },
+                "url": "{{baseUrl}}/skills"
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 409 Conflict', function () {",
+                      "  pm.response.to.have.status(409);",
+                      "});",
+                      "const body = pm.response.json();",
+                      "pm.test('errorCase ALREADY_EXISTS', function () {",
+                      "  pm.expect(body.errorCase).to.eql('ALREADY_EXISTS');",
+                      "  pm.expect(body.message).to.be.a('string').and.not.be.empty;",
+                      "});"
+                    ]
+                  }
+                }
+              ]
             },
-            "url": "{{baseUrl}}/skills"
-          },
-          "event": [
             {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test('Status 409 Conflict', function () {",
-                  "  pm.response.to.have.status(409);",
-                  "});",
-                  "const body = pm.response.json();",
-                  "pm.test('errorCase ALREADY_EXISTS', function () {",
-                  "  pm.expect(body.errorCase).to.eql('ALREADY_EXISTS');",
-                  "  pm.expect(body.message).to.be.a('string').and.not.be.empty;",
-                  "});"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "TC-GD06-07 Listar habilidades registradas (200)",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": "{{baseUrl}}/skills"
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test('Status 200 OK', function () {",
-                  "  pm.response.to.have.status(200);",
-                  "});",
-                  "const body = pm.response.json();",
-                  "const id1 = Number(pm.collectionVariables.get('skillId'));",
-                  "const id2 = Number(pm.collectionVariables.get('skillId2'));",
-                  "pm.test('Devuelve arreglo con las habilidades creadas', function () {",
-                  "  pm.expect(body).to.be.an('array');",
-                  "  const ids = body.map((s) => s.id);",
-                  "  pm.expect(ids).to.include(id1);",
-                  "  pm.expect(ids).to.include(id2);",
-                  "});"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "TC-GD06-08 Filtrar habilidades por nombre (200)",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": "{{baseUrl}}/skills?name={{skillName}}"
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test('Status 200 OK', function () {",
-                  "  pm.response.to.have.status(200);",
-                  "});",
-                  "const body = pm.response.json();",
-                  "const id1 = Number(pm.collectionVariables.get('skillId'));",
-                  "pm.test('Contiene la habilidad filtrada', function () {",
-                  "  pm.expect(body).to.be.an('array').with.lengthOf.at.least(1);",
-                  "  pm.expect(body.map((s) => s.id)).to.include(id1);",
-                  "});"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "TC-GD06-09 Listar con query param no permitido (400)",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": "{{baseUrl}}/skills?parametroInvalido=1"
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test('Status 400 Bad Request', function () {",
-                  "  pm.response.to.have.status(400);",
-                  "});"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "TC-GD06-10 Listar con query param name repetido (400)",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": "{{baseUrl}}/skills?name=a&name=b"
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test('Status 400 Bad Request (sin error 500)', function () {",
-                  "  pm.response.to.have.status(400);",
-                  "});"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "TC-GD06-11 Consultar detalle de habilidad (200)",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": "{{baseUrl}}/skills/{{skillId}}"
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test('Status 200 OK', function () {",
-                  "  pm.response.to.have.status(200);",
-                  "});",
-                  "const body = pm.response.json();",
-                  "pm.test('Detalle coincide con la habilidad creada', function () {",
-                  "  pm.expect(body.id).to.eql(Number(pm.collectionVariables.get('skillId')));",
-                  "  pm.expect(body.name).to.eql(pm.collectionVariables.get('skillName'));",
-                  "  pm.expect(body.description).to.be.a('string').and.not.be.empty;",
-                  "});"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "TC-GD06-12 Consultar detalle con id no numérico (400)",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": "{{baseUrl}}/skills/abc"
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test('Status 400 Bad Request', function () {",
-                  "  pm.response.to.have.status(400);",
-                  "});"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "TC-GD06-13 Consultar detalle de habilidad inexistente (404)",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": "{{baseUrl}}/skills/999999"
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test('Status 404 Not Found', function () {",
-                  "  pm.response.to.have.status(404);",
-                  "});",
-                  "const body = pm.response.json();",
-                  "pm.test('errorCase NOT_FOUND', function () {",
-                  "  pm.expect(body.errorCase).to.eql('NOT_FOUND');",
-                  "});"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "TC-GD06-14 Actualizar habilidad conservando su nombre (200)",
-          "request": {
-            "method": "PUT",
-            "header": [
-              { "key": "Content-Type", "value": "application/json" }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"name\": \"{{skillName}}\",\n  \"description\": \"Descripción actualizada de velocidad\"\n}"
+              "name": "TC-GD06-07 Listar habilidades registradas (200)",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": "{{baseUrl}}/skills"
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 200 OK', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "const body = pm.response.json();",
+                      "const id1 = Number(pm.collectionVariables.get('skillId'));",
+                      "const id2 = Number(pm.collectionVariables.get('skillId2'));",
+                      "pm.test('Devuelve arreglo con las habilidades creadas', function () {",
+                      "  pm.expect(body).to.be.an('array');",
+                      "  const ids = body.map((s) => s.id);",
+                      "  pm.expect(ids).to.include(id1);",
+                      "  pm.expect(ids).to.include(id2);",
+                      "});"
+                    ]
+                  }
+                }
+              ]
             },
-            "url": "{{baseUrl}}/skills/{{skillId}}"
-          },
-          "event": [
             {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test('Status 200 OK', function () {",
-                  "  pm.response.to.have.status(200);",
-                  "});",
-                  "const body = pm.response.json();",
-                  "pm.test('Descripción actualizada correctamente', function () {",
-                  "  pm.expect(body.id).to.eql(Number(pm.collectionVariables.get('skillId')));",
-                  "  pm.expect(body.description).to.eql('Descripción actualizada de velocidad');",
-                  "});"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "TC-GD06-15 Actualizar habilidad con nombre duplicado de otra habilidad (409)",
-          "request": {
-            "method": "PUT",
-            "header": [
-              { "key": "Content-Type", "value": "application/json" }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"name\": \"{{skillName2Upper}}\",\n  \"description\": \"Intento de duplicado en actualización\"\n}"
+              "name": "TC-GD06-08 Filtrar habilidades por nombre (200)",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": "{{baseUrl}}/skills?name={{skillName}}"
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 200 OK', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "const body = pm.response.json();",
+                      "const id1 = Number(pm.collectionVariables.get('skillId'));",
+                      "pm.test('Contiene la habilidad filtrada', function () {",
+                      "  pm.expect(body).to.be.an('array').with.lengthOf.at.least(1);",
+                      "  pm.expect(body.map((s) => s.id)).to.include(id1);",
+                      "});"
+                    ]
+                  }
+                }
+              ]
             },
-            "url": "{{baseUrl}}/skills/{{skillId}}"
-          },
-          "event": [
             {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test('Status 409 Conflict', function () {",
-                  "  pm.response.to.have.status(409);",
-                  "});",
-                  "const body = pm.response.json();",
-                  "pm.test('errorCase ALREADY_EXISTS', function () {",
-                  "  pm.expect(body.errorCase).to.eql('ALREADY_EXISTS');",
-                  "});"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "TC-GD06-16 Actualizar habilidad con descripción solo espacios (400)",
-          "request": {
-            "method": "PUT",
-            "header": [
-              { "key": "Content-Type", "value": "application/json" }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"name\": \"{{skillName}}\",\n  \"description\": \"   \"\n}"
+              "name": "TC-GD06-09 Listar con query param no permitido (400)",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": "{{baseUrl}}/skills?parametroInvalido=1"
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 400 Bad Request', function () {",
+                      "  pm.response.to.have.status(400);",
+                      "});"
+                    ]
+                  }
+                }
+              ]
             },
-            "url": "{{baseUrl}}/skills/{{skillId}}"
-          },
-          "event": [
             {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test('Status 400 Bad Request', function () {",
-                  "  pm.response.to.have.status(400);",
-                  "});"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "TC-GD06-17 Actualizar habilidad inexistente (404)",
-          "request": {
-            "method": "PUT",
-            "header": [
-              { "key": "Content-Type", "value": "application/json" }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"name\": \"Inexistente-{{runId}}\",\n  \"description\": \"Descripción de prueba\"\n}"
+              "name": "TC-GD06-10 Listar con query param name repetido (400)",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": "{{baseUrl}}/skills?name=a&name=b"
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 400 Bad Request (sin error 500)', function () {",
+                      "  pm.response.to.have.status(400);",
+                      "});"
+                    ]
+                  }
+                }
+              ]
             },
-            "url": "{{baseUrl}}/skills/999999"
-          },
-          "event": [
             {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test('Status 404 Not Found', function () {",
-                  "  pm.response.to.have.status(404);",
-                  "});",
-                  "const body = pm.response.json();",
-                  "pm.test('errorCase NOT_FOUND', function () {",
-                  "  pm.expect(body.errorCase).to.eql('NOT_FOUND');",
-                  "});"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "TC-GD06-18 Eliminar habilidad sin jugadores asociados (204)",
-          "request": {
-            "method": "DELETE",
-            "header": [],
-            "url": "{{baseUrl}}/skills/{{skillId}}"
-          },
-          "event": [
+              "name": "TC-GD06-11 Consultar detalle de habilidad (200)",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": "{{baseUrl}}/skills/{{skillId}}"
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 200 OK', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "const body = pm.response.json();",
+                      "pm.test('Detalle coincide con la habilidad creada', function () {",
+                      "  pm.expect(body.id).to.eql(Number(pm.collectionVariables.get('skillId')));",
+                      "  pm.expect(body.name).to.eql(pm.collectionVariables.get('skillName'));",
+                      "  pm.expect(body.description).to.be.a('string').and.not.be.empty;",
+                      "});"
+                    ]
+                  }
+                }
+              ]
+            },
             {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test('Status 204 No Content', function () {",
-                  "  pm.response.to.have.status(204);",
-                  "});"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "TC-GD06-19 Verificar que la habilidad eliminada ya no existe (404)",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": "{{baseUrl}}/skills/{{skillId}}"
-          },
-          "event": [
+              "name": "TC-GD06-12 Consultar detalle con id no numérico (400)",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": "{{baseUrl}}/skills/abc"
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 400 Bad Request', function () {",
+                      "  pm.response.to.have.status(400);",
+                      "});"
+                    ]
+                  }
+                }
+              ]
+            },
             {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test('Status 404 Not Found', function () {",
-                  "  pm.response.to.have.status(404);",
-                  "});",
-                  "const body = pm.response.json();",
-                  "pm.test('errorCase NOT_FOUND', function () {",
-                  "  pm.expect(body.errorCase).to.eql('NOT_FOUND');",
-                  "});"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "TC-GD06-20 Eliminar habilidad inexistente (404)",
-          "request": {
-            "method": "DELETE",
-            "header": [],
-            "url": "{{baseUrl}}/skills/999999"
-          },
-          "event": [
+              "name": "TC-GD06-13 Consultar detalle de habilidad inexistente (404)",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": "{{baseUrl}}/skills/999999"
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 404 Not Found', function () {",
+                      "  pm.response.to.have.status(404);",
+                      "});",
+                      "const body = pm.response.json();",
+                      "pm.test('errorCase NOT_FOUND', function () {",
+                      "  pm.expect(body.errorCase).to.eql('NOT_FOUND');",
+                      "});"
+                    ]
+                  }
+                }
+              ]
+            },
             {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test('Status 404 Not Found', function () {",
-                  "  pm.response.to.have.status(404);",
-                  "});",
-                  "const body = pm.response.json();",
-                  "pm.test('errorCase NOT_FOUND', function () {",
-                  "  pm.expect(body.errorCase).to.eql('NOT_FOUND');",
-                  "});"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "TC-GD06-21 Eliminar habilidad con id no numérico (400)",
-          "request": {
-            "method": "DELETE",
-            "header": [],
-            "url": "{{baseUrl}}/skills/abc"
-          },
-          "event": [
+              "name": "TC-GD06-14 Actualizar habilidad conservando su nombre (200)",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"{{skillName}}\",\n  \"description\": \"Descripción actualizada de velocidad\"\n}"
+                },
+                "url": "{{baseUrl}}/skills/{{skillId}}"
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 200 OK', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "const body = pm.response.json();",
+                      "pm.test('Descripción actualizada correctamente', function () {",
+                      "  pm.expect(body.id).to.eql(Number(pm.collectionVariables.get('skillId')));",
+                      "  pm.expect(body.description).to.eql('Descripción actualizada de velocidad');",
+                      "});"
+                    ]
+                  }
+                }
+              ]
+            },
             {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test('Status 400 Bad Request', function () {",
-                  "  pm.response.to.have.status(400);",
-                  "});"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "TC-GD06-22 Limpieza - eliminar segunda habilidad de prueba (204)",
-          "request": {
-            "method": "DELETE",
-            "header": [],
-            "url": "{{baseUrl}}/skills/{{skillId2}}"
-          },
-          "event": [
+              "name": "TC-GD06-15 Actualizar habilidad con nombre duplicado de otra habilidad (409)",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"{{skillName2Upper}}\",\n  \"description\": \"Intento de duplicado en actualización\"\n}"
+                },
+                "url": "{{baseUrl}}/skills/{{skillId}}"
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 409 Conflict', function () {",
+                      "  pm.response.to.have.status(409);",
+                      "});",
+                      "const body = pm.response.json();",
+                      "pm.test('errorCase ALREADY_EXISTS', function () {",
+                      "  pm.expect(body.errorCase).to.eql('ALREADY_EXISTS');",
+                      "});"
+                    ]
+                  }
+                }
+              ]
+            },
             {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test('Status 204 No Content', function () {",
-                  "  pm.response.to.have.status(204);",
-                  "});",
-                  "pm.collectionVariables.unset('runId');"
-                ]
-              }
+              "name": "TC-GD06-16 Actualizar habilidad con descripción solo espacios (400)",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"{{skillName}}\",\n  \"description\": \"   \"\n}"
+                },
+                "url": "{{baseUrl}}/skills/{{skillId}}"
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 400 Bad Request', function () {",
+                      "  pm.response.to.have.status(400);",
+                      "});"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "TC-GD06-17 Actualizar habilidad inexistente (404)",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Inexistente-{{runId}}\",\n  \"description\": \"Descripción de prueba\"\n}"
+                },
+                "url": "{{baseUrl}}/skills/999999"
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 404 Not Found', function () {",
+                      "  pm.response.to.have.status(404);",
+                      "});",
+                      "const body = pm.response.json();",
+                      "pm.test('errorCase NOT_FOUND', function () {",
+                      "  pm.expect(body.errorCase).to.eql('NOT_FOUND');",
+                      "});"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "TC-GD06-18 Eliminar habilidad sin jugadores asociados (204)",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": "{{baseUrl}}/skills/{{skillId}}"
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 204 No Content', function () {",
+                      "  pm.response.to.have.status(204);",
+                      "});"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "TC-GD06-19 Verificar que la habilidad eliminada ya no existe (404)",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": "{{baseUrl}}/skills/{{skillId}}"
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 404 Not Found', function () {",
+                      "  pm.response.to.have.status(404);",
+                      "});",
+                      "const body = pm.response.json();",
+                      "pm.test('errorCase NOT_FOUND', function () {",
+                      "  pm.expect(body.errorCase).to.eql('NOT_FOUND');",
+                      "});"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "TC-GD06-20 Eliminar habilidad inexistente (404)",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": "{{baseUrl}}/skills/999999"
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 404 Not Found', function () {",
+                      "  pm.response.to.have.status(404);",
+                      "});",
+                      "const body = pm.response.json();",
+                      "pm.test('errorCase NOT_FOUND', function () {",
+                      "  pm.expect(body.errorCase).to.eql('NOT_FOUND');",
+                      "});"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "TC-GD06-21 Eliminar habilidad con id no numérico (400)",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": "{{baseUrl}}/skills/abc"
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 400 Bad Request', function () {",
+                      "  pm.response.to.have.status(400);",
+                      "});"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "TC-GD06-22 Limpieza - eliminar segunda habilidad de prueba (204)",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": "{{baseUrl}}/skills/{{skillId2}}"
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 204 No Content', function () {",
+                      "  pm.response.to.have.status(204);",
+                      "});",
+                      "pm.collectionVariables.unset('runId');"
+                    ]
+                  }
+                }
+              ]
             }
           ]
         }
       ]
+    },
+    {
+      "name": "GD-04 Jugadores",
+      "item": [
+        {
+          "name": "Demo CRUD (7 endpoints)",
+          "item": [
+            {
+              "name": "Crear jugador",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"userId\": 1,\n  \"document\": \"1053812345\",\n  \"position\": \"Delantero\",\n  \"jerseyNumber\": 9\n}"
+                },
+                "url": "{{baseUrl}}/players"
+              }
+            },
+            {
+              "name": "Listar jugadores activos",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": "{{baseUrl}}/players"
+              }
+            },
+            {
+              "name": "Consultar jugador por id",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": "{{baseUrl}}/players/1"
+              }
+            },
+            {
+              "name": "Actualizar jugador",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"userId\": 1,\n  \"document\": \"1053812345\",\n  \"position\": \"Mediocampista\",\n  \"jerseyNumber\": 10\n}"
+                },
+                "url": "{{baseUrl}}/players/1"
+              }
+            },
+            {
+              "name": "Desactivar jugador",
+              "request": {
+                "method": "PATCH",
+                "header": [],
+                "url": "{{baseUrl}}/players/1/deactivate"
+              }
+            },
+            {
+              "name": "Activar jugador",
+              "request": {
+                "method": "PATCH",
+                "header": [],
+                "url": "{{baseUrl}}/players/1/activate"
+              }
+            },
+            {
+              "name": "Eliminar jugador",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": "{{baseUrl}}/players/1"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Pruebas automatizadas (24 casos)",
+          "item": [
+            {
+              "name": "TC-GD04-01 Crear jugador completo (éxito con trim)",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"userId\": {{testUserId1}},\n  \"document\": \"  CC-{{runId}}-1  \",\n  \"position\": \"  Delantero  \",\n  \"jerseyNumber\": 9\n}"
+                },
+                "url": "{{baseUrl}}/players"
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 201 Created', function () {",
+                      "  pm.response.to.have.status(201);",
+                      "});",
+                      "const body = pm.response.json();",
+                      "const expectedDoc = `CC-${pm.collectionVariables.get('runId')}-1`;",
+                      "pm.test('Devuelve DTO con campos recortados y active=true', function () {",
+                      "  pm.expect(body.id).to.be.a('number');",
+                      "  pm.expect(body.userId).to.eql(Number(pm.collectionVariables.get('testUserId1')));",
+                      "  pm.expect(body.document).to.eql(expectedDoc);",
+                      "  pm.expect(body.position).to.eql('Delantero');",
+                      "  pm.expect(body.jerseyNumber).to.eql(9);",
+                      "  pm.expect(body.active).to.eql(true);",
+                      "});",
+                      "pm.collectionVariables.set('playerId', body.id);",
+                      "pm.collectionVariables.set('playerUserId', body.userId);",
+                      "pm.collectionVariables.set('playerDocument', body.document);"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "TC-GD04-02 Crear segundo jugador solo con campos obligatorios",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"userId\": {{testUserId2}},\n  \"document\": \"CC-{{runId}}-2\"\n}"
+                },
+                "url": "{{baseUrl}}/players"
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 201 Created', function () {",
+                      "  pm.response.to.have.status(201);",
+                      "});",
+                      "const body = pm.response.json();",
+                      "pm.test('Campos opcionales en null y active=true', function () {",
+                      "  pm.expect(body.id).to.be.a('number');",
+                      "  pm.expect(body.position).to.eql(null);",
+                      "  pm.expect(body.jerseyNumber).to.eql(null);",
+                      "  pm.expect(body.active).to.eql(true);",
+                      "});",
+                      "pm.collectionVariables.set('playerId2', body.id);",
+                      "pm.collectionVariables.set('playerUserId2', body.userId);",
+                      "pm.collectionVariables.set('playerDocument2', body.document);",
+                      "pm.collectionVariables.set('playerDocument2Lower', body.document ? body.document.toLowerCase() : '');"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "TC-GD04-03 Crear jugador con userId inválido (400)",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"userId\": 0,\n  \"document\": \"CC-{{runId}}-3\"\n}"
+                },
+                "url": "{{baseUrl}}/players"
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 400 Bad Request', function () {",
+                      "  pm.response.to.have.status(400);",
+                      "});",
+                      "pm.test('Error de validación', function () {",
+                      "  pm.expect(pm.response.json().errorCase).to.eql('VALIDATION_ERROR');",
+                      "});"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "TC-GD04-04 Crear jugador con documento solo espacios (400)",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"userId\": {{testUserId3}},\n  \"document\": \"   \"\n}"
+                },
+                "url": "{{baseUrl}}/players"
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 400 Bad Request', function () {",
+                      "  pm.response.to.have.status(400);",
+                      "});",
+                      "pm.test('Error de validación', function () {",
+                      "  pm.expect(pm.response.json().errorCase).to.eql('VALIDATION_ERROR');",
+                      "});"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "TC-GD04-05 Crear jugador con jerseyNumber fuera de rango (400)",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"userId\": {{testUserId3}},\n  \"document\": \"CC-{{runId}}-4\",\n  \"jerseyNumber\": 100\n}"
+                },
+                "url": "{{baseUrl}}/players"
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 400 Bad Request', function () {",
+                      "  pm.response.to.have.status(400);",
+                      "});"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "TC-GD04-06 Crear jugador con documento duplicado en minúsculas (409)",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"userId\": {{testUserId3}},\n  \"document\": \"  cc-{{runId}}-1  \"\n}"
+                },
+                "url": "{{baseUrl}}/players"
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 409 Conflict', function () {",
+                      "  pm.response.to.have.status(409);",
+                      "});",
+                      "pm.test('errorCase ALREADY_EXISTS', function () {",
+                      "  pm.expect(pm.response.json().errorCase).to.eql('ALREADY_EXISTS');",
+                      "});"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "TC-GD04-07 Crear jugador con userId duplicado (409)",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"userId\": {{testUserId1}},\n  \"document\": \"CC-{{runId}}-99\"\n}"
+                },
+                "url": "{{baseUrl}}/players"
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 409 Conflict', function () {",
+                      "  pm.response.to.have.status(409);",
+                      "});",
+                      "pm.test('errorCase ALREADY_EXISTS', function () {",
+                      "  pm.expect(pm.response.json().errorCase).to.eql('ALREADY_EXISTS');",
+                      "});"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "TC-GD04-08 Listar jugadores activos por defecto (200)",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": "{{baseUrl}}/players"
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 200 OK', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "const body = pm.response.json();",
+                      "const id1 = Number(pm.collectionVariables.get('playerId'));",
+                      "const id2 = Number(pm.collectionVariables.get('playerId2'));",
+                      "pm.test('Contiene los jugadores creados ordenados por id', function () {",
+                      "  pm.expect(body).to.be.an('array');",
+                      "  const ids = body.map((p) => p.id);",
+                      "  pm.expect(ids).to.include(id1);",
+                      "  pm.expect(ids).to.include(id2);",
+                      "  pm.expect(ids.indexOf(id1)).to.be.below(ids.indexOf(id2));",
+                      "});"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "TC-GD04-09 Filtrar jugadores por documento (200)",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": "{{baseUrl}}/players?document={{playerDocument}}"
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 200 OK', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "const body = pm.response.json();",
+                      "pm.test('Devuelve el jugador filtrado', function () {",
+                      "  pm.expect(body).to.be.an('array').with.lengthOf.at.least(1);",
+                      "  pm.expect(body.map((p) => p.id)).to.include(Number(pm.collectionVariables.get('playerId')));",
+                      "});"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "TC-GD04-10 Listar con query param inválido (400)",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": "{{baseUrl}}/players?active=invalido"
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 400 Bad Request', function () {",
+                      "  pm.response.to.have.status(400);",
+                      "});"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "TC-GD04-11 Consultar detalle de jugador (200)",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": "{{baseUrl}}/players/{{playerId}}"
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 200 OK', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "const body = pm.response.json();",
+                      "pm.test('Coincide con el jugador creado', function () {",
+                      "  pm.expect(body.id).to.eql(Number(pm.collectionVariables.get('playerId')));",
+                      "  pm.expect(body.document).to.eql(pm.collectionVariables.get('playerDocument'));",
+                      "});"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "TC-GD04-12 Consultar detalle con id no numérico (400)",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": "{{baseUrl}}/players/abc"
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 400 Bad Request', function () {",
+                      "  pm.response.to.have.status(400);",
+                      "});"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "TC-GD04-13 Consultar jugador inexistente (404)",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": "{{baseUrl}}/players/999999"
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 404 Not Found', function () {",
+                      "  pm.response.to.have.status(404);",
+                      "});",
+                      "pm.test('errorCase NOT_FOUND', function () {",
+                      "  pm.expect(pm.response.json().errorCase).to.eql('NOT_FOUND');",
+                      "});"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "TC-GD04-14 Actualizar posición y camiseta conservando documento y userId (200)",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"userId\": {{playerUserId}},\n  \"document\": \"{{playerDocument}}\",\n  \"position\": \"Mediocampista\",\n  \"jerseyNumber\": 10\n}"
+                },
+                "url": "{{baseUrl}}/players/{{playerId}}"
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 200 OK', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "const body = pm.response.json();",
+                      "pm.test('Campos actualizados correctamente', function () {",
+                      "  pm.expect(body.position).to.eql('Mediocampista');",
+                      "  pm.expect(body.jerseyNumber).to.eql(10);",
+                      "});"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "TC-GD04-15 Actualizar con documento duplicado de otro jugador (409)",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"userId\": {{playerUserId}},\n  \"document\": \"{{playerDocument2Lower}}\",\n  \"position\": \"Defensa\"\n}"
+                },
+                "url": "{{baseUrl}}/players/{{playerId}}"
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 409 Conflict', function () {",
+                      "  pm.response.to.have.status(409);",
+                      "});",
+                      "pm.test('errorCase ALREADY_EXISTS', function () {",
+                      "  pm.expect(pm.response.json().errorCase).to.eql('ALREADY_EXISTS');",
+                      "});"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "TC-GD04-16 Actualizar con userId duplicado de otro jugador (409)",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"userId\": {{playerUserId2}},\n  \"document\": \"{{playerDocument}}\",\n  \"position\": \"Defensa\"\n}"
+                },
+                "url": "{{baseUrl}}/players/{{playerId}}"
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 409 Conflict', function () {",
+                      "  pm.response.to.have.status(409);",
+                      "});",
+                      "pm.test('errorCase ALREADY_EXISTS', function () {",
+                      "  pm.expect(pm.response.json().errorCase).to.eql('ALREADY_EXISTS');",
+                      "});"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "TC-GD04-17 Actualizar jugador inexistente (404)",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"userId\": {{testUserId3}},\n  \"document\": \"CC-{{runId}}-404\"\n}"
+                },
+                "url": "{{baseUrl}}/players/999999"
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 404 Not Found', function () {",
+                      "  pm.response.to.have.status(404);",
+                      "});",
+                      "pm.test('errorCase NOT_FOUND', function () {",
+                      "  pm.expect(pm.response.json().errorCase).to.eql('NOT_FOUND');",
+                      "});"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "TC-GD04-18 Desactivar jugador (200)",
+              "request": {
+                "method": "PATCH",
+                "header": [],
+                "url": "{{baseUrl}}/players/{{playerId}}/deactivate"
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 200 OK', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "pm.test('active cambia a false', function () {",
+                      "  pm.expect(pm.response.json().active).to.eql(false);",
+                      "});"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "TC-GD04-19 Consultar jugadores inactivos (active=false)",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": "{{baseUrl}}/players?active=false"
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 200 OK', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "const body = pm.response.json();",
+                      "pm.test('Jugador desactivado aparece en active=false', function () {",
+                      "  pm.expect(body.map((p) => p.id)).to.include(Number(pm.collectionVariables.get('playerId')));",
+                      "});"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "TC-GD04-20 Reactivar jugador (200)",
+              "request": {
+                "method": "PATCH",
+                "header": [],
+                "url": "{{baseUrl}}/players/{{playerId}}/activate"
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 200 OK', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "pm.test('active vuelve a true', function () {",
+                      "  pm.expect(pm.response.json().active).to.eql(true);",
+                      "});"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "TC-GD04-21 Eliminar jugador sin dependencias (204)",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": "{{baseUrl}}/players/{{playerId}}"
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 204 No Content', function () {",
+                      "  pm.response.to.have.status(204);",
+                      "});"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "TC-GD04-22 Verificar que el jugador eliminado ya no existe (404)",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": "{{baseUrl}}/players/{{playerId}}"
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 404 Not Found', function () {",
+                      "  pm.response.to.have.status(404);",
+                      "});",
+                      "pm.test('errorCase NOT_FOUND', function () {",
+                      "  pm.expect(pm.response.json().errorCase).to.eql('NOT_FOUND');",
+                      "});"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "TC-GD04-23 Eliminar jugador inexistente (404)",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": "{{baseUrl}}/players/999999"
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 404 Not Found', function () {",
+                      "  pm.response.to.have.status(404);",
+                      "});",
+                      "pm.test('errorCase NOT_FOUND', function () {",
+                      "  pm.expect(pm.response.json().errorCase).to.eql('NOT_FOUND');",
+                      "});"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "TC-GD04-24 Limpieza - eliminar segundo jugador de prueba (204)",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": "{{baseUrl}}/players/{{playerId2}}"
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 204 No Content', function () {",
+                      "  pm.response.to.have.status(204);",
+                      "});",
+                      "pm.collectionVariables.unset('runId');",
+                      "pm.collectionVariables.unset('testUserId1');",
+                      "pm.collectionVariables.unset('testUserId2');",
+                      "pm.collectionVariables.unset('testUserId3');"
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
         }
       ]
     }
