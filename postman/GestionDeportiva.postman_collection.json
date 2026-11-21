@@ -1524,6 +1524,696 @@
           ]
         }
       ]
+    },
+    {
+      "name": "GD-07 Habilidad-Jugador",
+      "item": [
+        {
+          "name": "Demo CRUD (4 endpoints)",
+          "item": [
+            {
+              "name": "Asignar habilidad a jugador",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": "{{baseUrl}}/players/1/skills/5",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"level\": 4\n}"
+                }
+              }
+            },
+            {
+              "name": "Consultar habilidades de un jugador",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": "{{baseUrl}}/players/1/skills"
+              }
+            },
+            {
+              "name": "Consultar jugadores con una habilidad",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": "{{baseUrl}}/skills/5/players"
+              }
+            },
+            {
+              "name": "Retirar habilidad de un jugador",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": "{{baseUrl}}/players/1/skills/5"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Pruebas automatizadas (GD-07)",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (!pm.collectionVariables.get('psRunId') || !pm.collectionVariables.get('psUserId1')) {",
+                  "  const now = Date.now();",
+                  "  const psRunId = String(now).slice(-6);",
+                  "  const base = 200000 + (now % 700000);",
+                  "  pm.collectionVariables.set('psRunId', psRunId);",
+                  "  pm.collectionVariables.set('psUserId1', String(base));",
+                  "  pm.collectionVariables.set('psUserId2', String(base + 1));",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "item": [
+            {
+              "name": "TC-GD07-01 Setup - Crear habilidad 1",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": "{{baseUrl}}/skills",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Regate-{{psRunId}}-1\",\n  \"description\": \"Capacidad de superar rivales con el balón\"\n}"
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 201 Created', () => pm.response.to.have.status(201));",
+                      "const b = pm.response.json();",
+                      "pm.collectionVariables.set('psSkillId1', b.id);"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "TC-GD07-02 Setup - Crear habilidad 2",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": "{{baseUrl}}/skills",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Definición-{{psRunId}}-2\",\n  \"description\": \"Efectividad frente al arco\"\n}"
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 201 Created', () => pm.response.to.have.status(201));",
+                      "const b = pm.response.json();",
+                      "pm.collectionVariables.set('psSkillId2', b.id);"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "TC-GD07-03 Setup - Crear jugador 1",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": "{{baseUrl}}/players",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"userId\": {{psUserId1}},\n  \"document\": \"PS-{{psRunId}}-1\",\n  \"position\": \"Delantero\",\n  \"jerseyNumber\": 11\n}"
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 201 Created', () => pm.response.to.have.status(201));",
+                      "const b = pm.response.json();",
+                      "pm.collectionVariables.set('psPlayerId1', b.id);"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "TC-GD07-04 Setup - Crear jugador 2",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": "{{baseUrl}}/players",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"userId\": {{psUserId2}},\n  \"document\": \"PS-{{psRunId}}-2\",\n  \"position\": \"Volante\",\n  \"jerseyNumber\": 8\n}"
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 201 Created', () => pm.response.to.have.status(201));",
+                      "const b = pm.response.json();",
+                      "pm.collectionVariables.set('psPlayerId2', b.id);"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "TC-GD07-05 Asignar habilidad 1 a jugador 1 con nivel (201)",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": "{{baseUrl}}/players/{{psPlayerId1}}/skills/{{psSkillId1}}",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"level\": 4\n}"
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 201 Created', () => pm.response.to.have.status(201));",
+                      "const b = pm.response.json();",
+                      "pm.test('Devuelve DTO de asociación con level=4 y assignedAt', () => {",
+                      "  pm.expect(b.id).to.be.a('number');",
+                      "  pm.expect(b.playerId).to.eql(Number(pm.collectionVariables.get('psPlayerId1')));",
+                      "  pm.expect(b.skillId).to.eql(Number(pm.collectionVariables.get('psSkillId1')));",
+                      "  pm.expect(b.level).to.eql(4);",
+                      "  pm.expect(b.assignedAt).to.be.a('string').and.not.be.empty;",
+                      "});"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "TC-GD07-06 Asignar habilidad 2 a jugador 1 sin body (201)",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": "{{baseUrl}}/players/{{psPlayerId1}}/skills/{{psSkillId2}}"
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 201 Created', () => pm.response.to.have.status(201));",
+                      "const b = pm.response.json();",
+                      "pm.test('Permite múltiples habilidades y level=null por defecto', () => {",
+                      "  pm.expect(b.level).to.eql(null);",
+                      "});"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "TC-GD07-07 Asignar habilidad 1 a jugador 2 (201)",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": "{{baseUrl}}/players/{{psPlayerId2}}/skills/{{psSkillId1}}",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"level\": 5\n}"
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 201 Created', () => pm.response.to.have.status(201));",
+                      "const b = pm.response.json();",
+                      "pm.test('Misma habilidad asignable a distintos jugadores', () => {",
+                      "  pm.expect(b.level).to.eql(5);",
+                      "});"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "TC-GD07-08 Asignación duplicada misma habilidad y jugador (409)",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": "{{baseUrl}}/players/{{psPlayerId1}}/skills/{{psSkillId1}}",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"level\": 3\n}"
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 409 Conflict', () => pm.response.to.have.status(409));",
+                      "pm.test('errorCase ALREADY_EXISTS', () => pm.expect(pm.response.json().errorCase).to.eql('ALREADY_EXISTS'));"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "TC-GD07-09 Asignar con nivel fuera de rango (400)",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": "{{baseUrl}}/players/{{psPlayerId2}}/skills/{{psSkillId2}}",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"level\": 6\n}"
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 400 Bad Request', () => pm.response.to.have.status(400));"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "TC-GD07-10 Asignar habilidad inexistente (404)",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": "{{baseUrl}}/players/{{psPlayerId1}}/skills/999999"
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 404 Not Found', () => pm.response.to.have.status(404));",
+                      "pm.test('errorCase NOT_FOUND', () => pm.expect(pm.response.json().errorCase).to.eql('NOT_FOUND'));"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "TC-GD07-11 Asignar a jugador inexistente (404)",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": "{{baseUrl}}/players/999999/skills/{{psSkillId1}}"
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 404 Not Found', () => pm.response.to.have.status(404));",
+                      "pm.test('errorCase NOT_FOUND', () => pm.expect(pm.response.json().errorCase).to.eql('NOT_FOUND'));"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "TC-GD07-12a Desactivar jugador 2 para probar regla R2",
+              "request": {
+                "method": "PATCH",
+                "header": [],
+                "url": "{{baseUrl}}/players/{{psPlayerId2}}/deactivate"
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 200 OK', () => pm.response.to.have.status(200));",
+                      "pm.test('active=false', () => pm.expect(pm.response.json().active).to.eql(false));"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "TC-GD07-12b Asignar habilidad a jugador inactivo (409 INVALID_STATE)",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": "{{baseUrl}}/players/{{psPlayerId2}}/skills/{{psSkillId2}}"
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 409 Conflict', () => pm.response.to.have.status(409));",
+                      "pm.test('errorCase INVALID_STATE', () => pm.expect(pm.response.json().errorCase).to.eql('INVALID_STATE'));"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "TC-GD07-13 Consultar habilidades del jugador 1 (200)",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": "{{baseUrl}}/players/{{psPlayerId1}}/skills"
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 200 OK', () => pm.response.to.have.status(200));",
+                      "const b = pm.response.json();",
+                      "pm.test('Devuelve ambas habilidades asignadas con resumen de skill', () => {",
+                      "  const ids = b.map((x) => x.skillId);",
+                      "  pm.expect(ids).to.include(Number(pm.collectionVariables.get('psSkillId1')));",
+                      "  pm.expect(ids).to.include(Number(pm.collectionVariables.get('psSkillId2')));",
+                      "  pm.expect(b[0].skill.name).to.be.a('string');",
+                      "});"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "TC-GD07-14 Consultar jugadores con la habilidad 1 (200)",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": "{{baseUrl}}/skills/{{psSkillId1}}/players"
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 200 OK', () => pm.response.to.have.status(200));",
+                      "const b = pm.response.json();",
+                      "pm.test('Devuelve ambos jugadores (incluido histórico inactivo)', () => {",
+                      "  const ids = b.map((x) => x.playerId);",
+                      "  pm.expect(ids).to.include(Number(pm.collectionVariables.get('psPlayerId1')));",
+                      "  pm.expect(ids).to.include(Number(pm.collectionVariables.get('psPlayerId2')));",
+                      "  pm.expect(b[0].player.document).to.be.a('string');",
+                      "});"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "TC-GD07-15 Bloqueo real HU-GD-06 - Eliminar habilidad con jugadores asociados (409)",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": "{{baseUrl}}/skills/{{psSkillId1}}"
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 409 Conflict', () => pm.response.to.have.status(409));",
+                      "pm.test('errorCase INVALID_STATE', () => pm.expect(pm.response.json().errorCase).to.eql('INVALID_STATE'));"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "TC-GD07-16 Bloqueo real HU-GD-04 - Eliminar jugador con habilidades asociadas (409)",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": "{{baseUrl}}/players/{{psPlayerId1}}"
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 409 Conflict', () => pm.response.to.have.status(409));",
+                      "pm.test('errorCase INVALID_STATE', () => pm.expect(pm.response.json().errorCase).to.eql('INVALID_STATE'));"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "TC-GD07-17 Retirar habilidad 1 del jugador 1 (204)",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": "{{baseUrl}}/players/{{psPlayerId1}}/skills/{{psSkillId1}}"
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 204 No Content', () => pm.response.to.have.status(204));"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "TC-GD07-18 Verificar que habilidad 1 sigue existiendo tras retiro (200)",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": "{{baseUrl}}/skills/{{psSkillId1}}"
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 200 OK', () => pm.response.to.have.status(200));",
+                      "pm.test('Habilidad intacta', () => pm.expect(pm.response.json().id).to.eql(Number(pm.collectionVariables.get('psSkillId1'))));"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "TC-GD07-19 Retirar asociación inexistente (404)",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": "{{baseUrl}}/players/{{psPlayerId1}}/skills/{{psSkillId1}}"
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 404 Not Found', () => pm.response.to.have.status(404));",
+                      "pm.test('errorCase NOT_FOUND', () => pm.expect(pm.response.json().errorCase).to.eql('NOT_FOUND'));"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "TC-GD07-20a Limpieza - Retirar habilidad 2 de jugador 1",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": "{{baseUrl}}/players/{{psPlayerId1}}/skills/{{psSkillId2}}"
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 204', () => pm.response.to.have.status(204));"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "TC-GD07-20b Limpieza - Retirar habilidad 1 de jugador 2",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": "{{baseUrl}}/players/{{psPlayerId2}}/skills/{{psSkillId1}}"
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 204', () => pm.response.to.have.status(204));"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "TC-GD07-20c Limpieza - Eliminar jugador 1",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": "{{baseUrl}}/players/{{psPlayerId1}}"
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 204', () => pm.response.to.have.status(204));"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "TC-GD07-20d Limpieza - Eliminar jugador 2",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": "{{baseUrl}}/players/{{psPlayerId2}}"
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 204', () => pm.response.to.have.status(204));"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "TC-GD07-20e Limpieza - Eliminar habilidad 1",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": "{{baseUrl}}/skills/{{psSkillId1}}"
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 204', () => pm.response.to.have.status(204));"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "TC-GD07-20f Limpieza - Eliminar habilidad 2 y limpiar variables",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": "{{baseUrl}}/skills/{{psSkillId2}}"
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 204', () => pm.response.to.have.status(204));",
+                      "pm.collectionVariables.unset('psRunId');",
+                      "pm.collectionVariables.unset('psUserId1');",
+                      "pm.collectionVariables.unset('psUserId2');"
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
     }
   ]
 }
