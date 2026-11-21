@@ -2864,6 +2864,406 @@
           ]
         }
       ]
+    },
+    {
+      "name": "GD-08 Perfil del jugador",
+      "item": [
+        {
+          "name": "Demo CRUD (2 endpoints)",
+          "item": [
+            {
+              "name": "Buscar jugador por documento",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": "{{baseUrl}}/players?document=1053"
+              }
+            },
+            {
+              "name": "Consultar perfil deportivo del jugador",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": "{{baseUrl}}/players/1/profile"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Pruebas automatizadas (GD-08)",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (!pm.collectionVariables.get('ppRunId') || !pm.collectionVariables.get('ppUserId')) {",
+                  "  const now = Date.now();",
+                  "  const ppRunId = String(now).slice(-6);",
+                  "  const ppUserId = 400000 + (now % 500000);",
+                  "  pm.collectionVariables.set('ppRunId', ppRunId);",
+                  "  pm.collectionVariables.set('ppUserId', String(ppUserId));",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "item": [
+            {
+              "name": "TC-GD08-01 Setup - Crear jugador temporal",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": "{{baseUrl}}/players",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"userId\": {{ppUserId}},\n  \"document\": \"PP-{{ppRunId}}\",\n  \"position\": \"Mediocampista\",\n  \"jerseyNumber\": 10\n}"
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 201 Created', () => pm.response.to.have.status(201));",
+                      "const b = pm.response.json();",
+                      "pm.collectionVariables.set('ppPlayerId', b.id);",
+                      "pm.collectionVariables.set('ppDocument', b.document);"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "TC-GD08-02 Setup - Crear habilidad temporal",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": "{{baseUrl}}/skills",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Pase-{{ppRunId}}\",\n  \"description\": \"Precisión en pases filtrados\"\n}"
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 201 Created', () => pm.response.to.have.status(201));",
+                      "pm.collectionVariables.set('ppSkillId', pm.response.json().id);"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "TC-GD08-03 Setup - Crear equipo temporal",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": "{{baseUrl}}/teams",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Halcones-{{ppRunId}}\",\n  \"city\": \"Armenia\",\n  \"contactEmail\": \"halcones{{ppRunId}}@club.com\",\n  \"foundedYear\": 2015\n}"
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 201 Created', () => pm.response.to.have.status(201));",
+                      "pm.collectionVariables.set('ppTeamId', pm.response.json().id);"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "TC-GD08-04 Perfil de jugador sin equipos ni habilidades (200)",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": "{{baseUrl}}/players/{{ppPlayerId}}/profile"
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 200 OK', () => pm.response.to.have.status(200));",
+                      "const b = pm.response.json();",
+                      "pm.test('Muestra listas vacías y mensajes explícitos', () => {",
+                      "  pm.expect(b.player.id).to.eql(Number(pm.collectionVariables.get('ppPlayerId')));",
+                      "  pm.expect(b.teams).to.eql([]);",
+                      "  pm.expect(b.teamsMessage).to.eql('El jugador no tiene equipos asociados');",
+                      "  pm.expect(b.skills).to.eql([]);",
+                      "  pm.expect(b.skillsMessage).to.eql('El jugador no tiene habilidades registradas');",
+                      "});"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "TC-GD08-05a Asignar habilidad al jugador",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": "{{baseUrl}}/players/{{ppPlayerId}}/skills/{{ppSkillId}}",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"level\": 5\n}"
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 201 Created', () => pm.response.to.have.status(201));"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "TC-GD08-05b Perfil con habilidad pero sin equipos (200)",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": "{{baseUrl}}/players/{{ppPlayerId}}/profile"
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 200 OK', () => pm.response.to.have.status(200));",
+                      "const b = pm.response.json();",
+                      "pm.test('skillsMessage es null y teamsMessage sigue presente', () => {",
+                      "  pm.expect(b.skills).to.have.lengthOf(1);",
+                      "  pm.expect(b.skillsMessage).to.eql(null);",
+                      "  pm.expect(b.teams).to.eql([]);",
+                      "  pm.expect(b.teamsMessage).to.eql('El jugador no tiene equipos asociados');",
+                      "});"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "TC-GD08-06a Crear contrato vigente para el jugador",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": "{{baseUrl}}/teams/{{ppTeamId}}/contracts",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"playerId\": {{ppPlayerId}},\n  \"startDate\": \"2025-01-01\"\n}"
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 201 Created', () => pm.response.to.have.status(201));",
+                      "pm.collectionVariables.set('ppContractId', pm.response.json().id);"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "TC-GD08-06b Perfil completo con equipo vigente y habilidad (200)",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": "{{baseUrl}}/players/{{ppPlayerId}}/profile"
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 200 OK', () => pm.response.to.have.status(200));",
+                      "const b = pm.response.json();",
+                      "pm.test('Devuelve equipo vigente y habilidad con mensajes en null', () => {",
+                      "  pm.expect(b.teams).to.have.lengthOf(1);",
+                      "  pm.expect(b.teams[0].current).to.eql(true);",
+                      "  pm.expect(b.teamsMessage).to.eql(null);",
+                      "  pm.expect(b.skills).to.have.lengthOf(1);",
+                      "  pm.expect(b.skillsMessage).to.eql(null);",
+                      "});"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "TC-GD08-07a Finalizar contrato",
+              "request": {
+                "method": "PATCH",
+                "header": [],
+                "url": "{{baseUrl}}/contracts/{{ppContractId}}/end"
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 200 OK', () => pm.response.to.have.status(200));"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "TC-GD08-07b Desactivar jugador",
+              "request": {
+                "method": "PATCH",
+                "header": [],
+                "url": "{{baseUrl}}/players/{{ppPlayerId}}/deactivate"
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 200 OK', () => pm.response.to.have.status(200));"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "TC-GD08-07c Perfil histórico de jugador inactivo con contrato finalizado (200)",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": "{{baseUrl}}/players/{{ppPlayerId}}/profile"
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 200 OK', () => pm.response.to.have.status(200));",
+                      "const b = pm.response.json();",
+                      "pm.test('Consulta histórica permitida para jugador inactivo', () => {",
+                      "  pm.expect(b.player.active).to.eql(false);",
+                      "  pm.expect(b.teams[0].current).to.eql(false);",
+                      "});"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "TC-GD08-08 Buscar jugador por documento incluyendo inactivos (200)",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": "{{baseUrl}}/players?document={{ppDocument}}&all=true"
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 200 OK', () => pm.response.to.have.status(200));",
+                      "const b = pm.response.json();",
+                      "pm.test('Encuentra el jugador por documento', () => {",
+                      "  pm.expect(b.map((p) => p.id)).to.include(Number(pm.collectionVariables.get('ppPlayerId')));",
+                      "});"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "TC-GD08-09 Perfil con id no numérico (400)",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": "{{baseUrl}}/players/abc/profile"
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 400 Bad Request', () => pm.response.to.have.status(400));"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "TC-GD08-10 Perfil de jugador inexistente (404) y limpiar variables",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": "{{baseUrl}}/players/999999/profile"
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 404 Not Found', () => pm.response.to.have.status(404));",
+                      "pm.test('errorCase NOT_FOUND', () => pm.expect(pm.response.json().errorCase).to.eql('NOT_FOUND'));",
+                      "pm.collectionVariables.unset('ppRunId');",
+                      "pm.collectionVariables.unset('ppUserId');"
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
     }
   ]
 }

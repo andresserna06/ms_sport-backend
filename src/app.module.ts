@@ -11,6 +11,7 @@ import { SkillsModule } from './skills/skills.module';
 import { PlayersModule } from './players/players.module';
 import { PlayerSkillsModule } from './player-skills/player-skills.module';
 import { PlayerContractsModule } from './player-contracts/player-contracts.module';
+import { PlayerProfileModule } from './player-profile/player-profile.module';
 
 @Module({
   imports: [
@@ -39,6 +40,7 @@ import { PlayerContractsModule } from './player-contracts/player-contracts.modul
     PlayersModule,
     PlayerSkillsModule,
     PlayerContractsModule,
+    PlayerProfileModule,
   ],
 })
 export class AppModule {}
