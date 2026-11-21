@@ -12,6 +12,7 @@ import {
 // them (contracts, registrations, matches...).
 const TEAM_ASSOCIATIONS: { table: string; column: string }[] = [
   { table: 'team_sports', column: 'team_id' },
+  { table: 'player_contracts', column: 'team_id' },
 ];
 
 const REFERENCED_ROW = ['ER_ROW_IS_REFERENCED', 'ER_ROW_IS_REFERENCED_2'];

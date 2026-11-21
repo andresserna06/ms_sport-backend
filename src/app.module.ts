@@ -8,6 +8,13 @@ import { PhasesModule } from './phases/base/phases.module';
 import { TournamentsModule } from './tournaments/tournaments.module';
 import { TeamsModule } from './teams/teams.module';
 import { SportsModule } from './sports/sports.module';
+import { SkillsModule } from './skills/skills.module';
+import { PlayersModule } from './players/players.module';
+import { PlayerSkillsModule } from './player-skills/player-skills.module';
+import { PlayerContractsModule } from './player-contracts/player-contracts.module';
+import { PlayerProfileModule } from './player-profile/player-profile.module';
+import { NotificationsModule } from './notifications/notifications.module';
+import { ScoringEventsModule } from './scoring-events/scoring-events.module';
 
 @Module({
   imports: [
@@ -34,6 +41,13 @@ import { SportsModule } from './sports/sports.module';
     TournamentsModule,
     TeamsModule,
     SportsModule,
+    SkillsModule,
+    PlayersModule,
+    PlayerSkillsModule,
+    PlayerContractsModule,
+    PlayerProfileModule,
+    NotificationsModule,
+    ScoringEventsModule,
   ],
 })
 export class AppModule {}

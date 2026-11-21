@@ -18,12 +18,16 @@ describe('TeamTypeOrmRepository', () => {
   });
 
   describe('countAssociations', () => {
-    it('counts the rows of team_sports that reference the team', async () => {
+    it('sums the rows of team_sports and player_contracts that reference the team', async () => {
       dataSource.query.mockResolvedValue([{ total: '3' }]);
 
-      await expect(repository.countAssociations(7)).resolves.toBe(3);
+      await expect(repository.countAssociations(7)).resolves.toBe(6);
       expect(dataSource.query).toHaveBeenCalledWith(
         expect.stringContaining('`team_sports`'),
+        [7],
+      );
+      expect(dataSource.query).toHaveBeenCalledWith(
+        expect.stringContaining('`player_contracts`'),
         [7],
       );
     });

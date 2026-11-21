@@ -6,5 +6,7 @@ export class MatchResponseDto {
   status!: MatchStatus;
   homeScore!: number | null;
   awayScore!: number | null;
+  homeTeamId!: number | null;
+  awayTeamId!: number | null;
   phaseId!: number;
 }

@@ -5,8 +5,8 @@ import { MigrationInterface, QueryRunner } from 'typeorm';
 //
 // It uses CREATE TABLE IF NOT EXISTS, so it is safe to run both on a clean
 // database (creates them) and on a database that already has them (no-op).
-export class InitialSchema1795046400000 implements MigrationInterface {
-  name = 'InitialSchema1795046400000';
+export class InitialSchema1763600000000 implements MigrationInterface {
+  name = 'InitialSchema1763600000000';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(`
