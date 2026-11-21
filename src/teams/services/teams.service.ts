@@ -37,7 +37,7 @@ export class TeamsService {
   }
 
   async findOneEntity(id: number): Promise<Team | null> {
-    return this.teamsRepository.findOne({ where: { id } });
+    return this.repository.findById(id);
   }
 
   async findOne(id: number): Promise<TeamResponseDto> {
