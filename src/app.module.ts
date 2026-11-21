@@ -14,6 +14,7 @@ import { PlayerContractsModule } from './player-contracts/player-contracts.modul
 import { PlayerProfileModule } from './player-profile/player-profile.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { ScoringEventsModule } from './scoring-events/scoring-events.module';
+import { RegistrationsModule } from './registrations/registrations.module';
 
 @Module({
   imports: [
@@ -29,7 +30,7 @@ import { ScoringEventsModule } from './scoring-events/scoring-events.module';
         password: configService.get<string>('DB_PASS'),
         database: configService.get<string>('DB_NAME'),
         entities: [__dirname + '/**/*.entity{.ts,.js}'],
-        synchronize: true, //Creacion automatica de las tablas, pasar a false cuando no se necesite
+        synchronize: false, 
       }),
     }),
     MatchesModule,
@@ -45,6 +46,7 @@ import { ScoringEventsModule } from './scoring-events/scoring-events.module';
     PlayerProfileModule,
     NotificationsModule,
     ScoringEventsModule,
+    RegistrationsModule,
   ],
 })
 export class AppModule {}

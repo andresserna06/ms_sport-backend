@@ -3,9 +3,11 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { Group } from '../../phases/group/entities/group.entity';
+import { Registration } from '../../registrations/entities/registration.entity';
 
 @Entity('teams')
 export class Team {
@@ -33,4 +35,7 @@ export class Team {
   })
   @JoinColumn({ name: 'group_id' })
   group!: Group | null;
+
+  @OneToMany(() => Registration, (registration) => registration.team)
+  registrations?: Registration[];
 }

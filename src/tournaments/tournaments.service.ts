@@ -35,6 +35,10 @@ export class TournamentsService {
     return this.tournamentMapper.toResponseDtoList(tournaments);
   }
 
+  async findOneEntity(id: number): Promise<Tournament | null> {
+    return this.tournamentsRepository.findOne({ where: { id } });
+  }
+
   async findOne(id: number): Promise<TournamentResponseDto> {
     const tournament = await this.tournamentsRepository.findOne({
       where: { id },
@@ -80,7 +84,7 @@ export class TournamentsService {
   }
 
   private validateDates(tournament: Tournament): void {
-    if (tournament.enrollmentDeadline > tournament.startDate) {
+    if (tournament.registrationDeadline > tournament.startDate) {
       throw new BadRequestException(
         'The enrollment deadline cannot be after the start date',
       );

@@ -37,6 +37,10 @@ export class TeamsService {
     return this.teamMapper.toResponseDtoList(teams);
   }
 
+  async findOneEntity(id: number): Promise<Team | null> {
+    return this.teamsRepository.findOne({ where: { id } });
+  }
+
   async findOne(id: number): Promise<TeamResponseDto> {
     const team = await this.getTeamOrFail(id);
     return this.teamMapper.toResponseDto(team);

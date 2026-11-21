@@ -152,6 +152,11 @@ export class GroupService {
     await this.groupRepository.saveTeam(team);
   }
 
+  async isTeamInGroup(_teamId: number, _tournamentId: number): Promise<boolean> {
+    // TODO: implement real check against groups
+    return false;
+  }
+
   async findTeams(groupId: number): Promise<GroupTeamResponseDto[]> {
     await this.getGroupOrFail(groupId);
     const teams = await this.groupRepository.findTeams(groupId);

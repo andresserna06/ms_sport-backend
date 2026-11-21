@@ -10,7 +10,7 @@ export class TournamentMapper {
     const entity = new Tournament();
     entity.name = dto.name;
     entity.startDate = dto.startDate;
-    entity.enrollmentDeadline = dto.enrollmentDeadline;
+    entity.registrationDeadline = dto.enrollmentDeadline;
     return entity;
   }
 
@@ -18,7 +18,7 @@ export class TournamentMapper {
     if (dto.name !== undefined) entity.name = dto.name;
     if (dto.startDate !== undefined) entity.startDate = dto.startDate;
     if (dto.enrollmentDeadline !== undefined) {
-      entity.enrollmentDeadline = dto.enrollmentDeadline;
+      entity.registrationDeadline = dto.enrollmentDeadline;
     }
     return entity;
   }
@@ -28,7 +28,7 @@ export class TournamentMapper {
       id: entity.id,
       name: entity.name,
       startDate: entity.startDate,
-      enrollmentDeadline: entity.enrollmentDeadline,
+      enrollmentDeadline: entity.registrationDeadline,
     };
   }
 
