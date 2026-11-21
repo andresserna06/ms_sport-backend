@@ -1,23 +1,25 @@
 import {
   ConflictException,
+  Inject,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { CreateTeamDto } from './dto/create-team.dto';
-import { TeamResponseDto } from './dto/team-response.dto';
-import { UpdateTeamDto } from './dto/update-team.dto';
-import { Team } from './entities/team.entity';
-import { TeamMapper } from './mappers/team.mapper';
-import { TeamsRepository } from './repositories/teams.repository';
+import { CreateTeamDto } from '../dtos/create-team.dto';
+import { TeamResponseDto } from '../dtos/team-response.dto';
+import { UpdateTeamDto } from '../dtos/update-team.dto';
+import { Team } from '../entities/team.entity';
+import { TeamMapper } from '../mappers/team.mapper';
+import {
+  TEAM_REPOSITORY,
+  TeamInUseError,
+  type TeamCityReportRow,
+  type TeamRepository,
+} from '../repositories/team.repository';
 
 @Injectable()
 export class TeamsService {
   constructor(
-    @InjectRepository(Team)
-    private readonly teamsRepository: Repository<Team>,
-    private readonly customTeamsRepository: TeamsRepository,
+    @Inject(TEAM_REPOSITORY) private readonly repository: TeamRepository,
     private readonly teamMapper: TeamMapper,
   ) {}
 
@@ -25,15 +27,12 @@ export class TeamsService {
     const entity = this.teamMapper.toEntity(dto);
     await this.ensureNameIsAvailable(entity.name);
 
-    const saved = await this.teamsRepository.save(entity);
+    const saved = await this.repository.save(entity);
     return this.teamMapper.toResponseDto(saved);
   }
 
   async findAll(active?: boolean): Promise<TeamResponseDto[]> {
-    const teams = await this.teamsRepository.find({
-      where: active === undefined ? {} : { active },
-      order: { name: 'ASC' },
-    });
+    const teams = await this.repository.findAll(active);
     return this.teamMapper.toResponseDtoList(teams);
   }
 
@@ -50,7 +49,7 @@ export class TeamsService {
       await this.ensureNameIsAvailable(merged.name, id);
     }
 
-    const saved = await this.teamsRepository.save(merged);
+    const saved = await this.repository.save(merged);
     return this.teamMapper.toResponseDto(saved);
   }
 
@@ -65,21 +64,29 @@ export class TeamsService {
   async remove(id: number): Promise<{ message: string }> {
     const team = await this.getTeamOrFail(id);
 
-    const associations = await this.customTeamsRepository.countAssociations(id);
+    const associations = await this.repository.countAssociations(id);
     if (associations > 0) {
       throw new ConflictException(
         `Team #${id} has associated information (${associations} records) and cannot be deleted. Deactivate it instead.`,
       );
     }
 
-    await this.teamsRepository.remove(team);
+    try {
+      await this.repository.remove(team);
+    } catch (error) {
+      // Something started referencing the team after the association count.
+      if (error instanceof TeamInUseError) {
+        throw new ConflictException(
+          `Team #${id} has associated information and cannot be deleted. Deactivate it instead.`,
+        );
+      }
+      throw error;
+    }
     return { message: `Team #${id} deleted successfully` };
   }
 
-  async getActiveByCityReport(): Promise<
-    { city: string; totalTeams: number }[]
-  > {
-    return this.customTeamsRepository.findActiveByCityReport();
+  async getActiveByCityReport(): Promise<TeamCityReportRow[]> {
+    return this.repository.findActiveByCityReport();
   }
 
   private async changeStatus(
@@ -88,12 +95,12 @@ export class TeamsService {
   ): Promise<TeamResponseDto> {
     const team = await this.getTeamOrFail(id);
     team.active = active;
-    const saved = await this.teamsRepository.save(team);
+    const saved = await this.repository.save(team);
     return this.teamMapper.toResponseDto(saved);
   }
 
   private async getTeamOrFail(id: number): Promise<Team> {
-    const team = await this.teamsRepository.findOne({ where: { id } });
+    const team = await this.repository.findById(id);
     if (!team) {
       throw new NotFoundException(`Team with id ${id} not found`);
     }
@@ -104,7 +111,7 @@ export class TeamsService {
     name: string,
     ignoreId?: number,
   ): Promise<void> {
-    const existing = await this.teamsRepository.findOne({ where: { name } });
+    const existing = await this.repository.findByName(name);
     if (existing && existing.id !== ignoreId) {
       throw new ConflictException(`A team named "${name}" already exists`);
     }

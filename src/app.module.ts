@@ -7,6 +7,7 @@ import { GroupModule } from './phases/group/group.module';
 import { PhasesModule } from './phases/base/phases.module';
 import { TournamentsModule } from './tournaments/tournaments.module';
 import { TeamsModule } from './teams/teams.module';
+import { SportsModule } from './sports/sports.module';
 
 @Module({
   imports: [
@@ -22,7 +23,8 @@ import { TeamsModule } from './teams/teams.module';
         password: configService.get<string>('DB_PASS'),
         database: configService.get<string>('DB_NAME'),
         entities: [__dirname + '/**/*.entity{.ts,.js}'],
-        synchronize: true, //Creacion automatica de las tablas, pasar a false cuando no se necesite
+        // Schema changes are applied only through migrations (src/migrations).
+        synchronize: false,
       }),
     }),
     MatchesModule,
@@ -31,6 +33,7 @@ import { TeamsModule } from './teams/teams.module';
     FinalModule,
     TournamentsModule,
     TeamsModule,
+    SportsModule,
   ],
 })
 export class AppModule {}

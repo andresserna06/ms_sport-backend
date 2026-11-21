@@ -1,6 +1,7 @@
 import {
   Column,
   Entity,
+  Index,
   JoinColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
@@ -14,6 +15,7 @@ export enum MatchStatus {
 }
 
 @Entity('matches')
+@Index('IDX_matches_phase_id', ['phase'])
 export class Match {
   @PrimaryGeneratedColumn()
   id!: number;
@@ -35,6 +37,9 @@ export class Match {
     nullable: false,
     onDelete: 'RESTRICT',
   })
-  @JoinColumn({ name: 'phase_id' })
+  @JoinColumn({
+    name: 'phase_id',
+    foreignKeyConstraintName: 'FK_matches_phase',
+  })
   phase!: Phase;
 }
