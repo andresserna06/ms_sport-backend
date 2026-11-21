@@ -7,8 +7,8 @@ import { SPORT_REPOSITORY } from './repositories/sport.repository';
 import { SportTypeOrmRepository } from './repositories/sport.typeorm.repository';
 import { SportsService } from './services/sports.service';
 
-// SportsService is not exported yet: it relies on the global ValidationPipe
-// (trim). HU-GD-03 and HU-GC-01 export it when they need to validate sports.
+// SportsService is exported for HU-GD-03 (team-sports) and HU-GC-01
+// (tournaments), which validate that a sport exists and is active.
 @Module({
   imports: [TypeOrmModule.forFeature([Sport])],
   controllers: [SportsController],
@@ -17,5 +17,6 @@ import { SportsService } from './services/sports.service';
     SportMapper,
     { provide: SPORT_REPOSITORY, useClass: SportTypeOrmRepository },
   ],
+  exports: [SportsService],
 })
 export class SportsModule {}
