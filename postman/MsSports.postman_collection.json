@@ -37077,6 +37077,2451 @@
       ]
     },
     {
+      "name": "GC-01 Torneos",
+      "item": [
+        {
+          "name": "S-00 Setup: deporte X",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.collectionVariables.set('tcRun', 'QA' + Date.now() + 'C');"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 201', () => pm.response.to.have.status(201));",
+                  "pm.collectionVariables.set('tcSportX', pm.response.json().id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"{{tcRun}} Sx\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/sports",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "sports"
+              ]
+            }
+          }
+        },
+        {
+          "name": "S-01 Setup: deporte Y",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 201', () => pm.response.to.have.status(201));",
+                  "pm.collectionVariables.set('tcSportY', pm.response.json().id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"{{tcRun}} Sy\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/sports",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "sports"
+              ]
+            }
+          }
+        },
+        {
+          "name": "S-02 Setup: deporte Z (se desactiva)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 201', () => pm.response.to.have.status(201));",
+                  "pm.collectionVariables.set('tcSportZ', pm.response.json().id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"{{tcRun}} Sz\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/sports",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "sports"
+              ]
+            }
+          }
+        },
+        {
+          "name": "S-03 Setup: desactivar Z",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/sports/{{tcSportZ}}/deactivate",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "sports",
+                "{{tcSportZ}}",
+                "deactivate"
+              ]
+            }
+          }
+        },
+        {
+          "name": "S-04 Setup: deporte W (se desactiva despues)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 201', () => pm.response.to.have.status(201));",
+                  "pm.collectionVariables.set('tcSportW', pm.response.json().id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"{{tcRun}} Sw\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/sports",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "sports"
+              ]
+            }
+          }
+        },
+        {
+          "name": "C-01 Crear torneo",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 201', () => pm.response.to.have.status(201));",
+                  "pm.collectionVariables.set('tcT1', pm.response.json().id);",
+                  "const b = pm.response.json(); pm.test('shape', () => { pm.expect(b.id).to.be.a('number'); pm.expect(b.sport.id).to.be.a('number'); pm.expect(b.sport.name).to.be.a('string'); pm.expect(b.startDate).to.match(/^\\d{4}-\\d{2}-\\d{2}$/); pm.expect(b.enrollmentDeadline).to.match(/^\\d{4}-\\d{2}-\\d{2}$/); pm.expect(b.active).to.eql(true); });",
+                  "pm.test('sport is X', () => pm.expect(b.sport.id).to.eql(Number(pm.collectionVariables.get('tcSportX'))));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"{{tcRun}} Copa\",\n  \"sportId\": {{tcSportX}},\n  \"startDate\": \"2027-06-10\",\n  \"enrollmentDeadline\": \"2027-05-20\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/tournaments",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tournaments"
+              ]
+            }
+          }
+        },
+        {
+          "name": "C-02 El nombre se recorta",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 201', () => pm.response.to.have.status(201));",
+                  "pm.collectionVariables.set('tcT2', pm.response.json().id);",
+                  "pm.test('trimmed', () => pm.expect(pm.response.json().name).to.eql(pm.collectionVariables.get('tcRun') + ' Trim'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"   {{tcRun}} Trim   \",\n  \"sportId\": {{tcSportX}},\n  \"startDate\": \"2027-06-10\",\n  \"enrollmentDeadline\": \"2027-05-20\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/tournaments",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tournaments"
+              ]
+            }
+          }
+        },
+        {
+          "name": "C-03 Nombre repetido en el mismo deporte (sin distinguir mayusculas)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 409', () => pm.response.to.have.status(409));",
+                  "pm.test('errorCase is ALREADY_EXISTS', () => pm.expect(pm.response.json().errorCase).to.eql('ALREADY_EXISTS'));",
+                  "pm.test('Spanish message', () => pm.expect(pm.response.json().message).to.match(/Ya existe un torneo/));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"{{tcRun}} COPA\",\n  \"sportId\": {{tcSportX}},\n  \"startDate\": \"2027-06-10\",\n  \"enrollmentDeadline\": \"2027-05-20\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/tournaments",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tournaments"
+              ]
+            }
+          }
+        },
+        {
+          "name": "C-04 El mismo nombre en otro deporte esta permitido",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 201', () => pm.response.to.have.status(201));",
+                  "pm.collectionVariables.set('tcT3', pm.response.json().id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"{{tcRun}} Copa\",\n  \"sportId\": {{tcSportY}},\n  \"startDate\": \"2027-06-10\",\n  \"enrollmentDeadline\": \"2027-05-20\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/tournaments",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tournaments"
+              ]
+            }
+          }
+        },
+        {
+          "name": "C-05 Falta el deporte",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 400', () => pm.response.to.have.status(400));",
+                  "const b = pm.response.json(); pm.test('flat field errors', () => { pm.expect(b).to.not.have.property('errorCase'); pm.expect(b).to.have.property('sportId'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"{{tcRun}} Sin deporte\",\n  \"startDate\": \"2027-06-10\",\n  \"enrollmentDeadline\": \"2027-05-20\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/tournaments",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tournaments"
+              ]
+            }
+          }
+        },
+        {
+          "name": "C-06 Deporte cero",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 400', () => pm.response.to.have.status(400));",
+                  "const b = pm.response.json(); pm.test('flat field errors', () => { pm.expect(b).to.not.have.property('errorCase'); pm.expect(b).to.have.property('sportId'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"{{tcRun}} Cero\",\n  \"sportId\": 0,\n  \"startDate\": \"2027-06-10\",\n  \"enrollmentDeadline\": \"2027-05-20\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/tournaments",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tournaments"
+              ]
+            }
+          }
+        },
+        {
+          "name": "C-07 Deporte como texto",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 400', () => pm.response.to.have.status(400));",
+                  "const b = pm.response.json(); pm.test('flat field errors', () => { pm.expect(b).to.not.have.property('errorCase'); pm.expect(b).to.have.property('sportId'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"{{tcRun}} Texto\",\n  \"sportId\": \"1\",\n  \"startDate\": \"2027-06-10\",\n  \"enrollmentDeadline\": \"2027-05-20\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/tournaments",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tournaments"
+              ]
+            }
+          }
+        },
+        {
+          "name": "C-08 Deporte inexistente",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 404', () => pm.response.to.have.status(404));",
+                  "pm.test('errorCase is NOT_FOUND', () => pm.expect(pm.response.json().errorCase).to.eql('NOT_FOUND'));",
+                  "pm.test('Spanish message', () => pm.expect(pm.response.json().message).to.match(/No existe el deporte/));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"{{tcRun}} Huerfano\",\n  \"sportId\": 999999,\n  \"startDate\": \"2027-06-10\",\n  \"enrollmentDeadline\": \"2027-05-20\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/tournaments",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tournaments"
+              ]
+            }
+          }
+        },
+        {
+          "name": "C-09 Deporte inactivo",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 409', () => pm.response.to.have.status(409));",
+                  "pm.test('errorCase is INVALID_STATE', () => pm.expect(pm.response.json().errorCase).to.eql('INVALID_STATE'));",
+                  "pm.test('Spanish message', () => pm.expect(pm.response.json().message).to.match(/inactivo/));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"{{tcRun}} Inactivo\",\n  \"sportId\": {{tcSportZ}},\n  \"startDate\": \"2027-06-10\",\n  \"enrollmentDeadline\": \"2027-05-20\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/tournaments",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tournaments"
+              ]
+            }
+          }
+        },
+        {
+          "name": "C-10 Cierre de inscripcion posterior al inicio",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 400', () => pm.response.to.have.status(400));",
+                  "pm.test('errorCase is INVALID_OPERATION', () => pm.expect(pm.response.json().errorCase).to.eql('INVALID_OPERATION'));",
+                  "pm.test('Spanish message', () => pm.expect(pm.response.json().message).to.match(/no puede ser posterior/));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"{{tcRun}} Fechas\",\n  \"sportId\": {{tcSportX}},\n  \"startDate\": \"2027-06-10\",\n  \"enrollmentDeadline\": \"2027-06-11\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/tournaments",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tournaments"
+              ]
+            }
+          }
+        },
+        {
+          "name": "C-11 Cierre el mismo dia del inicio",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 201', () => pm.response.to.have.status(201));",
+                  "pm.collectionVariables.set('tcT4', pm.response.json().id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"{{tcRun}} Mismo dia\",\n  \"sportId\": {{tcSportX}},\n  \"startDate\": \"2027-06-10\",\n  \"enrollmentDeadline\": \"2027-06-10\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/tournaments",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tournaments"
+              ]
+            }
+          }
+        },
+        {
+          "name": "C-12 Fecha imposible",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 400', () => pm.response.to.have.status(400));",
+                  "const b = pm.response.json(); pm.test('flat field errors', () => { pm.expect(b).to.not.have.property('errorCase'); pm.expect(b).to.have.property('startDate'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"{{tcRun}} Imposible\",\n  \"sportId\": {{tcSportX}},\n  \"startDate\": \"2027-02-30\",\n  \"enrollmentDeadline\": \"2027-05-20\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/tournaments",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tournaments"
+              ]
+            }
+          }
+        },
+        {
+          "name": "C-13 Formato de fecha incorrecto",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 400', () => pm.response.to.have.status(400));",
+                  "const b = pm.response.json(); pm.test('flat field errors', () => { pm.expect(b).to.not.have.property('errorCase'); pm.expect(b).to.have.property('enrollmentDeadline'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"{{tcRun}} Formato\",\n  \"sportId\": {{tcSportX}},\n  \"startDate\": \"2027-06-10\",\n  \"enrollmentDeadline\": \"20/05/2027\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/tournaments",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tournaments"
+              ]
+            }
+          }
+        },
+        {
+          "name": "C-14 Nombre vacio",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 400', () => pm.response.to.have.status(400));",
+                  "const b = pm.response.json(); pm.test('flat field errors', () => { pm.expect(b).to.not.have.property('errorCase'); pm.expect(b).to.have.property('name'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"   \",\n  \"sportId\": {{tcSportX}},\n  \"startDate\": \"2027-06-10\",\n  \"enrollmentDeadline\": \"2027-05-20\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/tournaments",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tournaments"
+              ]
+            }
+          }
+        },
+        {
+          "name": "C-15 Nombre demasiado largo",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 400', () => pm.response.to.have.status(400));",
+                  "const b = pm.response.json(); pm.test('flat field errors', () => { pm.expect(b).to.not.have.property('errorCase'); pm.expect(b).to.have.property('name'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\",\n  \"sportId\": {{tcSportX}},\n  \"startDate\": \"2027-06-10\",\n  \"enrollmentDeadline\": \"2027-05-20\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/tournaments",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tournaments"
+              ]
+            }
+          }
+        },
+        {
+          "name": "C-16 Campo no permitido",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 400', () => pm.response.to.have.status(400));",
+                  "const b = pm.response.json(); pm.test('flat field errors', () => { pm.expect(b).to.not.have.property('errorCase'); pm.expect(b).to.have.property('active'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"{{tcRun}} Extra\",\n  \"sportId\": {{tcSportX}},\n  \"startDate\": \"2027-06-10\",\n  \"enrollmentDeadline\": \"2027-05-20\",\n  \"active\": false\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/tournaments",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tournaments"
+              ]
+            }
+          }
+        },
+        {
+          "name": "C-17 Fechas pasadas permitidas",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 201', () => pm.response.to.have.status(201));",
+                  "pm.collectionVariables.set('tcT5', pm.response.json().id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"{{tcRun}} Pasado\",\n  \"sportId\": {{tcSportX}},\n  \"startDate\": \"2020-03-01\",\n  \"enrollmentDeadline\": \"2020-02-01\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/tournaments",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tournaments"
+              ]
+            }
+          }
+        },
+        {
+          "name": "L-01 Listar incluye los torneos creados",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('contains T1', () => pm.expect(pm.response.json().some((t) => t.id == pm.collectionVariables.get('tcT1'))).to.eql(true));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/tournaments",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tournaments"
+              ]
+            }
+          }
+        },
+        {
+          "name": "L-02 Filtrar por deporte",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('only sport X', () => { const l = pm.response.json(); pm.expect(l.length).to.be.above(0); pm.expect(l.every((t) => t.sport.id == pm.collectionVariables.get('tcSportX'))).to.eql(true); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/tournaments?sportId={{tcSportX}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tournaments"
+              ],
+              "query": [
+                {
+                  "key": "sportId",
+                  "value": "{{tcSportX}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "L-03 Orden por fecha de inicio",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('sorted by startDate', () => { const d = pm.response.json().map((t) => t.startDate); pm.expect(d).to.eql([...d].sort()); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/tournaments?sportId={{tcSportX}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tournaments"
+              ],
+              "query": [
+                {
+                  "key": "sportId",
+                  "value": "{{tcSportX}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "L-04 Filtrar por nombre",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('one match', () => { const l = pm.response.json(); pm.expect(l).to.have.lengthOf(1); pm.expect(l[0].id).to.eql(Number(pm.collectionVariables.get('tcT2'))); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/tournaments?name={{tcRun}} Trim",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tournaments"
+              ],
+              "query": [
+                {
+                  "key": "name",
+                  "value": "{{tcRun}} Trim"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "L-05 Filtro active=false no devuelve activos",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('only inactive', () => pm.expect(pm.response.json().every((t) => t.active === false)).to.eql(true));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/tournaments?active=false",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tournaments"
+              ],
+              "query": [
+                {
+                  "key": "active",
+                  "value": "false"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "L-06 Filtro de deporte invalido",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 400', () => pm.response.to.have.status(400));",
+                  "const b = pm.response.json(); pm.test('flat field errors', () => { pm.expect(b).to.not.have.property('errorCase'); pm.expect(b).to.have.property('sportId'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/tournaments?sportId=abc",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tournaments"
+              ],
+              "query": [
+                {
+                  "key": "sportId",
+                  "value": "abc"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "L-07 Filtro active invalido",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 400', () => pm.response.to.have.status(400));",
+                  "const b = pm.response.json(); pm.test('flat field errors', () => { pm.expect(b).to.not.have.property('errorCase'); pm.expect(b).to.have.property('active'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/tournaments?active=abc",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tournaments"
+              ],
+              "query": [
+                {
+                  "key": "active",
+                  "value": "abc"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "L-08 Reporte de inscripciones abiertas",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('array with sport', () => { const l = pm.response.json(); pm.expect(l).to.be.an('array'); l.forEach((t) => pm.expect(t.sport).to.have.property('name')); });",
+                  "pm.test('past tournament is not open', () => pm.expect(pm.response.json().some((t) => t.id == pm.collectionVariables.get('tcT5'))).to.eql(false));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/tournaments/reports/open-enrollment",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tournaments",
+                "reports",
+                "open-enrollment"
+              ]
+            }
+          }
+        },
+        {
+          "name": "L-09 Los torneos del seed siguen intactos",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('seed tournament exists: run npm run seed', () => pm.expect(pm.response.json()).to.have.lengthOf(1));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/tournaments?name=Copa Colombia de Fútbol 2027",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tournaments"
+              ],
+              "query": [
+                {
+                  "key": "name",
+                  "value": "Copa Colombia de Fútbol 2027"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "G-01 Detalle",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 200', () => pm.response.to.have.status(200));",
+                  "const b = pm.response.json(); pm.test('shape', () => { pm.expect(b.id).to.be.a('number'); pm.expect(b.sport.id).to.be.a('number'); pm.expect(b.sport.name).to.be.a('string'); pm.expect(b.startDate).to.match(/^\\d{4}-\\d{2}-\\d{2}$/); pm.expect(b.enrollmentDeadline).to.match(/^\\d{4}-\\d{2}-\\d{2}$/); pm.expect(b.active).to.eql(true); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/tournaments/{{tcT1}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tournaments",
+                "{{tcT1}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "G-02 Detalle inexistente",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 404', () => pm.response.to.have.status(404));",
+                  "pm.test('errorCase is NOT_FOUND', () => pm.expect(pm.response.json().errorCase).to.eql('NOT_FOUND'));",
+                  "pm.test('Spanish message', () => pm.expect(pm.response.json().message).to.match(/No existe el torneo con id 999999/));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/tournaments/999999",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tournaments",
+                "999999"
+              ]
+            }
+          }
+        },
+        {
+          "name": "G-03 Id no numerico",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 400', () => pm.response.to.have.status(400));",
+                  "pm.test('errorCase is INVALID_OPERATION', () => pm.expect(pm.response.json().errorCase).to.eql('INVALID_OPERATION'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/tournaments/abc",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tournaments",
+                "abc"
+              ]
+            }
+          }
+        },
+        {
+          "name": "U-01 PUT reemplaza todos los campos",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 200', () => pm.response.to.have.status(200));",
+                  "const b = pm.response.json(); pm.test('replaced', () => { pm.expect(b.name).to.eql(pm.collectionVariables.get('tcRun') + ' Copa Final'); pm.expect(b.startDate).to.eql('2027-07-01'); pm.expect(b.enrollmentDeadline).to.eql('2027-06-01'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"{{tcRun}} Copa Final\",\n  \"sportId\": {{tcSportX}},\n  \"startDate\": \"2027-07-01\",\n  \"enrollmentDeadline\": \"2027-06-01\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/tournaments/{{tcT1}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tournaments",
+                "{{tcT1}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "U-02 PUT sin campos obligatorios",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 400', () => pm.response.to.have.status(400));",
+                  "const b = pm.response.json(); pm.test('flat field errors', () => { pm.expect(b).to.not.have.property('errorCase'); pm.expect(b).to.have.property('sportId'); pm.expect(b).to.have.property('startDate'); pm.expect(b).to.have.property('enrollmentDeadline'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"x\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/tournaments/{{tcT1}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tournaments",
+                "{{tcT1}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "U-03 PUT conservando su nombre",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"{{tcRun}} Copa Final\",\n  \"sportId\": {{tcSportX}},\n  \"startDate\": \"2027-07-01\",\n  \"enrollmentDeadline\": \"2027-06-01\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/tournaments/{{tcT1}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tournaments",
+                "{{tcT1}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "U-04 PUT con el nombre de otro torneo del deporte",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 409', () => pm.response.to.have.status(409));",
+                  "pm.test('errorCase is ALREADY_EXISTS', () => pm.expect(pm.response.json().errorCase).to.eql('ALREADY_EXISTS'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"{{tcRun}} Trim\",\n  \"sportId\": {{tcSportX}},\n  \"startDate\": \"2027-06-10\",\n  \"enrollmentDeadline\": \"2027-05-20\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/tournaments/{{tcT1}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tournaments",
+                "{{tcT1}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "U-05 PUT cambiando a otro deporte activo",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('moved to X', () => pm.expect(pm.response.json().sport.id).to.eql(Number(pm.collectionVariables.get('tcSportX'))));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"{{tcRun}} Copa Otro\",\n  \"sportId\": {{tcSportX}},\n  \"startDate\": \"2027-06-10\",\n  \"enrollmentDeadline\": \"2027-05-20\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/tournaments/{{tcT3}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tournaments",
+                "{{tcT3}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "U-06 PUT cambiando a un deporte inactivo",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 409', () => pm.response.to.have.status(409));",
+                  "pm.test('errorCase is INVALID_STATE', () => pm.expect(pm.response.json().errorCase).to.eql('INVALID_STATE'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"{{tcRun}} Copa Otro\",\n  \"sportId\": {{tcSportZ}},\n  \"startDate\": \"2027-06-10\",\n  \"enrollmentDeadline\": \"2027-05-20\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/tournaments/{{tcT3}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tournaments",
+                "{{tcT3}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "U-07 PUT con deporte inexistente",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 404', () => pm.response.to.have.status(404));",
+                  "pm.test('errorCase is NOT_FOUND', () => pm.expect(pm.response.json().errorCase).to.eql('NOT_FOUND'));",
+                  "pm.test('Spanish message', () => pm.expect(pm.response.json().message).to.match(/No existe el deporte/));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"{{tcRun}} Copa Otro\",\n  \"sportId\": 999999,\n  \"startDate\": \"2027-06-10\",\n  \"enrollmentDeadline\": \"2027-05-20\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/tournaments/{{tcT3}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tournaments",
+                "{{tcT3}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "U-08 PUT de torneo inexistente",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 404', () => pm.response.to.have.status(404));",
+                  "pm.test('errorCase is NOT_FOUND', () => pm.expect(pm.response.json().errorCase).to.eql('NOT_FOUND'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"{{tcRun}} Nada\",\n  \"sportId\": {{tcSportX}},\n  \"startDate\": \"2027-06-10\",\n  \"enrollmentDeadline\": \"2027-05-20\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/tournaments/999999",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tournaments",
+                "999999"
+              ]
+            }
+          }
+        },
+        {
+          "name": "U-09 PATCH ya no existe para editar",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('route removed (404)', () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"x\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/tournaments/{{tcT1}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tournaments",
+                "{{tcT1}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "U-10 PUT cierre posterior al inicio",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 400', () => pm.response.to.have.status(400));",
+                  "pm.test('errorCase is INVALID_OPERATION', () => pm.expect(pm.response.json().errorCase).to.eql('INVALID_OPERATION'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"{{tcRun}} Copa Final\",\n  \"sportId\": {{tcSportX}},\n  \"startDate\": \"2027-06-10\",\n  \"enrollmentDeadline\": \"2027-12-31\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/tournaments/{{tcT1}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tournaments",
+                "{{tcT1}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "U-11 Setup: torneo en el deporte W",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 201', () => pm.response.to.have.status(201));",
+                  "pm.collectionVariables.set('tcT6', pm.response.json().id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"{{tcRun}} Torneo W\",\n  \"sportId\": {{tcSportW}},\n  \"startDate\": \"2027-06-10\",\n  \"enrollmentDeadline\": \"2027-05-20\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/tournaments",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tournaments"
+              ]
+            }
+          }
+        },
+        {
+          "name": "U-12 Setup: desactivar el deporte W",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/sports/{{tcSportW}}/deactivate",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "sports",
+                "{{tcSportW}}",
+                "deactivate"
+              ]
+            }
+          }
+        },
+        {
+          "name": "U-13 PUT sin cambiar de deporte funciona aunque el deporte este inactivo",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('renamed', () => pm.expect(pm.response.json().name).to.eql(pm.collectionVariables.get('tcRun') + ' Torneo W Corregido'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"{{tcRun}} Torneo W Corregido\",\n  \"sportId\": {{tcSportW}},\n  \"startDate\": \"2027-06-10\",\n  \"enrollmentDeadline\": \"2027-05-20\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/tournaments/{{tcT6}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tournaments",
+                "{{tcT6}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "V-01 Desactivar",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('inactive', () => pm.expect(pm.response.json().active).to.eql(false));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/tournaments/{{tcT1}}/deactivate",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tournaments",
+                "{{tcT1}}",
+                "deactivate"
+              ]
+            }
+          }
+        },
+        {
+          "name": "V-02 Desactivar es idempotente",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/tournaments/{{tcT1}}/deactivate",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tournaments",
+                "{{tcT1}}",
+                "deactivate"
+              ]
+            }
+          }
+        },
+        {
+          "name": "V-03 El inactivo aparece con active=false",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('contains T1', () => pm.expect(pm.response.json().some((t) => t.id == pm.collectionVariables.get('tcT1'))).to.eql(true));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/tournaments?active=false&sportId={{tcSportX}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tournaments"
+              ],
+              "query": [
+                {
+                  "key": "active",
+                  "value": "false"
+                },
+                {
+                  "key": "sportId",
+                  "value": "{{tcSportX}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "V-03b El inactivo no aparece en inscripciones abiertas",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('inactive tournament is not open', () => pm.expect(pm.response.json().some((t) => t.id == pm.collectionVariables.get('tcT1'))).to.eql(false));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/tournaments/reports/open-enrollment",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tournaments",
+                "reports",
+                "open-enrollment"
+              ]
+            }
+          }
+        },
+        {
+          "name": "V-04 Activar",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('active', () => pm.expect(pm.response.json().active).to.eql(true));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/tournaments/{{tcT1}}/activate",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tournaments",
+                "{{tcT1}}",
+                "activate"
+              ]
+            }
+          }
+        },
+        {
+          "name": "V-05 Desactivar inexistente",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 404', () => pm.response.to.have.status(404));",
+                  "pm.test('errorCase is NOT_FOUND', () => pm.expect(pm.response.json().errorCase).to.eql('NOT_FOUND'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/tournaments/999999/deactivate",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tournaments",
+                "999999",
+                "deactivate"
+              ]
+            }
+          }
+        },
+        {
+          "name": "D-01 Eliminar un torneo sin dependencias",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 204', () => pm.response.to.have.status(204));",
+                  "pm.test('empty body', () => pm.expect(pm.response.text()).to.eql(''));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/tournaments/{{tcT4}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tournaments",
+                "{{tcT4}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "D-02 Eliminar de nuevo: 404",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 404', () => pm.response.to.have.status(404));",
+                  "pm.test('errorCase is NOT_FOUND', () => pm.expect(pm.response.json().errorCase).to.eql('NOT_FOUND'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/tournaments/{{tcT4}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tournaments",
+                "{{tcT4}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "D-03 Ya no existe",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 404', () => pm.response.to.have.status(404));",
+                  "pm.test('errorCase is NOT_FOUND', () => pm.expect(pm.response.json().errorCase).to.eql('NOT_FOUND'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/tournaments/{{tcT4}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tournaments",
+                "{{tcT4}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "D-04 El deporte con torneos no se elimina (GD-01)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 409', () => pm.response.to.have.status(409));",
+                  "pm.test('errorCase is INVALID_STATE', () => pm.expect(pm.response.json().errorCase).to.eql('INVALID_STATE'));",
+                  "pm.test('Spanish message', () => pm.expect(pm.response.json().message).to.match(/torneos/));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/sports/{{tcSportX}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "sports",
+                "{{tcSportX}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "D-05 Id invalido",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 400', () => pm.response.to.have.status(400));",
+                  "pm.test('errorCase is INVALID_OPERATION', () => pm.expect(pm.response.json().errorCase).to.eql('INVALID_OPERATION'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/tournaments/abc",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tournaments",
+                "abc"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Z-01 Cleanup: torneo T1",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 204', () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/tournaments/{{tcT1}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tournaments",
+                "{{tcT1}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Z-02 Cleanup: torneo T2",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 204', () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/tournaments/{{tcT2}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tournaments",
+                "{{tcT2}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Z-03 Cleanup: torneo T3",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 204', () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/tournaments/{{tcT3}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tournaments",
+                "{{tcT3}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Z-04 Cleanup: torneo T5",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 204', () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/tournaments/{{tcT5}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tournaments",
+                "{{tcT5}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Z-05 Cleanup: torneo T6",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 204', () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/tournaments/{{tcT6}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tournaments",
+                "{{tcT6}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Z-06 Cleanup: deporte X",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 204', () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/sports/{{tcSportX}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "sports",
+                "{{tcSportX}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Z-07 Cleanup: deporte Y",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 204', () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/sports/{{tcSportY}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "sports",
+                "{{tcSportY}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Z-08 Cleanup: deporte Z",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 204', () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/sports/{{tcSportZ}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "sports",
+                "{{tcSportZ}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Z-09 Cleanup: deporte W",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 204', () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/sports/{{tcSportW}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "sports",
+                "{{tcSportW}}"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
       "name": "99 Cleanup",
       "item": [
         {
