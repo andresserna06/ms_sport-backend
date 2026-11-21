@@ -1,9 +1,11 @@
 export interface ScoringEventNotificationPayload {
   matchId: number;
+  playerUserId?: number;
   playerDocument: string;
   teamName: string;
   minute: number;
   type: string;
+  authorizationHeader?: string;
 }
 
 export interface MatchFinishedNotificationPayload {
@@ -12,10 +14,34 @@ export interface MatchFinishedNotificationPayload {
   awayTeamName: string;
   homeScore: number;
   awayScore: number;
+  authorizationHeader?: string;
   scoringEvents: {
     minute: number;
     type: string;
+    playerUserId?: number;
     playerDocument: string;
+    teamName: string;
+  }[];
+}
+
+export interface ScoringEventEmailData {
+  matchId: number;
+  playerName: string;
+  teamName: string;
+  minute: number;
+  type: string;
+}
+
+export interface MatchFinishedEmailData {
+  matchId: number;
+  homeTeamName: string;
+  awayTeamName: string;
+  homeScore: number;
+  awayScore: number;
+  scoringEvents: {
+    minute: number;
+    type: string;
+    playerName: string;
     teamName: string;
   }[];
 }
@@ -29,43 +55,45 @@ function escapeHtml(text: string): string {
     .replace(/'/g, '&#39;');
 }
 
-export function buildScoringEventEmail(
-  payload: ScoringEventNotificationPayload,
-): { subject: string; htmlContent: string } {
-  const subject = `Nueva anotación en el partido #${payload.matchId}`;
+export function buildScoringEventEmail(data: ScoringEventEmailData): {
+  subject: string;
+  htmlContent: string;
+} {
+  const subject = `Nueva anotación en el partido #${data.matchId}`;
   const htmlContent = [
     `<h2>¡Nueva anotación registrada!</h2>`,
-    `<p>Se registró una anotación en el <strong>partido #${payload.matchId}</strong>:</p>`,
+    `<p>Se registró una anotación en el <strong>partido #${data.matchId}</strong>:</p>`,
     `<ul>`,
-    `<li><strong>Tipo:</strong> ${escapeHtml(payload.type)}</li>`,
-    `<li><strong>Minuto:</strong> ${payload.minute}'</li>`,
-    `<li><strong>Equipo:</strong> ${escapeHtml(payload.teamName)}</li>`,
-    `<li><strong>Jugador (doc):</strong> ${escapeHtml(payload.playerDocument)}</li>`,
+    `<li><strong>Tipo:</strong> ${escapeHtml(data.type)}</li>`,
+    `<li><strong>Minuto:</strong> ${data.minute}'</li>`,
+    `<li><strong>Equipo:</strong> ${escapeHtml(data.teamName)}</li>`,
+    `<li><strong>Jugador:</strong> ${escapeHtml(data.playerName)}</li>`,
     `</ul>`,
   ].join('');
 
   return { subject, htmlContent };
 }
 
-export function buildMatchFinishedEmail(
-  payload: MatchFinishedNotificationPayload,
-): { subject: string; htmlContent: string } {
-  const safeHome = escapeHtml(payload.homeTeamName);
-  const safeAway = escapeHtml(payload.awayTeamName);
-  const subject = `Resumen final: ${payload.homeTeamName} ${payload.homeScore} - ${payload.awayScore} ${payload.awayTeamName}`;
+export function buildMatchFinishedEmail(data: MatchFinishedEmailData): {
+  subject: string;
+  htmlContent: string;
+} {
+  const safeHome = escapeHtml(data.homeTeamName);
+  const safeAway = escapeHtml(data.awayTeamName);
+  const subject = `Resumen final: ${data.homeTeamName} ${data.homeScore} - ${data.awayScore} ${data.awayTeamName}`;
   const eventsHtml =
-    payload.scoringEvents.length > 0
-      ? `<ul>${payload.scoringEvents
+    data.scoringEvents.length > 0
+      ? `<ul>${data.scoringEvents
           .map(
             (e) =>
-              `<li><strong>${e.minute}'</strong> – ${escapeHtml(e.type)} (${escapeHtml(e.teamName)}, jugador doc. ${escapeHtml(e.playerDocument)})</li>`,
+              `<li><strong>${e.minute}'</strong> – ${escapeHtml(e.type)} (${escapeHtml(e.teamName)}, ${escapeHtml(e.playerName)})</li>`,
           )
           .join('')}</ul>`
       : `<p>No se registraron anotaciones individuales en este encuentro.</p>`;
 
   const htmlContent = [
-    `<h2>Resumen final del partido #${payload.matchId}</h2>`,
-    `<p><strong>${safeHome} ${payload.homeScore} - ${payload.awayScore} ${safeAway}</strong></p>`,
+    `<h2>Resumen final del partido #${data.matchId}</h2>`,
+    `<p><strong>${safeHome} ${data.homeScore} - ${data.awayScore} ${safeAway}</strong></p>`,
     `<h3>Anotaciones</h3>`,
     eventsHtml,
   ].join('');

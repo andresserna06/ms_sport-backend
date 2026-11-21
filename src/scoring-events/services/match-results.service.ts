@@ -51,6 +51,7 @@ export class MatchResultsService {
   async finishMatch(
     matchId: number,
     dto?: FinishMatchDto,
+    authorizationHeader?: string,
   ): Promise<MatchResponseDto> {
     const finished = await this.matchesService.finishMatch(
       matchId,
@@ -74,9 +75,11 @@ export class MatchResultsService {
       awayTeamName: awayTeam?.name ?? `Equipo #${finished.awayTeamId}`,
       homeScore: finished.homeScore ?? 0,
       awayScore: finished.awayScore ?? 0,
+      authorizationHeader,
       scoringEvents: events.map((event) => ({
         minute: event.minute,
         type: event.type,
+        playerUserId: event.player?.userId,
         playerDocument: event.player?.document ?? `#${event.playerId}`,
         teamName: event.team?.name ?? `Equipo #${event.teamId}`,
       })),
@@ -88,8 +91,9 @@ export class MatchResultsService {
   async createScoringEvent(
     matchId: number,
     dto: CreateScoringEventDto,
+    authorizationHeader?: string,
   ): Promise<ScoringEventResponseDto> {
-    const { playerDocument, teamName } =
+    const { playerUserId, playerDocument, teamName } =
       await this.validateScoringEventReferencesAndRules(matchId, dto);
 
     const entity = this.scoringEventMapper.toEntity(matchId, dto);
@@ -97,10 +101,12 @@ export class MatchResultsService {
 
     void this.matchNotifier.notifyScoringEventCreated({
       matchId,
+      playerUserId,
       playerDocument,
       teamName,
       minute: saved.minute,
       type: saved.type,
+      authorizationHeader,
     });
 
     return this.scoringEventMapper.toResponseDto(saved);
@@ -148,7 +154,7 @@ export class MatchResultsService {
   private async validateScoringEventReferencesAndRules(
     matchId: number,
     dto: CreateScoringEventDto,
-  ): Promise<{ playerDocument: string; teamName: string }> {
+  ): Promise<{ playerUserId: number; playerDocument: string; teamName: string }> {
     const match = await this.matchesService.findOne(matchId);
     const player = await this.playerService.findOne(dto.playerId);
     const team = await this.getTeamOrFail(dto.teamId);
@@ -189,7 +195,11 @@ export class MatchResultsService {
       );
     }
 
-    return { playerDocument: player.document, teamName: team.name };
+    return {
+      playerUserId: player.userId,
+      playerDocument: player.document,
+      teamName: team.name,
+    };
   }
 
   private async getTeamOrFail(teamId: number): Promise<TeamResponseDto> {

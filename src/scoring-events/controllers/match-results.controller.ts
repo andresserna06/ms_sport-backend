@@ -3,6 +3,7 @@ import {
   Controller,
   Delete,
   Get,
+  Headers,
   HttpCode,
   HttpStatus,
   Param,
@@ -35,16 +36,22 @@ export class MatchResultsController {
   finishMatch(
     @Param('id', ParseIntPipe) id: number,
     @Body() dto?: FinishMatchDto,
+    @Headers('authorization') authorizationHeader?: string,
   ): Promise<MatchResponseDto> {
-    return this.matchResultsService.finishMatch(id, dto);
+    return this.matchResultsService.finishMatch(id, dto, authorizationHeader);
   }
 
   @Post('matches/:id/scoring-events')
   createScoringEvent(
     @Param('id', ParseIntPipe) id: number,
     @Body() dto: CreateScoringEventDto,
+    @Headers('authorization') authorizationHeader?: string,
   ): Promise<ScoringEventResponseDto> {
-    return this.matchResultsService.createScoringEvent(id, dto);
+    return this.matchResultsService.createScoringEvent(
+      id,
+      dto,
+      authorizationHeader,
+    );
   }
 
   @Get('matches/:id/scoring-events')

@@ -133,10 +133,12 @@ describe('MatchResultsService', () => {
     });
     expect(matchNotifier.notifyScoringEventCreated).toHaveBeenCalledWith({
       matchId: 7,
+      playerUserId: 50,
       playerDocument: '1053812345',
       teamName: 'Leones FC',
       minute: 30,
       type: 'GOL',
+      authorizationHeader: undefined,
     });
   });
 
@@ -201,6 +203,7 @@ describe('MatchResultsService', () => {
       awayTeamName: 'Tigres FC',
       homeScore: 2,
       awayScore: 1,
+      authorizationHeader: undefined,
       scoringEvents: [],
     });
   });
