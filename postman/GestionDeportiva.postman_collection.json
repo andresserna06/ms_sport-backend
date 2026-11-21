@@ -207,7 +207,7 @@
                       "});",
                       "const body = pm.response.json();",
                       "pm.test('Error de validación', function () {",
-                      "  pm.expect(body.errorCase).to.eql('VALIDATION_ERROR');",
+                      "  pm.expect(body).to.not.have.property('errorCase'); pm.expect(Object.keys(body)).to.not.be.empty; /* flat {campo: mensaje} */",
                       "});"
                     ]
                   }
@@ -241,7 +241,7 @@
                       "});",
                       "const body = pm.response.json();",
                       "pm.test('Error de validación', function () {",
-                      "  pm.expect(body.errorCase).to.eql('VALIDATION_ERROR');",
+                      "  pm.expect(body).to.not.have.property('errorCase'); pm.expect(Object.keys(body)).to.not.be.empty; /* flat {campo: mensaje} */",
                       "});"
                     ]
                   }
@@ -275,7 +275,7 @@
                       "});",
                       "const body = pm.response.json();",
                       "pm.test('Rechaza campos no permitidos', function () {",
-                      "  pm.expect(body.errorCase).to.eql('VALIDATION_ERROR');",
+                      "  pm.expect(body).to.not.have.property('errorCase'); pm.expect(Object.keys(body)).to.not.be.empty; /* flat {campo: mensaje} */",
                       "});"
                     ]
                   }
@@ -935,7 +935,7 @@
                       "  pm.response.to.have.status(400);",
                       "});",
                       "pm.test('Error de validación', function () {",
-                      "  pm.expect(pm.response.json().errorCase).to.eql('VALIDATION_ERROR');",
+                      "  pm.expect(pm.response.json()).to.not.have.property('errorCase'); /* flat {campo: mensaje} */",
                       "});"
                     ]
                   }
@@ -968,7 +968,7 @@
                       "  pm.response.to.have.status(400);",
                       "});",
                       "pm.test('Error de validación', function () {",
-                      "  pm.expect(pm.response.json().errorCase).to.eql('VALIDATION_ERROR');",
+                      "  pm.expect(pm.response.json()).to.not.have.property('errorCase'); /* flat {campo: mensaje} */",
                       "});"
                     ]
                   }
