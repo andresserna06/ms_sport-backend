@@ -1,77 +1,185 @@
-import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { PhasesService } from '../base/phases.service';
+import { TournamentsService } from '../../tournaments/tournaments.service';
 import { CreateGroupDto } from './dto/create-group.dto';
 import { GroupResponseDto } from './dto/group-response.dto';
+import { GroupTeamResponseDto } from './dto/group-team-response.dto';
 import { UpdateGroupDto } from './dto/update-group.dto';
 import { Group } from './entities/group.entity';
 import { GroupMapper } from './mappers/group.mapper';
-import { PhasesService } from '../base/phases.service';
+import { GROUP_REPOSITORY } from './repositories/group.repository';
+import type { GroupRepository } from './repositories/group.repository';
 import { ApplicationException } from '../../exception/application.exception';
 import { ErrorCase } from '../../exception/error-case.enum';
 
 @Injectable()
 export class GroupService {
   constructor(
-    @InjectRepository(Group)
-    private readonly groupsRepository: Repository<Group>,
+    @Inject(GROUP_REPOSITORY)
+    private readonly groupRepository: GroupRepository,
     private readonly groupMapper: GroupMapper,
     private readonly phasesService: PhasesService,
+    private readonly tournamentsService: TournamentsService,
   ) {}
 
   async create(dto: CreateGroupDto): Promise<GroupResponseDto> {
-    const entity = this.groupMapper.toEntity(dto);
-    const saved = await this.groupsRepository.save(entity);
+    await this.getTournamentOrFail(dto.tournamentId);
+
+    if (
+      await this.phasesService.existsByNameInTournament(
+        dto.name,
+        dto.tournamentId,
+      )
+    ) {
+      throw new ApplicationException(
+        ErrorCase.ALREADY_EXISTS,
+        `Ya existe una fase con el nombre "${dto.name}" en el torneo ${dto.tournamentId}`,
+      );
+    }
+
+    const entity = this.groupMapper.toEntity(dto, dto.tournamentId);
+    const saved = await this.groupRepository.save(entity);
     return this.groupMapper.toResponseDto(saved);
   }
 
-  async findAll(): Promise<GroupResponseDto[]> {
-    const groups = await this.groupsRepository.find({ order: { order: 'ASC' } });
+  async findAll(tournamentId?: number): Promise<GroupResponseDto[]> {
+    const groups = await this.groupRepository.findAll(tournamentId);
     return this.groupMapper.toResponseDtoList(groups);
   }
 
   async findOne(id: number): Promise<GroupResponseDto> {
-    const group = await this.groupsRepository.findOne({ where: { id } });
-    if (!group) {
-      throw new ApplicationException(
-        ErrorCase.NOT_FOUND,
-        `Group with id ${id} not found`,
-      );
-    }
+    const group = await this.getGroupOrFail(id);
     return this.groupMapper.toResponseDto(group);
   }
 
   async update(id: number, dto: UpdateGroupDto): Promise<GroupResponseDto> {
-    const group = await this.groupsRepository.findOne({ where: { id } });
-    if (!group) {
+    const group = await this.getGroupOrFail(id);
+    const tournamentId = group.tournament?.id;
+
+    if (
+      dto.name !== undefined &&
+      tournamentId !== undefined &&
+      (await this.phasesService.existsByNameInTournament(
+        dto.name,
+        tournamentId,
+        id,
+      ))
+    ) {
       throw new ApplicationException(
-        ErrorCase.NOT_FOUND,
-        `Group with id ${id} not found`,
+        ErrorCase.ALREADY_EXISTS,
+        `Ya existe una fase con el nombre "${dto.name}" en el torneo ${tournamentId}`,
       );
     }
 
     const merged = this.groupMapper.mergeEntity(group, dto);
-    const saved = await this.groupsRepository.save(merged);
+    const saved = await this.groupRepository.save(merged);
     return this.groupMapper.toResponseDto(saved);
   }
 
   async remove(id: number): Promise<{ message: string }> {
-    const group = await this.groupsRepository.findOne({ where: { id } });
-    if (!group) {
-      throw new ApplicationException(
-        ErrorCase.NOT_FOUND,
-        `Group with id ${id} not found`,
-      );
-    }
+    const group = await this.getGroupOrFail(id);
 
     if (await this.phasesService.hasMatches(id)) {
       throw new ApplicationException(
-        ErrorCase.INVALID_OPERATION,
-        `Group #${id} has matches and cannot be deleted`,
+        ErrorCase.INVALID_STATE,
+        `El grupo #${id} tiene partidos y no se puede eliminar`,
       );
     }
 
-    await this.groupsRepository.remove(group);
-    return { message: `Group #${id} deleted successfully` };
+    await this.groupRepository.remove(group);
+    return { message: `Grupo #${id} eliminado correctamente` };
+  }
+
+  async assignTeam(
+    groupId: number,
+    teamId: number,
+  ): Promise<GroupResponseDto> {
+    const group = await this.getGroupOrFail(groupId);
+    const team = await this.groupRepository.findTeamById(teamId);
+
+    if (!team) {
+      throw new ApplicationException(
+        ErrorCase.NOT_FOUND,
+        `No existe un equipo con el id ${teamId}`,
+      );
+    }
+
+    if (!team.active) {
+      throw new ApplicationException(
+        ErrorCase.INVALID_STATE,
+        `El equipo #${teamId} está inactivo y no se puede asignar a un grupo`,
+      );
+    }
+
+    if (team.group?.id === groupId) {
+      throw new ApplicationException(
+        ErrorCase.ALREADY_EXISTS,
+        `El equipo #${teamId} ya pertenece al grupo #${groupId}`,
+      );
+    }
+
+    if (team.group) {
+      throw new ApplicationException(
+        ErrorCase.INVALID_STATE,
+        `El equipo #${teamId} ya pertenece al grupo #${team.group.id}; retírelo antes de asignarlo a otro grupo`,
+      );
+    }
+
+    team.group = group;
+    await this.groupRepository.saveTeam(team);
+    return this.findOne(groupId);
+  }
+
+  async removeTeam(groupId: number, teamId: number): Promise<void> {
+    await this.getGroupOrFail(groupId);
+    const team = await this.groupRepository.findTeamById(teamId);
+
+    if (!team) {
+      throw new ApplicationException(
+        ErrorCase.NOT_FOUND,
+        `No existe un equipo con el id ${teamId}`,
+      );
+    }
+
+    if (team.group?.id !== groupId) {
+      throw new ApplicationException(
+        ErrorCase.INVALID_STATE,
+        `El equipo #${teamId} no pertenece al grupo #${groupId}`,
+      );
+    }
+
+    team.group = null;
+    await this.groupRepository.saveTeam(team);
+  }
+
+  async findTeams(groupId: number): Promise<GroupTeamResponseDto[]> {
+    await this.getGroupOrFail(groupId);
+    const teams = await this.groupRepository.findTeams(groupId);
+    return this.groupMapper.toTeamResponseDtoList(teams);
+  }
+
+  private async getGroupOrFail(id: number): Promise<Group> {
+    const group = await this.groupRepository.findById(id);
+    if (!group) {
+      throw new ApplicationException(
+        ErrorCase.NOT_FOUND,
+        `No existe un grupo con el id ${id}`,
+      );
+    }
+    return group;
+  }
+
+  private async getTournamentOrFail(id: number): Promise<void> {
+    try {
+      await this.tournamentsService.findOne(id);
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw new ApplicationException(
+          ErrorCase.NOT_FOUND,
+          `No existe un torneo con el id ${id}`,
+        );
+      }
+      throw error;
+    }
   }
 }

@@ -1,6 +1,7 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { TournamentsService } from '../../tournaments/tournaments.service';
 import { CreateFinalDto } from './dto/create-final.dto';
 import { FinalResponseDto } from './dto/final-response.dto';
 import { UpdateFinalDto } from './dto/update-final.dto';
@@ -17,36 +18,60 @@ export class FinalService {
     private readonly finalsRepository: Repository<Final>,
     private readonly finalMapper: FinalMapper,
     private readonly phasesService: PhasesService,
+    private readonly tournamentsService: TournamentsService,
   ) {}
 
   async create(dto: CreateFinalDto): Promise<FinalResponseDto> {
-    const entity = this.finalMapper.toEntity(dto);
+    await this.getTournamentOrFail(dto.tournamentId);
+
+    if (
+      await this.phasesService.existsByNameInTournament(
+        dto.name,
+        dto.tournamentId,
+      )
+    ) {
+      throw new ApplicationException(
+        ErrorCase.ALREADY_EXISTS,
+        `Ya existe una fase con el nombre "${dto.name}" en el torneo ${dto.tournamentId}`,
+      );
+    }
+
+    const entity = this.finalMapper.toEntity(dto, dto.tournamentId);
     const saved = await this.finalsRepository.save(entity);
     return this.finalMapper.toResponseDto(saved);
   }
 
-  async findAll(): Promise<FinalResponseDto[]> {
-    const finals = await this.finalsRepository.find({ order: { order: 'ASC' } });
+  async findAll(tournamentId?: number): Promise<FinalResponseDto[]> {
+    const finals = await this.finalsRepository.find({
+      where:
+        tournamentId === undefined ? {} : { tournament: { id: tournamentId } },
+      relations: { tournament: true },
+      order: { order: 'ASC' },
+    });
     return this.finalMapper.toResponseDtoList(finals);
   }
 
   async findOne(id: number): Promise<FinalResponseDto> {
-    const final = await this.finalsRepository.findOne({ where: { id } });
-    if (!final) {
-      throw new ApplicationException(
-        ErrorCase.NOT_FOUND,
-        `Final with id ${id} not found`,
-      );
-    }
+    const final = await this.getFinalOrFail(id);
     return this.finalMapper.toResponseDto(final);
   }
 
   async update(id: number, dto: UpdateFinalDto): Promise<FinalResponseDto> {
-    const final = await this.finalsRepository.findOne({ where: { id } });
-    if (!final) {
+    const final = await this.getFinalOrFail(id);
+    const tournamentId = final.tournament?.id;
+
+    if (
+      dto.name !== undefined &&
+      tournamentId !== undefined &&
+      (await this.phasesService.existsByNameInTournament(
+        dto.name,
+        tournamentId,
+        id,
+      ))
+    ) {
       throw new ApplicationException(
-        ErrorCase.NOT_FOUND,
-        `Final with id ${id} not found`,
+        ErrorCase.ALREADY_EXISTS,
+        `Ya existe una fase con el nombre "${dto.name}" en el torneo ${tournamentId}`,
       );
     }
 
@@ -56,22 +81,44 @@ export class FinalService {
   }
 
   async remove(id: number): Promise<{ message: string }> {
-    const final = await this.finalsRepository.findOne({ where: { id } });
-    if (!final) {
-      throw new ApplicationException(
-        ErrorCase.NOT_FOUND,
-        `Final with id ${id} not found`,
-      );
-    }
+    const final = await this.getFinalOrFail(id);
 
     if (await this.phasesService.hasMatches(id)) {
       throw new ApplicationException(
-        ErrorCase.INVALID_OPERATION,
-        `Final #${id} has matches and cannot be deleted`,
+        ErrorCase.INVALID_STATE,
+        `La fase final #${id} tiene partidos y no se puede eliminar`,
       );
     }
 
     await this.finalsRepository.remove(final);
-    return { message: `Final #${id} deleted successfully` };
+    return { message: `Fase final #${id} eliminada correctamente` };
+  }
+
+  private async getFinalOrFail(id: number): Promise<Final> {
+    const final = await this.finalsRepository.findOne({
+      where: { id },
+      relations: { tournament: true },
+    });
+    if (!final) {
+      throw new ApplicationException(
+        ErrorCase.NOT_FOUND,
+        `No existe una fase final con el id ${id}`,
+      );
+    }
+    return final;
+  }
+
+  private async getTournamentOrFail(id: number): Promise<void> {
+    try {
+      await this.tournamentsService.findOne(id);
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw new ApplicationException(
+          ErrorCase.NOT_FOUND,
+          `No existe un torneo con el id ${id}`,
+        );
+      }
+      throw error;
+    }
   }
 }

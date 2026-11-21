@@ -20,9 +20,10 @@ export class PhasesService {
     private readonly phaseMapper: PhaseMapper,
   ) {}
 
-  async findAll(): Promise<PhaseResponseDto[]> {
+  async findAll(tournamentId?: number): Promise<PhaseResponseDto[]> {
     const phases = await this.phasesRepository.find({
-      relations: { matches: true },
+      where: tournamentId === undefined ? {} : { tournament: { id: tournamentId } },
+      relations: { tournament: true, matches: true },
       order: { order: 'ASC' },
     });
     return this.phaseMapper.toResponseDtoList(phases);
@@ -31,7 +32,7 @@ export class PhasesService {
   async findOne(id: number): Promise<PhaseResponseDto> {
     const phase = await this.phasesRepository.findOne({
       where: { id },
-      relations: { matches: true },
+      relations: { tournament: true, matches: true },
     });
     if (!phase) {
       throw new ApplicationException(
@@ -47,6 +48,23 @@ export class PhasesService {
       where: { phase: { id } },
     });
     return total > 0;
+  }
+
+  async existsByNameInTournament(
+    name: string,
+    tournamentId: number,
+    excludeId?: number,
+  ): Promise<boolean> {
+    const query = this.phasesRepository
+      .createQueryBuilder('phase')
+      .where('phase.tournament_id = :tournamentId', { tournamentId })
+      .andWhere('LOWER(phase.name) = LOWER(:name)', { name });
+
+    if (excludeId !== undefined) {
+      query.andWhere('phase.id <> :excludeId', { excludeId });
+    }
+
+    return (await query.getCount()) > 0;
   }
 
   async getCountByTypeReport(): Promise<{ phaseType: string; total: number }[]> {

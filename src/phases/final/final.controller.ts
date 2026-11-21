@@ -7,7 +7,9 @@ import {
   ParseIntPipe,
   Patch,
   Post,
+  Query,
 } from '@nestjs/common';
+import { FindPhasesQueryDto } from '../base/dto/find-phases-query.dto';
 import { CreateFinalDto } from './dto/create-final.dto';
 import { UpdateFinalDto } from './dto/update-final.dto';
 import { FinalService } from './final.service';
@@ -22,8 +24,8 @@ export class FinalController {
   }
 
   @Get()
-  findAll() {
-    return this.finalService.findAll();
+  findAll(@Query() query: FindPhasesQueryDto) {
+    return this.finalService.findAll(query.tournamentId);
   }
 
   @Get(':id')

@@ -12,6 +12,7 @@ export class PhaseMapper {
       id: entity.id,
       name: entity.name,
       order: entity.order,
+      tournamentId: entity.tournament?.id ?? null,
       phaseType: entity.phaseType as 'GROUP' | 'FINAL',
       matches: entity.matches
         ? this.matchMapper.toResponseDtoList(entity.matches, entity.id)

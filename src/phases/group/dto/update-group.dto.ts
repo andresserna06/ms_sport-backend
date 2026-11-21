@@ -1,4 +1,3 @@
-import { PartialType } from '@nestjs/mapped-types';
-import { CreateGroupDto } from './create-group.dto';
+import { UpdatePhaseRequestDto } from '../../base/dto/update-phase-request.dto';
 
-export class UpdateGroupDto extends PartialType(CreateGroupDto) {}
+export class UpdateGroupDto extends UpdatePhaseRequestDto {}

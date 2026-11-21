@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { Tournament } from '../../../tournaments/entities/tournament.entity';
 import { CreateFinalDto } from '../dto/create-final.dto';
 import { FinalResponseDto } from '../dto/final-response.dto';
 import { UpdateFinalDto } from '../dto/update-final.dto';
@@ -6,10 +7,11 @@ import { Final } from '../entities/final.entity';
 
 @Injectable()
 export class FinalMapper {
-  toEntity(dto: CreateFinalDto): Final {
+  toEntity(dto: CreateFinalDto, tournamentId: number): Final {
     const entity = new Final();
     entity.name = dto.name;
     entity.order = dto.order;
+    entity.tournament = { id: tournamentId } as Tournament;
     return entity;
   }
 
@@ -24,6 +26,7 @@ export class FinalMapper {
       id: entity.id,
       name: entity.name,
       order: entity.order,
+      tournamentId: entity.tournament?.id ?? null,
       phaseType: 'FINAL',
     };
   }

@@ -1,4 +1,3 @@
-import { PartialType } from '@nestjs/mapped-types';
-import { CreateFinalDto } from './create-final.dto';
+import { UpdatePhaseRequestDto } from '../../base/dto/update-phase-request.dto';
 
-export class UpdateFinalDto extends PartialType(CreateFinalDto) {}
+export class UpdateFinalDto extends UpdatePhaseRequestDto {}

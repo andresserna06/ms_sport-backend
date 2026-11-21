@@ -1,8 +1,11 @@
 import {
   Column,
   Entity,
+  JoinColumn,
+  ManyToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
+import { Group } from '../../phases/group/entities/group.entity';
 
 @Entity('teams')
 export class Team {
@@ -23,4 +26,11 @@ export class Team {
 
   @Column({ default: true })
   active!: boolean;
+
+  @ManyToOne(() => Group, (group) => group.teams, {
+    nullable: true,
+    onDelete: 'SET NULL',
+  })
+  @JoinColumn({ name: 'group_id' })
+  group!: Group | null;
 }

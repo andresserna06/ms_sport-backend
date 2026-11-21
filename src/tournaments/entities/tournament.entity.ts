@@ -1,4 +1,5 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { Phase } from '../../phases/base/entities/phase.entity';
 
 @Entity('tournaments')
 export class Tournament {
@@ -13,4 +14,7 @@ export class Tournament {
 
   @Column({ type: 'date', name: 'enrollment_deadline' })
   enrollmentDeadline!: string;
+
+  @OneToMany(() => Phase, (phase) => phase.tournament)
+  phases?: Phase[];
 }
