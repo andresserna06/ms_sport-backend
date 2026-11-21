@@ -8,6 +8,10 @@ import {
   PLAYER_SKILL_DEPENDENCY_CHECKER,
   PlayerSkillDependenciesModule,
 } from '../player-skills/player-skill-dependencies.module';
+import {
+  SCORING_EVENT_PLAYER_DEPENDENCY_CHECKER,
+  ScoringEventDependenciesModule,
+} from '../scoring-events/scoring-event-dependencies.module';
 import { PlayerController } from './controllers/player.controller';
 import { Player } from './entities/player.entity';
 import { PlayerMapper } from './mappers/player.mapper';
@@ -24,6 +28,7 @@ import { PlayerService } from './services/player.service';
     TypeOrmModule.forFeature([Player]),
     PlayerSkillDependenciesModule,
     PlayerContractDependenciesModule,
+    ScoringEventDependenciesModule,
   ],
   controllers: [PlayerController],
   providers: [
@@ -38,18 +43,23 @@ import { PlayerService } from './services/player.service';
       useFactory: (
         skillChecker: PlayerDependenciesChecker,
         contractChecker: PlayerDependenciesChecker,
+        scoringEventChecker: PlayerDependenciesChecker,
       ): PlayerDependenciesChecker => ({
         async hasAssociatedRecords(playerId: number): Promise<boolean> {
-          const [hasSkills, hasContracts] = await Promise.all([
-            skillChecker.hasAssociatedRecords(playerId),
-            contractChecker.hasAssociatedRecords(playerId),
-          ]);
-          return hasSkills || hasContracts;
+          const [hasSkills, hasContracts, hasScoringEvents] = await Promise.all(
+            [
+              skillChecker.hasAssociatedRecords(playerId),
+              contractChecker.hasAssociatedRecords(playerId),
+              scoringEventChecker.hasAssociatedRecords(playerId),
+            ],
+          );
+          return hasSkills || hasContracts || hasScoringEvents;
         },
       }),
       inject: [
         PLAYER_SKILL_DEPENDENCY_CHECKER,
         PLAYER_CONTRACT_DEPENDENCY_CHECKER,
+        SCORING_EVENT_PLAYER_DEPENDENCY_CHECKER,
       ],
     },
   ],
