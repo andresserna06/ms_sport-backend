@@ -1,15 +1,20 @@
 import {
   Column,
   Entity,
+  Index,
+  OneToMany,
   PrimaryGeneratedColumn,
+  type Relation,
 } from 'typeorm';
+import { TeamSport } from '../../team-sports/entities/team-sport.entity';
 
 @Entity('teams')
+@Index('UQ_teams_name', ['name'], { unique: true })
 export class Team {
   @PrimaryGeneratedColumn()
   id!: number;
 
-  @Column({ length: 120, unique: true })
+  @Column({ length: 120 })
   name!: string;
 
   @Column({ length: 100 })
@@ -23,4 +28,7 @@ export class Team {
 
   @Column({ default: true })
   active!: boolean;
+
+  @OneToMany(() => TeamSport, (teamSport) => teamSport.team)
+  teamSports!: Relation<TeamSport>[];
 }

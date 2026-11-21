@@ -7,6 +7,14 @@ import { GroupModule } from './phases/group/group.module';
 import { PhasesModule } from './phases/base/phases.module';
 import { TournamentsModule } from './tournaments/tournaments.module';
 import { TeamsModule } from './teams/teams.module';
+import { SportsModule } from './sports/sports.module';
+import { SkillsModule } from './skills/skills.module';
+import { PlayersModule } from './players/players.module';
+import { PlayerSkillsModule } from './player-skills/player-skills.module';
+import { PlayerContractsModule } from './player-contracts/player-contracts.module';
+import { PlayerProfileModule } from './player-profile/player-profile.module';
+import { NotificationsModule } from './notifications/notifications.module';
+import { ScoringEventsModule } from './scoring-events/scoring-events.module';
 
 @Module({
   imports: [
@@ -22,7 +30,8 @@ import { TeamsModule } from './teams/teams.module';
         password: configService.get<string>('DB_PASS'),
         database: configService.get<string>('DB_NAME'),
         entities: [__dirname + '/**/*.entity{.ts,.js}'],
-        synchronize: true, //Creacion automatica de las tablas, pasar a false cuando no se necesite
+        // Schema changes are applied only through migrations (src/migrations).
+        synchronize: false,
       }),
     }),
     MatchesModule,
@@ -31,6 +40,14 @@ import { TeamsModule } from './teams/teams.module';
     FinalModule,
     TournamentsModule,
     TeamsModule,
+    SportsModule,
+    SkillsModule,
+    PlayersModule,
+    PlayerSkillsModule,
+    PlayerContractsModule,
+    PlayerProfileModule,
+    NotificationsModule,
+    ScoringEventsModule,
   ],
 })
 export class AppModule {}
