@@ -17,13 +17,12 @@ export class TeamMapper {
     return entity;
   }
 
-  mergeEntity(entity: Team, dto: UpdateTeamDto): Team {
-    if (dto.name !== undefined) entity.name = dto.name;
-    if (dto.city !== undefined) entity.city = dto.city;
-    if (dto.contactEmail !== undefined) {
-      entity.contactEmail = dto.contactEmail.toLowerCase();
-    }
-    if (dto.foundedYear !== undefined) entity.foundedYear = dto.foundedYear;
+  // PUT replaces every field; an omitted foundedYear clears it.
+  replaceEntity(entity: Team, dto: UpdateTeamDto): Team {
+    entity.name = dto.name;
+    entity.city = dto.city;
+    entity.contactEmail = dto.contactEmail.toLowerCase();
+    entity.foundedYear = dto.foundedYear ?? null;
     return entity;
   }
 

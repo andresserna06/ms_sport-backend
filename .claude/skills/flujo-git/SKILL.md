@@ -1,6 +1,6 @@
 ---
 name: flujo-git
-description: Flujo de trabajo en Git del grupo - ramas por historia, mensajes de commit y requisitos para pull requests. Úsala al crear ramas, hacer commits o preparar un pull request.
+description: Flujo de trabajo en Git del grupo - ramas por historia, mensajes de commit y revisión obligatoria antes de hacer commit y push. Úsala al crear ramas, hacer commits o hacer push.
 ---
 
 # Flujo de Git
@@ -9,10 +9,10 @@ Mismas convenciones que el grupo ya usa en ms_security y el frontend.
 
 ## Ramas
 
-- `main`: estable, solo recibe merges revisados.
+- `main`: rama estable del proyecto.
 - Una rama por historia o módulo desde `main`: `feature/<modulo>`
-  (ej. `feature/deportes`, `feature/inscripciones`). Si una historia toca varios
-  módulos, la rama lleva el nombre de la historia: `feature/gc-07-resultados`.
+  (ej. `feature/sports`, `feature/registrations`). Si una historia toca varios
+  módulos, la rama lleva el nombre de la historia: `feature/gc-07-match-results`.
 - Cambios a la configuración de IA (AGENTS.md, skills, agentes): `chore/ia-<descripcion>`.
 
 ## Commits
@@ -21,10 +21,20 @@ Conventional Commits con la descripción en inglés: `<tipo>(<scope>): <descripc
 
 Tipos: `feat`, `fix`, `test`, `refactor`, `docs`, `chore`. El scope es el módulo.
 
-Ejemplos: `feat(contratos): validate overlapping contracts`,
-`test(inscripciones): add closed registration cases`.
+Ejemplos: `feat(contracts): validate overlapping contracts`,
+`test(registrations): add closed registration cases`.
+
+**Mensaje corto:** solo la línea de título, en inglés, en modo imperativo,
+sin punto final y de unos 72 caracteres como máximo. No agregues cuerpo,
+viñetas ni explicaciones debajo: el detalle va en la historia o en el PR.
+Esto aplica también a los commits de merge (`merge: <origen> into <destino>`).
 
 Commits pequeños; no mezclar dos historias en un commit.
+
+**Autoría:** los commits son del integrante que los hace.
+Ningún agente se agrega como coautor ni deja firma: nada de líneas
+`Co-Authored-By:`, "Generated with…", "🤖" ni enlaces a la herramienta de IA,
+en ninguna parte del mensaje del commit.
 
 ## Archivos compartidos
 
@@ -32,14 +42,18 @@ Commits pequeños; no mezclar dos historias en un commit.
 skills: antes de modificarlos, avisar al grupo; cambios en commits separados
 para que los conflictos sean fáciles de resolver.
 
-## Antes de abrir un pull request
+## Antes de hacer commit y push
 
-1. Especificación de la historia en `docs/specs/`.
-2. Reporte del agente `architect` sin incumplimientos pendientes (o justificados).
-3. Colección Postman de la historia ejecutada con Newman, todo en verde.
-4. Pruebas Jest pasando.
-5. La descripción del PR enlaza la especificación e incluye el resumen de Newman.
-6. Lo revisa otro integrante del grupo, no quien lo escribió.
+El agente **nunca** hace commit ni push por su cuenta. Primero:
+
+1. Muestra la lista de archivos que se van a incluir y un resumen de los cambios.
+2. Verifica que el código compile (`npm run build`) y que las pruebas Jest pasen (`npm run test`).
+3. Si la historia ya tiene colección Postman, indica si se ejecutó con Newman y su resultado.
+4. Confirma que no se incluyen `.env`, credenciales, `node_modules` ni `dist`.
+5. Propone el mensaje del commit siguiendo el formato de arriba.
+6. **Espera la aprobación del integrante** antes de hacer el commit, y otra vez antes del push.
+
+Si algo de los puntos 2 a 4 falla, lo reporta y no continúa.
 
 ## Prohibido
 

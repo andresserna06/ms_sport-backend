@@ -31,7 +31,7 @@ describe('TeamMapper', () => {
     expect(entity.foundedYear).toBeNull();
   });
 
-  it('only changes the fields that are present when merging', () => {
+  it('replaces every editable field and keeps id and active', () => {
     const existing = Object.assign(new Team(), {
       id: 3,
       name: 'Old',
@@ -41,24 +41,20 @@ describe('TeamMapper', () => {
       active: false,
     });
 
-    const merged = mapper.mergeEntity(existing, { city: 'Bogotá' });
-
-    expect(merged).toMatchObject({
-      id: 3,
-      name: 'Old',
+    const replaced = mapper.replaceEntity(existing, {
+      name: 'New',
       city: 'Bogotá',
-      contactEmail: 'old@mail.com',
-      foundedYear: 1990,
+      contactEmail: 'NEW@Mail.com',
+    });
+
+    expect(replaced).toMatchObject({
+      id: 3,
+      name: 'New',
+      city: 'Bogotá',
+      contactEmail: 'new@mail.com',
+      foundedYear: null,
       active: false,
     });
-  });
-
-  it('lowercases the email when merging', () => {
-    const existing = Object.assign(new Team(), { contactEmail: 'old@mail.com' });
-
-    expect(
-      mapper.mergeEntity(existing, { contactEmail: 'NEW@Mail.com' }).contactEmail,
-    ).toBe('new@mail.com');
   });
 
   it('maps to a response DTO and to a list', () => {
