@@ -47,6 +47,15 @@ export class CreatePlayersTable1763676000000 implements MigrationInterface {
       }),
       true,
     );
+
+    // Match the index names TypeORM expects from the entity (avoids schema drift).
+    await queryRunner.query(
+      'ALTER TABLE `players` RENAME INDEX `UQ_ba3575d2fbe71fab7155366235e` TO `IDX_ba3575d2fbe71fab7155366235`',
+    );
+    // Match the index names TypeORM expects from the entity (avoids schema drift).
+    await queryRunner.query(
+      'ALTER TABLE `players` RENAME INDEX `UQ_e9e29de4fbc27a0f2df42ede46c` TO `IDX_e9e29de4fbc27a0f2df42ede46`',
+    );
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {

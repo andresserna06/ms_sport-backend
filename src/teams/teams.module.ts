@@ -15,6 +15,7 @@ import { TeamsService } from './services/teams.service';
     TeamMapper,
     { provide: TEAM_REPOSITORY, useClass: TeamTypeOrmRepository },
   ],
-  // Nothing exports yet: HU-GD-03 exports TeamsService when it needs it.
+  // Matches, player contracts and scoring events use TeamsService / TeamMapper.
+  exports: [TeamsService, TeamMapper],
 })
 export class TeamsModule {}

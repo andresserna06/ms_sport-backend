@@ -30,6 +30,11 @@ export class CreateSkillsTable1763672400000 implements MigrationInterface {
       }),
       true,
     );
+
+    // Match the index names TypeORM expects from the entity (avoids schema drift).
+    await queryRunner.query(
+      'ALTER TABLE `skills` RENAME INDEX `UQ_81f05095507fd84aa2769b4a522` TO `IDX_81f05095507fd84aa2769b4a52`',
+    );
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {

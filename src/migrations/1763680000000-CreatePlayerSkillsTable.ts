@@ -2,10 +2,8 @@ import {
   MigrationInterface,
   QueryRunner,
   Table,
-  TableCheck,
   TableForeignKey,
   TableIndex,
-  TableUnique,
 } from 'typeorm';
 
 export class CreatePlayerSkillsTable1763680000000
@@ -49,9 +47,10 @@ export class CreatePlayerSkillsTable1763680000000
       true,
     );
 
-    await queryRunner.createUniqueConstraint(
+    await queryRunner.createIndex(
       'player_skills',
-      new TableUnique({
+      new TableIndex({
+        isUnique: true,
         name: 'UQ_player_skills_player_skill',
         columnNames: ['player_id', 'skill_id'],
       }),
@@ -68,24 +67,20 @@ export class CreatePlayerSkillsTable1763680000000
       }),
     ]);
 
-    await queryRunner.createCheckConstraint(
-      'player_skills',
-      new TableCheck({
-        name: 'CHK_player_skills_level_range',
-        expression: 'level IS NULL OR (level >= 1 AND level <= 5)',
-      }),
+    await queryRunner.query(
+      'ALTER TABLE `player_skills` ADD CONSTRAINT `CHK_player_skills_level_range` CHECK (level IS NULL OR (level >= 1 AND level <= 5))',
     );
 
     await queryRunner.createForeignKeys('player_skills', [
       new TableForeignKey({
-        name: 'FK_player_skills_player',
+        name: 'FK_1ec09bc2eca330ad10927d3ea37',
         columnNames: ['player_id'],
         referencedTableName: 'players',
         referencedColumnNames: ['id'],
         onDelete: 'RESTRICT',
       }),
       new TableForeignKey({
-        name: 'FK_player_skills_skill',
+        name: 'FK_2646438b8d39b999ce786003e6d',
         columnNames: ['skill_id'],
         referencedTableName: 'skills',
         referencedColumnNames: ['id'],

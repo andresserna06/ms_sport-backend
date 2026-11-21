@@ -2,7 +2,6 @@ import {
   MigrationInterface,
   QueryRunner,
   Table,
-  TableCheck,
   TableForeignKey,
   TableIndex,
 } from 'typeorm';
@@ -58,24 +57,20 @@ export class CreatePlayerContractsTable1763684000000
       }),
     ]);
 
-    await queryRunner.createCheckConstraint(
-      'player_contracts',
-      new TableCheck({
-        name: 'CHK_player_contracts_date_range',
-        expression: 'end_date IS NULL OR end_date >= start_date',
-      }),
+    await queryRunner.query(
+      'ALTER TABLE `player_contracts` ADD CONSTRAINT `CHK_player_contracts_date_range` CHECK (end_date IS NULL OR end_date >= start_date)',
     );
 
     await queryRunner.createForeignKeys('player_contracts', [
       new TableForeignKey({
-        name: 'FK_player_contracts_player',
+        name: 'FK_a6a92f80d5b8bee63bd0042c845',
         columnNames: ['player_id'],
         referencedTableName: 'players',
         referencedColumnNames: ['id'],
         onDelete: 'RESTRICT',
       }),
       new TableForeignKey({
-        name: 'FK_player_contracts_team',
+        name: 'FK_3a1be401ee7f250d6ba2dd02c48',
         columnNames: ['team_id'],
         referencedTableName: 'teams',
         referencedColumnNames: ['id'],
