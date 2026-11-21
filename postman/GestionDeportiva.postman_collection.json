@@ -2214,6 +2214,656 @@
           ]
         }
       ]
+    },
+    {
+      "name": "GD-05 Contratos",
+      "item": [
+        {
+          "name": "Demo CRUD (4 endpoints)",
+          "item": [
+            {
+              "name": "Asignar jugador a equipo (crear contrato)",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": "{{baseUrl}}/teams/1/contracts",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"playerId\": 1,\n  \"startDate\": \"2026-01-01\",\n  \"endDate\": \"2026-12-31\"\n}"
+                }
+              }
+            },
+            {
+              "name": "Consultar jugadores vigentes de un equipo",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": "{{baseUrl}}/teams/1/players?current=true"
+              }
+            },
+            {
+              "name": "Consultar historial de equipos de un jugador",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": "{{baseUrl}}/players/1/teams"
+              }
+            },
+            {
+              "name": "Finalizar contrato (retirar jugador)",
+              "request": {
+                "method": "PATCH",
+                "header": [],
+                "url": "{{baseUrl}}/contracts/1/end"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Pruebas automatizadas (GD-05)",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (!pm.collectionVariables.get('pcRunId') || !pm.collectionVariables.get('pcUserId1')) {",
+                  "  const now = Date.now();",
+                  "  const pcRunId = String(now).slice(-6);",
+                  "  const base = 300000 + (now % 600000);",
+                  "  pm.collectionVariables.set('pcRunId', pcRunId);",
+                  "  pm.collectionVariables.set('pcUserId1', String(base));",
+                  "  pm.collectionVariables.set('pcUserId2', String(base + 1));",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "item": [
+            {
+              "name": "TC-GD05-01 Setup - Crear equipo 1",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": "{{baseUrl}}/teams",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Leones-{{pcRunId}}-1\",\n  \"city\": \"Manizales\",\n  \"contactEmail\": \"leones{{pcRunId}}@club.com\",\n  \"foundedYear\": 2010\n}"
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 201 Created', () => pm.response.to.have.status(201));",
+                      "pm.collectionVariables.set('pcTeamId1', pm.response.json().id);"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "TC-GD05-02 Setup - Crear equipo 2",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": "{{baseUrl}}/teams",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Tigres-{{pcRunId}}-2\",\n  \"city\": \"Pereira\",\n  \"contactEmail\": \"tigres{{pcRunId}}@club.com\",\n  \"foundedYear\": 2012\n}"
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 201 Created', () => pm.response.to.have.status(201));",
+                      "pm.collectionVariables.set('pcTeamId2', pm.response.json().id);"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "TC-GD05-03 Setup - Crear jugador 1",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": "{{baseUrl}}/players",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"userId\": {{pcUserId1}},\n  \"document\": \"PC-{{pcRunId}}-1\",\n  \"position\": \"Delantero\",\n  \"jerseyNumber\": 9\n}"
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 201 Created', () => pm.response.to.have.status(201));",
+                      "pm.collectionVariables.set('pcPlayerId1', pm.response.json().id);"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "TC-GD05-04 Setup - Crear jugador 2",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": "{{baseUrl}}/players",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"userId\": {{pcUserId2}},\n  \"document\": \"PC-{{pcRunId}}-2\",\n  \"position\": \"Defensa\",\n  \"jerseyNumber\": 4\n}"
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 201 Created', () => pm.response.to.have.status(201));",
+                      "pm.collectionVariables.set('pcPlayerId2', pm.response.json().id);"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "TC-GD05-05 Crear contrato abierto vigente para jugador 1 en equipo 1 (201)",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": "{{baseUrl}}/teams/{{pcTeamId1}}/contracts",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"playerId\": {{pcPlayerId1}},\n  \"startDate\": \"2025-01-01\"\n}"
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 201 Created', () => pm.response.to.have.status(201));",
+                      "const b = pm.response.json();",
+                      "pm.test('Contrato abierto vigente', () => {",
+                      "  pm.expect(b.id).to.be.a('number');",
+                      "  pm.expect(b.endDate).to.eql(null);",
+                      "  pm.expect(b.current).to.eql(true);",
+                      "});",
+                      "pm.collectionVariables.set('pcContractId1', b.id);"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "TC-GD05-06 Contratar jugador 2 en el mismo equipo 1 (201)",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": "{{baseUrl}}/teams/{{pcTeamId1}}/contracts",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"playerId\": {{pcPlayerId2}},\n  \"startDate\": \"2025-06-01\"\n}"
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 201 Created', () => pm.response.to.have.status(201));",
+                      "pm.test('Múltiples jugadores en equipo', () => pm.expect(pm.response.json().current).to.eql(true));",
+                      "pm.collectionVariables.set('pcContractId2', pm.response.json().id);"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "TC-GD05-07 Crear contrato con endDate < startDate (400 INVALID_OPERATION)",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": "{{baseUrl}}/teams/{{pcTeamId2}}/contracts",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"playerId\": {{pcPlayerId1}},\n  \"startDate\": \"2026-06-01\",\n  \"endDate\": \"2026-05-01\"\n}"
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 400 Bad Request', () => pm.response.to.have.status(400));",
+                      "pm.test('errorCase INVALID_OPERATION', () => pm.expect(pm.response.json().errorCase).to.eql('INVALID_OPERATION'));"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "TC-GD05-08 Crear contrato solapado mismo jugador y equipo (409 ALREADY_EXISTS)",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": "{{baseUrl}}/teams/{{pcTeamId1}}/contracts",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"playerId\": {{pcPlayerId1}},\n  \"startDate\": \"2026-01-01\",\n  \"endDate\": \"2026-12-31\"\n}"
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 409 Conflict', () => pm.response.to.have.status(409));",
+                      "pm.test('errorCase ALREADY_EXISTS', () => pm.expect(pm.response.json().errorCase).to.eql('ALREADY_EXISTS'));"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "TC-GD05-09 Crear contrato en equipo inexistente (404 NOT_FOUND)",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": "{{baseUrl}}/teams/999999/contracts",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"playerId\": {{pcPlayerId1}},\n  \"startDate\": \"2026-01-01\"\n}"
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 404 Not Found', () => pm.response.to.have.status(404));",
+                      "pm.test('errorCase NOT_FOUND', () => pm.expect(pm.response.json().errorCase).to.eql('NOT_FOUND'));"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "TC-GD05-10 Crear contrato con jugador inexistente (404 NOT_FOUND)",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": "{{baseUrl}}/teams/{{pcTeamId1}}/contracts",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"playerId\": 999999,\n  \"startDate\": \"2026-01-01\"\n}"
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 404 Not Found', () => pm.response.to.have.status(404));",
+                      "pm.test('errorCase NOT_FOUND', () => pm.expect(pm.response.json().errorCase).to.eql('NOT_FOUND'));"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "TC-GD05-11 Consultar jugadores vigentes del equipo 1 (200)",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": "{{baseUrl}}/teams/{{pcTeamId1}}/players?current=true"
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 200 OK', () => pm.response.to.have.status(200));",
+                      "const b = pm.response.json();",
+                      "pm.test('Contiene jugador 1 y jugador 2 vigentes', () => {",
+                      "  const ids = b.map((x) => x.playerId);",
+                      "  pm.expect(ids).to.include(Number(pm.collectionVariables.get('pcPlayerId1')));",
+                      "  pm.expect(ids).to.include(Number(pm.collectionVariables.get('pcPlayerId2')));",
+                      "  pm.expect(b.every((x) => x.current === true)).to.eql(true);",
+                      "});"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "TC-GD05-12 Consultar equipos del jugador 1 (200)",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": "{{baseUrl}}/players/{{pcPlayerId1}}/teams"
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 200 OK', () => pm.response.to.have.status(200));",
+                      "const b = pm.response.json();",
+                      "pm.test('Incluye equipo 1 con resumen', () => {",
+                      "  pm.expect(b.map((x) => x.teamId)).to.include(Number(pm.collectionVariables.get('pcTeamId1')));",
+                      "  pm.expect(b[0].team.name).to.be.a('string');",
+                      "});"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "TC-GD05-13a Bloqueo real - Eliminar jugador con contrato (409 INVALID_STATE)",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": "{{baseUrl}}/players/{{pcPlayerId1}}"
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 409 Conflict', () => pm.response.to.have.status(409));",
+                      "pm.test('errorCase INVALID_STATE', () => pm.expect(pm.response.json().errorCase).to.eql('INVALID_STATE'));"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "TC-GD05-13b Bloqueo real - Eliminar equipo con contrato (409)",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": "{{baseUrl}}/teams/{{pcTeamId1}}"
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 409 Conflict', () => pm.response.to.have.status(409));"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "TC-GD05-14 Finalizar contrato 1 - retirar jugador 1 de equipo 1 (200)",
+              "request": {
+                "method": "PATCH",
+                "header": [],
+                "url": "{{baseUrl}}/contracts/{{pcContractId1}}/end"
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 200 OK', () => pm.response.to.have.status(200));",
+                      "const b = pm.response.json();",
+                      "pm.test('Contrato finalizado sin borrar registro', () => {",
+                      "  pm.expect(b.current).to.eql(false);",
+                      "  pm.expect(b.endDate).to.be.a('string').and.not.be.empty;",
+                      "});"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "TC-GD05-15 Intentar finalizar contrato ya finalizado (409 INVALID_STATE)",
+              "request": {
+                "method": "PATCH",
+                "header": [],
+                "url": "{{baseUrl}}/contracts/{{pcContractId1}}/end"
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 409 Conflict', () => pm.response.to.have.status(409));",
+                      "pm.test('errorCase INVALID_STATE', () => pm.expect(pm.response.json().errorCase).to.eql('INVALID_STATE'));"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "TC-GD05-16 Confirmar que jugador 1 sigue existiendo tras retiro (200)",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": "{{baseUrl}}/players/{{pcPlayerId1}}"
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 200 OK', () => pm.response.to.have.status(200));"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "TC-GD05-17 Fichar jugador 1 en equipo 2 tras retiro (historial de traspasos) (201)",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": "{{baseUrl}}/teams/{{pcTeamId2}}/contracts",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"playerId\": {{pcPlayerId1}},\n  \"startDate\": \"2026-01-01\"\n}"
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 201 Created', () => pm.response.to.have.status(201));",
+                      "pm.test('Nuevo contrato vigente', () => pm.expect(pm.response.json().current).to.eql(true));"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "TC-GD05-18 Consultar historial completo de traspasos de jugador 1 (200)",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": "{{baseUrl}}/players/{{pcPlayerId1}}/teams"
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 200 OK', () => pm.response.to.have.status(200));",
+                      "const b = pm.response.json();",
+                      "pm.test('Tiene contrato histórico (false) y vigente (true)', () => {",
+                      "  pm.expect(b).to.have.lengthOf(2);",
+                      "  pm.expect(b[0].current).to.eql(false);",
+                      "  pm.expect(b[1].current).to.eql(true);",
+                      "});"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "TC-GD05-19 Volver al mismo equipo 1 en periodo futuro sin solape (201)",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": "{{baseUrl}}/teams/{{pcTeamId1}}/contracts",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"playerId\": {{pcPlayerId1}},\n  \"startDate\": \"2028-01-01\",\n  \"endDate\": \"2028-12-31\"\n}"
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 201 Created', () => pm.response.to.have.status(201));",
+                      "const b = pm.response.json();",
+                      "pm.test('Contrato futuro no vigente todavía', () => pm.expect(b.current).to.eql(false));",
+                      "pm.collectionVariables.set('pcContractIdFuture', b.id);"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "TC-GD05-20 Intentar finalizar contrato futuro (409 INVALID_STATE)",
+              "request": {
+                "method": "PATCH",
+                "header": [],
+                "url": "{{baseUrl}}/contracts/{{pcContractIdFuture}}/end"
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 409 Conflict', () => pm.response.to.have.status(409));",
+                      "pm.test('errorCase INVALID_STATE', () => pm.expect(pm.response.json().errorCase).to.eql('INVALID_STATE'));"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "TC-GD05-21 Query param current inválido (400) y limpiar variables",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": "{{baseUrl}}/teams/{{pcTeamId1}}/players?current=invalido"
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 400 Bad Request', () => pm.response.to.have.status(400));",
+                      "pm.collectionVariables.unset('pcRunId');",
+                      "pm.collectionVariables.unset('pcUserId1');",
+                      "pm.collectionVariables.unset('pcUserId2');"
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
     }
   ]
 }
