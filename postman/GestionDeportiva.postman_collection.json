@@ -3264,6 +3264,807 @@
           ]
         }
       ]
+    },
+    {
+      "name": "GC-07 Resultados y anotaciones",
+      "item": [
+        {
+          "name": "Demo CRUD (6 endpoints)",
+          "item": [
+            {
+              "name": "Registrar o actualizar resultado del partido",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": "{{baseUrl}}/matches/1/result",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"homeScore\": 2,\n  \"awayScore\": 1\n}"
+                }
+              }
+            },
+            {
+              "name": "Registrar anotación en el partido",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": "{{baseUrl}}/matches/1/scoring-events",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"playerId\": 1,\n  \"teamId\": 1,\n  \"minute\": 25,\n  \"type\": \"GOL\"\n}"
+                }
+              }
+            },
+            {
+              "name": "Consultar anotaciones del partido",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": "{{baseUrl}}/matches/1/scoring-events"
+              }
+            },
+            {
+              "name": "Modificar anotación",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": "{{baseUrl}}/scoring-events/1",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"playerId\": 1,\n  \"teamId\": 1,\n  \"minute\": 27,\n  \"type\": \"TIRO LIBRE\"\n}"
+                }
+              }
+            },
+            {
+              "name": "Eliminar anotación",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": "{{baseUrl}}/scoring-events/1"
+              }
+            },
+            {
+              "name": "Finalizar partido y enviar resumen",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": "{{baseUrl}}/matches/1/finish",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"homeScore\": 2,\n  \"awayScore\": 1\n}"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Pruebas automatizadas (GC-07)",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (!pm.collectionVariables.get('gcRunId') || !pm.collectionVariables.get('gcUserId1')) {",
+                  "  const now = Date.now();",
+                  "  const gcRunId = String(now).slice(-6);",
+                  "  const base = 500000 + (now % 400000);",
+                  "  pm.collectionVariables.set('gcRunId', gcRunId);",
+                  "  pm.collectionVariables.set('gcUserId1', String(base));",
+                  "  pm.collectionVariables.set('gcUserId2', String(base + 1));",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "item": [
+            {
+              "name": "TC-GC07-01 Setup - Crear fase de grupos",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": "{{baseUrl}}/groups",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Grupo-{{gcRunId}}\",\n  \"order\": 1\n}"
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 201 Created', () => pm.response.to.have.status(201));",
+                      "pm.collectionVariables.set('gcPhaseId', pm.response.json().id);"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "TC-GC07-02a Setup - Crear equipo local",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": "{{baseUrl}}/teams",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Local-{{gcRunId}}\",\n  \"city\": \"Manizales\",\n  \"contactEmail\": \"local{{gcRunId}}@club.com\",\n  \"foundedYear\": 2010\n}"
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 201 Created', () => pm.response.to.have.status(201));",
+                      "pm.collectionVariables.set('gcTeamId1', pm.response.json().id);"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "TC-GC07-02b Setup - Crear equipo visitante",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": "{{baseUrl}}/teams",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Visitante-{{gcRunId}}\",\n  \"city\": \"Pereira\",\n  \"contactEmail\": \"visitante{{gcRunId}}@club.com\",\n  \"foundedYear\": 2011\n}"
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 201 Created', () => pm.response.to.have.status(201));",
+                      "pm.collectionVariables.set('gcTeamId2', pm.response.json().id);"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "TC-GC07-02c Setup - Crear equipo externo (no juega este partido)",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": "{{baseUrl}}/teams",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Externo-{{gcRunId}}\",\n  \"city\": \"Armenia\",\n  \"contactEmail\": \"externo{{gcRunId}}@club.com\",\n  \"foundedYear\": 2012\n}"
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 201 Created', () => pm.response.to.have.status(201));",
+                      "pm.collectionVariables.set('gcTeamId3', pm.response.json().id);"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "TC-GC07-03a Setup - Crear jugador 1 (del equipo local)",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": "{{baseUrl}}/players",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"userId\": {{gcUserId1}},\n  \"document\": \"GC-{{gcRunId}}-1\",\n  \"position\": \"Delantero\",\n  \"jerseyNumber\": 9\n}"
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 201 Created', () => pm.response.to.have.status(201));",
+                      "pm.collectionVariables.set('gcPlayerId1', pm.response.json().id);"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "TC-GC07-03b Setup - Crear jugador 2 (del equipo visitante)",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": "{{baseUrl}}/players",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"userId\": {{gcUserId2}},\n  \"document\": \"GC-{{gcRunId}}-2\",\n  \"position\": \"Volante\",\n  \"jerseyNumber\": 10\n}"
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 201 Created', () => pm.response.to.have.status(201));",
+                      "pm.collectionVariables.set('gcPlayerId2', pm.response.json().id);"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "TC-GC07-04a Setup - Contrato jugador 1 en equipo local",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": "{{baseUrl}}/teams/{{gcTeamId1}}/contracts",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"playerId\": {{gcPlayerId1}},\n  \"startDate\": \"2025-01-01\"\n}"
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 201 Created', () => pm.response.to.have.status(201));"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "TC-GC07-04b Setup - Contrato jugador 2 en equipo visitante",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": "{{baseUrl}}/teams/{{gcTeamId2}}/contracts",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"playerId\": {{gcPlayerId2}},\n  \"startDate\": \"2025-01-01\"\n}"
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 201 Created', () => pm.response.to.have.status(201));"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "TC-GC07-06 Setup - Crear partido con equipo local y visitante",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": "{{baseUrl}}/matches",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"scheduledAt\": \"2026-06-15T15:00:00.000Z\",\n  \"phaseId\": {{gcPhaseId}},\n  \"homeTeamId\": {{gcTeamId1}},\n  \"awayTeamId\": {{gcTeamId2}}\n}"
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 201 Created', () => pm.response.to.have.status(201));",
+                      "pm.collectionVariables.set('gcMatchId', pm.response.json().id);"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "TC-GC07-07 Registrar resultado del partido (200)",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": "{{baseUrl}}/matches/{{gcMatchId}}/result",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"homeScore\": 1,\n  \"awayScore\": 0\n}"
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 200 OK', () => pm.response.to.have.status(200));",
+                      "const b = pm.response.json();",
+                      "pm.test('Marcador actualizado', () => { pm.expect(b.homeScore).to.eql(1); pm.expect(b.awayScore).to.eql(0); });"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "TC-GC07-08 Registrar resultado con marcador negativo (400)",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": "{{baseUrl}}/matches/{{gcMatchId}}/result",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"homeScore\": -1,\n  \"awayScore\": 0\n}"
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 400 Bad Request', () => pm.response.to.have.status(400));"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "TC-GC07-09 Registrar resultado en partido inexistente (404)",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": "{{baseUrl}}/matches/999999/result",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"homeScore\": 1,\n  \"awayScore\": 1\n}"
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 404 Not Found', () => pm.response.to.have.status(404));",
+                      "pm.test('errorCase NOT_FOUND', () => pm.expect(pm.response.json().errorCase).to.eql('NOT_FOUND'));"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "TC-GC07-10 Registrar anotación 1 - jugador local (201)",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": "{{baseUrl}}/matches/{{gcMatchId}}/scoring-events",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"playerId\": {{gcPlayerId1}},\n  \"teamId\": {{gcTeamId1}},\n  \"minute\": 15,\n  \"type\": \"GOL\"\n}"
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 201 Created', () => pm.response.to.have.status(201));",
+                      "const b = pm.response.json();",
+                      "pm.test('Anotación registrada con jugador y equipo', () => { pm.expect(b.minute).to.eql(15); pm.expect(b.type).to.eql('GOL'); });",
+                      "pm.collectionVariables.set('gcEventId1', b.id);"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "TC-GC07-11 Registrar anotación 2 - jugador visitante (201)",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": "{{baseUrl}}/matches/{{gcMatchId}}/scoring-events",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"playerId\": {{gcPlayerId2}},\n  \"teamId\": {{gcTeamId2}},\n  \"minute\": 40,\n  \"type\": \"PENAL\"\n}"
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 201 Created', () => pm.response.to.have.status(201));",
+                      "pm.collectionVariables.set('gcEventId2', pm.response.json().id);"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "TC-GC07-12 Anotación por equipo que no juega el partido (409 INVALID_STATE)",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": "{{baseUrl}}/matches/{{gcMatchId}}/scoring-events",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"playerId\": {{gcPlayerId1}},\n  \"teamId\": {{gcTeamId3}},\n  \"minute\": 50,\n  \"type\": \"GOL\"\n}"
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 409 Conflict', () => pm.response.to.have.status(409));",
+                      "pm.test('errorCase INVALID_STATE', () => pm.expect(pm.response.json().errorCase).to.eql('INVALID_STATE'));"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "TC-GC07-13 Jugador 2 anotando por el equipo rival sin contrato (409 INVALID_STATE)",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": "{{baseUrl}}/matches/{{gcMatchId}}/scoring-events",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"playerId\": {{gcPlayerId2}},\n  \"teamId\": {{gcTeamId1}},\n  \"minute\": 55,\n  \"type\": \"GOL\"\n}"
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 409 Conflict', () => pm.response.to.have.status(409));",
+                      "pm.test('errorCase INVALID_STATE', () => pm.expect(pm.response.json().errorCase).to.eql('INVALID_STATE'));"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "TC-GC07-14 Consultar anotaciones del partido ordenadas por minuto (200)",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": "{{baseUrl}}/matches/{{gcMatchId}}/scoring-events"
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 200 OK', () => pm.response.to.have.status(200));",
+                      "const b = pm.response.json();",
+                      "pm.test('Devuelve 2 anotaciones ordenadas por minuto', () => {",
+                      "  pm.expect(b).to.have.lengthOf(2);",
+                      "  pm.expect(b[0].minute).to.eql(15);",
+                      "  pm.expect(b[1].minute).to.eql(40);",
+                      "});"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "TC-GC07-15 Modificar anotación 1 (200)",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": "{{baseUrl}}/scoring-events/{{gcEventId1}}",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"playerId\": {{gcPlayerId1}},\n  \"teamId\": {{gcTeamId1}},\n  \"minute\": 18,\n  \"type\": \"TIRO LIBRE\"\n}"
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 200 OK', () => pm.response.to.have.status(200));",
+                      "const b = pm.response.json();",
+                      "pm.test('Minuto y tipo actualizados', () => { pm.expect(b.minute).to.eql(18); pm.expect(b.type).to.eql('TIRO LIBRE'); });"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "TC-GC07-16a Bloqueo real - Eliminar partido con anotaciones (409 INVALID_STATE)",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": "{{baseUrl}}/matches/{{gcMatchId}}"
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 409 Conflict', () => pm.response.to.have.status(409));",
+                      "pm.test('errorCase INVALID_STATE', () => pm.expect(pm.response.json().errorCase).to.eql('INVALID_STATE'));"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "TC-GC07-16b Bloqueo real - Eliminar jugador con anotaciones (409 INVALID_STATE)",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": "{{baseUrl}}/players/{{gcPlayerId1}}"
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 409 Conflict', () => pm.response.to.have.status(409));",
+                      "pm.test('errorCase INVALID_STATE', () => pm.expect(pm.response.json().errorCase).to.eql('INVALID_STATE'));"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "TC-GC07-17 Eliminar anotación 2 (204)",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": "{{baseUrl}}/scoring-events/{{gcEventId2}}"
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 204 No Content', () => pm.response.to.have.status(204));"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "TC-GC07-18 Verificar que jugador 2 sigue existiendo tras eliminar anotación (200)",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": "{{baseUrl}}/players/{{gcPlayerId2}}"
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 200 OK', () => pm.response.to.have.status(200));"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "TC-GC07-19 Finalizar partido con marcador y enviar resumen (200)",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": "{{baseUrl}}/matches/{{gcMatchId}}/finish",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"homeScore\": 2,\n  \"awayScore\": 1\n}"
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 200 OK', () => pm.response.to.have.status(200));",
+                      "const b = pm.response.json();",
+                      "pm.test('Partido finalizado con marcador 2-1', () => {",
+                      "  pm.expect(b.status).to.eql('FINISHED');",
+                      "  pm.expect(b.homeScore).to.eql(2);",
+                      "  pm.expect(b.awayScore).to.eql(1);",
+                      "});"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "TC-GC07-20 Intentar finalizar un partido ya finalizado (409 INVALID_STATE)",
+              "request": {
+                "method": "PATCH",
+                "header": [],
+                "url": "{{baseUrl}}/matches/{{gcMatchId}}/finish"
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 409 Conflict', () => pm.response.to.have.status(409));",
+                      "pm.test('errorCase INVALID_STATE', () => pm.expect(pm.response.json().errorCase).to.eql('INVALID_STATE'));"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "TC-GC07-21 Corregir resultado de partido finalizado (200) y limpiar variables",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": "{{baseUrl}}/matches/{{gcMatchId}}/result",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"homeScore\": 3,\n  \"awayScore\": 1\n}"
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 200 OK', () => pm.response.to.have.status(200));",
+                      "const b = pm.response.json();",
+                      "pm.test('Marcador corregido a 3-1', () => { pm.expect(b.homeScore).to.eql(3); pm.expect(b.awayScore).to.eql(1); });",
+                      "pm.collectionVariables.unset('gcRunId');",
+                      "pm.collectionVariables.unset('gcUserId1');",
+                      "pm.collectionVariables.unset('gcUserId2');"
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
     }
   ]
 }
