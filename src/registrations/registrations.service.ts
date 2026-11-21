@@ -1,10 +1,11 @@
-﻿import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ApplicationException } from '../exception/application.exception';
 import { ErrorCase } from '../exception/error-case.enum';
 import { Match } from '../matches/entities/match.entity';
 import { Group } from '../phases/group/entities/group.entity';
+import { TeamSport } from '../team-sports/entities/team-sport.entity';
 import { Team } from '../teams/entities/team.entity';
 import { Tournament, TournamentStatus } from '../tournaments/entities/tournament.entity';
 import { CreateRegistrationDto } from './dto/create-registration.dto';
@@ -29,6 +30,8 @@ export class RegistrationsService {
     private readonly groupsRepository: Repository<Group>,
     @InjectRepository(Match)
     private readonly matchesRepository: Repository<Match>,
+    @InjectRepository(TeamSport)
+    private readonly teamSportsRepository: Repository<TeamSport>,
     private readonly registrationMapper: RegistrationMapper,
   ) {}
 
@@ -42,7 +45,7 @@ export class RegistrationsService {
     this.assertTournamentActive(tournament);
     this.assertTeamActive(team);
     this.assertRegistrationOpen(tournament);
-    this.assertTeamSportAssociation(tournament);
+    await this.assertTeamSportAssociation(tournament, team.id);
     await this.assertNotDuplicated(tournament.id, team.id);
 
     const saved = await this.registrationsRepository.save(
@@ -78,7 +81,7 @@ export class RegistrationsService {
     if (!registration) {
       throw new ApplicationException(
         ErrorCase.INVALID_STATE,
-        `El equipo ${teamId} no está inscrito activamente en el torneo ${tournamentId}`,
+        `El equipo ${teamId} no estÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡ inscrito activamente en el torneo ${tournamentId}`,
       );
     }
   }
@@ -94,7 +97,7 @@ export class RegistrationsService {
     if (!registration) {
       throw new ApplicationException(
         ErrorCase.NOT_FOUND,
-        `No existe una inscripción del equipo ${teamId} en el torneo ${tournamentId}`,
+        `No existe una inscripciÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³n del equipo ${teamId} en el torneo ${tournamentId}`,
       );
     }
 
@@ -131,7 +134,7 @@ export class RegistrationsService {
     if (!tournament.active) {
       throw new ApplicationException(
         ErrorCase.INVALID_STATE,
-        `El torneo ${tournament.id} está inactivo y no permite inscripciones`,
+        `El torneo ${tournament.id} estÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡ inactivo y no permite inscripciones`,
       );
     }
   }
@@ -140,7 +143,7 @@ export class RegistrationsService {
     if (!team.active) {
       throw new ApplicationException(
         ErrorCase.INVALID_STATE,
-        `El equipo ${team.id} está inactivo y no puede inscribirse`,
+        `El equipo ${team.id} estÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡ inactivo y no puede inscribirse`,
       );
     }
   }
@@ -149,7 +152,7 @@ export class RegistrationsService {
     if (this.hasTournamentStarted(tournament) || this.isRegistrationDeadlinePassed(tournament)) {
       throw new ApplicationException(
         ErrorCase.INVALID_STATE,
-        `El torneo ${tournament.id} no permite inscripciones porque ya inició o el periodo de inscripciones está cerrado`,
+        `El torneo ${tournament.id} no permite inscripciones porque ya iniciÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³ o el periodo de inscripciones estÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡ cerrado`,
       );
     }
   }
@@ -158,7 +161,7 @@ export class RegistrationsService {
     if (this.hasTournamentStarted(tournament) || this.isRegistrationDeadlinePassed(tournament)) {
       throw new ApplicationException(
         ErrorCase.INVALID_STATE,
-        `El torneo ${tournament.id} no permite retiros porque ya inició o el periodo de inscripciones está cerrado`,
+        `El torneo ${tournament.id} no permite retiros porque ya iniciÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³ o el periodo de inscripciones estÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡ cerrado`,
       );
     }
   }
@@ -171,18 +174,26 @@ export class RegistrationsService {
     return this.today() > tournament.registrationDeadline;
   }
 
-  private assertTeamSportAssociation(tournament: Tournament): void {
+  private async assertTeamSportAssociation(
+    tournament: Tournament,
+    teamId: number,
+  ): Promise<void> {
     if (tournament.sportId == null) {
       throw new ApplicationException(
         ErrorCase.INVALID_STATE,
-        `No se puede validar la asociación equipo-deporte del torneo ${tournament.id} porque el torneo no tiene un deporte definido`,
+        `No se puede validar la asociacion equipo-deporte del torneo ${tournament.id} porque el torneo no tiene un deporte definido`,
       );
     }
 
-    throw new ApplicationException(
-      ErrorCase.INVALID_STATE,
-      'No se puede validar que el equipo esté asociado al deporte del torneo porque la dependencia HU-GD-03 (TeamSport) no está implementada',
-    );
+    const teamSport = await this.teamSportsRepository.findOne({
+      where: { teamId, sportId: tournament.sportId },
+    });
+    if (!teamSport) {
+      throw new ApplicationException(
+        ErrorCase.INVALID_STATE,
+        `El equipo ${teamId} no esta asociado al deporte del torneo ${tournament.id}`,
+      );
+    }
   }
 
   private async assertNotDuplicated(tournamentId: number, teamId: number): Promise<void> {
@@ -193,7 +204,7 @@ export class RegistrationsService {
     if (existing) {
       throw new ApplicationException(
         ErrorCase.ALREADY_EXISTS,
-        `El equipo ${teamId} ya está inscrito en el torneo ${tournamentId}`,
+        `El equipo ${teamId} ya estÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡ inscrito en el torneo ${tournamentId}`,
       );
     }
   }
@@ -214,7 +225,7 @@ export class RegistrationsService {
     if (group) {
       throw new ApplicationException(
         ErrorCase.INVALID_STATE,
-        `No se puede retirar la inscripción del equipo ${teamId} porque está asignado a un grupo del torneo ${tournamentId}`,
+        `No se puede retirar la inscripciÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³n del equipo ${teamId} porque estÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡ asignado a un grupo del torneo ${tournamentId}`,
       );
     }
   }
@@ -236,7 +247,7 @@ export class RegistrationsService {
     if (match) {
       throw new ApplicationException(
         ErrorCase.INVALID_STATE,
-        `No se puede retirar la inscripción del equipo ${teamId} porque tiene partidos en el torneo ${tournamentId}`,
+        `No se puede retirar la inscripciÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³n del equipo ${teamId} porque tiene partidos en el torneo ${tournamentId}`,
       );
     }
   }

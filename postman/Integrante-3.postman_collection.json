@@ -1,7 +1,7 @@
 {
   "info": {
     "name": "Integrante 3 - Gestión de competencias",
-    "description": "Colección Postman v2.1 para las historias GC-02 a GC-06 asignadas al integrante 3. Contiene una petición por cada método HTTP disponible en cada carpeta. Reemplaza los IDs de ejemplo por IDs existentes. Para otras rutas del mismo método, edita la URL y el body según corresponda.",
+    "description": "Coleccion Postman para HU-GC-02/03/04/05/06 (Integrante 3). Una peticion por metodo por carpeta; editar URL/body para variantes del mismo metodo. Precondiciones: baseUrl/token en environment, torneo/equipos/fase existentes. GC-02: el torneo debe tener sportId y debe existir asociacion TeamSport(teamId,sportId); si GD-03 no esta implementada en API, crearla por seed/SQL antes de probar. runId se genera automaticamente.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "auth": {
@@ -16,57 +16,70 @@
   },
   "variable": [
     {
+      "key": "token",
+      "value": "",
+      "type": "string",
+      "description": "JWT pegado manualmente (ms_security tiene 2FA)."
+    },
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000/api/v1",
+      "type": "string",
+      "description": "URL base de ms_sports."
+    },
+    {
       "key": "runId",
       "value": "",
-      "type": "string"
+      "type": "string",
+      "description": "Se genera automaticamente en prerequest."
     },
     {
       "key": "tournamentId",
       "value": "1",
       "type": "string",
-      "description": "Reemplazar por el ID de un torneo existente."
+      "description": "ID de torneo existente con sportId definido y ventana de inscripcion abierta para GC-02."
     },
     {
       "key": "teamId",
       "value": "1",
       "type": "string",
-      "description": "Reemplazar por el ID de un equipo existente."
+      "description": "ID de equipo existente asociado al deporte del torneo (TeamSport) para GC-02."
     },
     {
       "key": "homeTeamId",
       "value": "1",
       "type": "string",
-      "description": "Reemplazar por el ID de un equipo inscrito en el torneo."
+      "description": "ID equipo local inscrito en el torneo; para GC-06 en fase GROUP debe pertenecer al grupo de la fase."
     },
     {
       "key": "awayTeamId",
       "value": "2",
       "type": "string",
-      "description": "Reemplazar por el ID de otro equipo inscrito en el torneo."
+      "description": "ID equipo visitante inscrito en el torneo; distinto de homeTeamId."
     },
     {
       "key": "phaseId",
       "value": "1",
       "type": "string",
-      "description": "Reemplazar por el ID de una fase existente."
+      "description": "ID de fase existente del torneo (GROUP o FINAL segun caso)."
     },
     {
       "key": "groupId",
       "value": "1",
       "type": "string",
-      "description": "Se actualiza automáticamente al crear un grupo."
+      "description": "Se actualiza al crear grupo; tambien sirve para endpoints de teams de grupo."
     },
     {
       "key": "finalId",
       "value": "1",
       "type": "string",
-      "description": "Se actualiza automáticamente al crear una fase final."
+      "description": "Se actualiza al crear fase final."
     },
     {
       "key": "matchId",
       "value": "1",
       "type": "string",
-      "description": "Se actualiza automáticamente al crear un partido."
+      "description": "Se actualiza al crear partido."
     }
   ],
   "item": [
@@ -93,7 +106,7 @@
               }
             },
             "url": "{{baseUrl}}/tournaments/{{tournamentId}}/registrations",
-            "description": "El torneo y el equipo deben existir, estar activos y el equipo debe estar asociado con el deporte del torneo."
+            "description": "Crea inscripcion. Precondicion: TeamSport existente para teamId y sportId del torneo. Retorna 201 con RegistrationResponseDto."
           },
           "event": [
             {
@@ -122,7 +135,7 @@
             "method": "GET",
             "header": [],
             "url": "{{baseUrl}}/tournaments/{{tournamentId}}/registrations",
-            "description": "Para consultar torneos por equipo, cambia la URL a /teams/{{teamId}}/tournaments."
+            "description": "Lista equipos inscritos en torneo. Variante mismo metodo: GET {{baseUrl}}/teams/{{teamId}}/tournaments."
           },
           "event": [
             {
@@ -148,7 +161,7 @@
             "method": "DELETE",
             "header": [],
             "url": "{{baseUrl}}/tournaments/{{tournamentId}}/registrations/{{teamId}}",
-            "description": "Solo se permite retirar la inscripción mientras el estado y la fecha límite del torneo lo permitan."
+            "description": "Retira inscripcion. 204 si OK; 409 si torneo iniciado/cerrado o equipo asignado a grupo/con partidos."
           },
           "event": [
             {
@@ -165,7 +178,8 @@
           ],
           "response": []
         }
-      ]
+      ],
+      "description": "HU-GC-02. Endpoints cubiertos por metodo: POST/GET/DELETE en /tournaments/:tournamentId/registrations. Variante GET mismo metodo (editar URL): /teams/{{teamId}}/tournaments. Punto 2: create valida TeamSport(teamId,tournament.sportId); si falta asociacion o torneo sin sportId retorna 409 INVALID_STATE."
     },
     {
       "name": "GC-03 Fases",
@@ -176,7 +190,7 @@
             "method": "GET",
             "header": [],
             "url": "{{baseUrl}}/phases?tournamentId={{tournamentId}}",
-            "description": "Para consultar una fase por ID, cambia la URL a /phases/{{phaseId}}. Las fases se crean desde las carpetas Grupos o Fases finales."
+            "description": "Lista fases por tournamentId. Editar query para filtrar o usar /phases/{{phaseId}}."
           },
           "event": [
             {
@@ -196,7 +210,8 @@
           ],
           "response": []
         }
-      ]
+      ],
+      "description": "HU-GC-03. Base de fases es read/report; creacion/edicion se hace en GC-04 (/groups) y GC-05 (/finals). Variante GET: {{baseUrl}}/phases/{{phaseId}} o {{baseUrl}}/phases/reports/count-by-type."
     },
     {
       "name": "GC-04 Grupos",
@@ -221,7 +236,7 @@
               }
             },
             "url": "{{baseUrl}}/groups",
-            "description": "Se requiere un torneo existente. Para asignar un equipo, cambia la URL a /groups/{{groupId}}/teams/{{teamId}} y elimina el body."
+            "description": "Crea grupo/fase GROUP. Variante POST: asignar equipo a grupo con /groups/{{groupId}}/teams/{{teamId}} sin body."
           },
           "event": [
             {
@@ -259,7 +274,7 @@
             "method": "GET",
             "header": [],
             "url": "{{baseUrl}}/groups?tournamentId={{tournamentId}}",
-            "description": "Para consultar los equipos del grupo, cambia la URL a /groups/{{groupId}}/teams."
+            "description": "Lista grupos por torneo. Variante GET: /groups/{{groupId}} o /groups/{{groupId}}/teams."
           },
           "event": [
             {
@@ -298,7 +313,8 @@
                 }
               }
             },
-            "url": "{{baseUrl}}/groups/{{groupId}}"
+            "url": "{{baseUrl}}/groups/{{groupId}}",
+            "description": "Actualiza name/order del grupo."
           },
           "event": [
             {
@@ -326,7 +342,7 @@
             "method": "DELETE",
             "header": [],
             "url": "{{baseUrl}}/groups/{{groupId}}",
-            "description": "Para quitar un equipo del grupo, cambia la URL a /groups/{{groupId}}/teams/{{teamId}}."
+            "description": "Elimina grupo. 200 con mensaje si no tiene partidos; 409 INVALID_STATE si tiene partidos. Variante DELETE: /groups/{{groupId}}/teams/{{teamId}} devuelve 204."
           },
           "event": [
             {
@@ -346,7 +362,8 @@
           ],
           "response": []
         }
-      ]
+      ],
+      "description": "HU-GC-04. CRUD basico de grupos. Variantes mismo metodo: GET {{baseUrl}}/groups/{{groupId}} o {{baseUrl}}/groups/{{groupId}}/teams; POST {{baseUrl}}/groups/{{groupId}}/teams/{{teamId}} (asignar equipo); DELETE {{baseUrl}}/groups/{{groupId}}/teams/{{teamId}} (quitar equipo, 204)."
     },
     {
       "name": "GC-05 Fases finales",
@@ -371,7 +388,7 @@
               }
             },
             "url": "{{baseUrl}}/finals",
-            "description": "Se requiere un torneo existente. La fase final se crea como tipo FINAL."
+            "description": "Crea fase FINAL."
           },
           "event": [
             {
@@ -409,7 +426,7 @@
             "method": "GET",
             "header": [],
             "url": "{{baseUrl}}/finals?tournamentId={{tournamentId}}",
-            "description": "Para consultar una fase final por ID, cambia la URL a /finals/{{finalId}}."
+            "description": "Lista fases finales por torneo. Variante GET: /finals/{{finalId}}."
           },
           "event": [
             {
@@ -448,7 +465,8 @@
                 }
               }
             },
-            "url": "{{baseUrl}}/finals/{{finalId}}"
+            "url": "{{baseUrl}}/finals/{{finalId}}",
+            "description": "Actualiza name/order de fase final."
           },
           "event": [
             {
@@ -476,7 +494,7 @@
             "method": "DELETE",
             "header": [],
             "url": "{{baseUrl}}/finals/{{finalId}}",
-            "description": "Solo se elimina si no tiene partidos asociados."
+            "description": "Elimina fase final. 200 con mensaje si no tiene partidos; 409 si tiene partidos."
           },
           "event": [
             {
@@ -496,7 +514,8 @@
           ],
           "response": []
         }
-      ]
+      ],
+      "description": "HU-GC-05. CRUD basico de fases finales. Variante GET: {{baseUrl}}/finals/{{finalId}}."
     },
     {
       "name": "GC-06 Partidos",
@@ -521,7 +540,7 @@
               }
             },
             "url": "{{baseUrl}}/phases/{{phaseId}}/matches",
-            "description": "La fase y ambos equipos deben existir; los equipos deben estar inscritos en el torneo de la fase. Sustituye scheduledAt y los IDs por datos válidos. La creación emite el evento de correo, pero el partido debe guardarse aunque ms_notificaciones no esté disponible."
+            "description": "Crea partido en fase. En GROUP home/away son obligatorios y deben estar inscritos y pertenecer al grupo. En FINAL pueden ser null."
           },
           "event": [
             {
@@ -551,7 +570,7 @@
             "method": "GET",
             "header": [],
             "url": "{{baseUrl}}/matches",
-            "description": "Para consultar un partido por ID, cambia la URL a /matches/{{matchId}}. Para listar por fase, cambia a /phases/{{phaseId}}/matches."
+            "description": "Lista partidos. Variantes GET: /phases/{{phaseId}}/matches o /matches/{{matchId}}."
           },
           "event": [
             {
@@ -591,7 +610,7 @@
               }
             },
             "url": "{{baseUrl}}/matches/{{matchId}}",
-            "description": "Solo se puede actualizar un partido en estado SCHEDULED. Los campos del body son opcionales."
+            "description": "Actualiza partido SCHEDULED. No enviar status/homeScore/awayScore; usar GC-07 para resultado/finalizacion."
           },
           "event": [
             {
@@ -619,7 +638,7 @@
             "method": "DELETE",
             "header": [],
             "url": "{{baseUrl}}/matches/{{matchId}}",
-            "description": "Solo se elimina si está SCHEDULED y no tiene anotaciones registradas."
+            "description": "Elimina partido SCHEDULED sin dependencias. Respuesta 204."
           },
           "event": [
             {
@@ -636,7 +655,21 @@
           ],
           "response": []
         }
-      ]
+      ],
+      "description": "HU-GC-06. Contrato actual: POST/GET por fase, GET/PUT/DELETE por match. Update generico no acepta status/homeScore/awayScore (GC-07). Variantes GET mismo metodo: {{baseUrl}}/phases/{{phaseId}}/matches, {{baseUrl}}/matches/{{matchId}}."
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "if (!pm.collectionVariables.get('runId')) {",
+          "  pm.collectionVariables.set('runId', String(Date.now()));",
+          "}"
+        ]
+      }
     }
   ]
 }
