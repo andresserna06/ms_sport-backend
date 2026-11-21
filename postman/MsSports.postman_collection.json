@@ -39522,6 +39522,570 @@
       ]
     },
     {
+      "name": "GC-08 Desarrollo de un torneo",
+      "item": [
+        {
+          "name": "S-00 Setup: torneo con competencia (Copa Colombia)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 200', () => pm.response.to.have.status(200));",
+                  "const t = pm.response.json().find((x) => x.name === 'Copa Colombia de Fútbol 2027'); pm.test('seed tournament exists: run npm run seed', () => pm.expect(t, 'tournament Copa Colombia de Fútbol 2027 not found').to.exist); pm.collectionVariables.set('ovCopaId', t ? t.id : 'setup-failed');"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/tournaments?name=Copa Colombia",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tournaments"
+              ],
+              "query": [
+                {
+                  "key": "name",
+                  "value": "Copa Colombia"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "S-01 Setup: torneo sin fases (Liga Profesional)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 200', () => pm.response.to.have.status(200));",
+                  "const t = pm.response.json().find((x) => x.name === 'Liga Profesional de Fútbol 2027'); pm.test('seed tournament exists: run npm run seed', () => pm.expect(t, 'tournament Liga Profesional de Fútbol 2027 not found').to.exist); pm.collectionVariables.set('ovLigaId', t ? t.id : 'setup-failed');"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/tournaments?name=Liga Profesional",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tournaments"
+              ],
+              "query": [
+                {
+                  "key": "name",
+                  "value": "Liga Profesional"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "O-01 Informacion general y fases en orden",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 200', () => pm.response.to.have.status(200));",
+                  "const b = pm.response.json();",
+                  "pm.test('tournament info', () => { pm.expect(b.tournament.id).to.eql(Number(pm.collectionVariables.get('ovCopaId'))); pm.expect(b.tournament.name).to.eql('Copa Colombia de Fútbol 2027'); pm.expect(b.tournament.sport.name).to.eql('Fútbol'); pm.expect(b.tournament.startDate).to.eql('2027-03-06'); pm.expect(b.tournament).to.have.property('active'); });",
+                  "pm.test('phases in competition order', () => { pm.expect(b.phases.map((p) => p.name)).to.eql(['Fase de grupos', 'Final']); pm.expect(b.phases.map((p) => p.order)).to.eql([1, 2]); pm.expect(b.phases.map((p) => p.type)).to.eql(['GROUP_STAGE', 'KNOCKOUT']); });",
+                  "pm.test('no empty-tournament message', () => pm.expect(b).to.not.have.property('message'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/tournaments/{{ovCopaId}}/overview",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tournaments",
+                "{{ovCopaId}}",
+                "overview"
+              ]
+            }
+          }
+        },
+        {
+          "name": "O-02 Partidos de la fase de grupos con resultado o pendiente",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 200', () => pm.response.to.have.status(200));",
+                  "const m = pm.response.json().phases[0].matches;",
+                  "pm.test('three matches by schedule', () => { pm.expect(m).to.have.lengthOf(3); const d = m.map((x) => x.scheduledAt); pm.expect(d).to.eql([...d].sort()); });",
+                  "pm.test('hasResult: registered vs pending', () => pm.expect(m.map((x) => x.hasResult)).to.eql([true, true, false]));",
+                  "pm.test('first match score and teams', () => { pm.expect(m[0].status).to.eql('FINISHED'); pm.expect(m[0].homeTeam.name).to.eql('Atlético Nacional'); pm.expect(m[0].awayTeam.name).to.eql('Millonarios'); pm.expect([m[0].homeScore, m[0].awayScore]).to.eql([2, 1]); });",
+                  "pm.test('a 0-0 draw counts as a registered result', () => { pm.expect(m[1].hasResult).to.eql(true); pm.expect([m[1].homeScore, m[1].awayScore]).to.eql([0, 0]); });",
+                  "pm.test('pending match has no score', () => { pm.expect(m[2].status).to.eql('SCHEDULED'); pm.expect(m[2].homeScore).to.eql(null); pm.expect(m[2].awayScore).to.eql(null); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/tournaments/{{ovCopaId}}/overview",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tournaments",
+                "{{ovCopaId}}",
+                "overview"
+              ]
+            }
+          }
+        },
+        {
+          "name": "O-03 Anotaciones por partido",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 200', () => pm.response.to.have.status(200));",
+                  "const m = pm.response.json().phases[0].matches;",
+                  "pm.test('scoring events of the first match by minute', () => { const e = m[0].scoringEvents; pm.expect(e.map((x) => x.minute)).to.eql([12, 40, 78]); pm.expect(e.every((x) => x.type === 'GOAL')).to.eql(true); pm.expect(e[0].player).to.include.keys('id', 'document'); pm.expect(e[0].team.name).to.eql('Atlético Nacional'); pm.expect(e[1].team.name).to.eql('Millonarios'); });",
+                  "pm.test('matches without goals have an empty list', () => pm.expect(m[1].scoringEvents).to.eql([]));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/tournaments/{{ovCopaId}}/overview",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tournaments",
+                "{{ovCopaId}}",
+                "overview"
+              ]
+            }
+          }
+        },
+        {
+          "name": "O-04 Fase final con partido sin equipos definidos",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 200', () => pm.response.to.have.status(200));",
+                  "const f = pm.response.json().phases[1];",
+                  "pm.test('final has one pending match without teams', () => { pm.expect(f.matches).to.have.lengthOf(1); pm.expect(f.matches[0].homeTeam).to.eql(null); pm.expect(f.matches[0].awayTeam).to.eql(null); pm.expect(f.matches[0].hasResult).to.eql(false); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/tournaments/{{ovCopaId}}/overview",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tournaments",
+                "{{ovCopaId}}",
+                "overview"
+              ]
+            }
+          }
+        },
+        {
+          "name": "O-05 Solo la informacion del torneo seleccionado",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 200', () => pm.response.to.have.status(200));",
+                  "const b = pm.response.json();",
+                  "pm.test('another tournament does not show the Copa competition', () => { pm.expect(b.tournament.id).to.eql(Number(pm.collectionVariables.get('ovLigaId'))); pm.expect(b.phases).to.eql([]); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/tournaments/{{ovLigaId}}/overview",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tournaments",
+                "{{ovLigaId}}",
+                "overview"
+              ]
+            }
+          }
+        },
+        {
+          "name": "O-06 Torneo sin fases responde 200 con mensaje",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('message in Spanish', () => pm.expect(pm.response.json().message).to.eql('El torneo aún no tiene fases configuradas'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/tournaments/{{ovLigaId}}/overview",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tournaments",
+                "{{ovLigaId}}",
+                "overview"
+              ]
+            }
+          }
+        },
+        {
+          "name": "O-07 Torneo inexistente",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 404', () => pm.response.to.have.status(404));",
+                  "pm.test('errorCase is NOT_FOUND', () => pm.expect(pm.response.json().errorCase).to.eql('NOT_FOUND'));",
+                  "pm.test('Spanish message', () => pm.expect(pm.response.json().message).to.match(/No existe el torneo con id 999999/));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/tournaments/999999/overview",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tournaments",
+                "999999",
+                "overview"
+              ]
+            }
+          }
+        },
+        {
+          "name": "O-08 Id no numerico",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 400', () => pm.response.to.have.status(400));",
+                  "pm.test('errorCase is INVALID_OPERATION', () => pm.expect(pm.response.json().errorCase).to.eql('INVALID_OPERATION'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/tournaments/abc/overview",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tournaments",
+                "abc",
+                "overview"
+              ]
+            }
+          }
+        },
+        {
+          "name": "O-09 Id cero",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 404', () => pm.response.to.have.status(404));",
+                  "pm.test('errorCase is NOT_FOUND', () => pm.expect(pm.response.json().errorCase).to.eql('NOT_FOUND'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/tournaments/0/overview",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tournaments",
+                "0",
+                "overview"
+              ]
+            }
+          }
+        },
+        {
+          "name": "O-10 Setup: deporte QA",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.collectionVariables.set('ovRun', 'QA' + Date.now() + 'O');"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 201', () => pm.response.to.have.status(201));",
+                  "pm.collectionVariables.set('ovSportId', pm.response.json().id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"{{ovRun}} Sport\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/sports",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "sports"
+              ]
+            }
+          }
+        },
+        {
+          "name": "O-11 Setup: torneo QA",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 201', () => pm.response.to.have.status(201));",
+                  "pm.collectionVariables.set('ovQaId', pm.response.json().id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"name\": \"{{ovRun}} Torneo\", \"sportId\": {{ovSportId}}, \"startDate\": \"2027-06-10\", \"enrollmentDeadline\": \"2027-05-20\" }",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/tournaments",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tournaments"
+              ]
+            }
+          }
+        },
+        {
+          "name": "O-12 Setup: desactivar el torneo QA",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/tournaments/{{ovQaId}}/deactivate",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tournaments",
+                "{{ovQaId}}",
+                "deactivate"
+              ]
+            }
+          }
+        },
+        {
+          "name": "O-13 Un torneo inactivo tambien se consulta",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('inactive but visible', () => { const b = pm.response.json(); pm.expect(b.tournament.active).to.eql(false); pm.expect(b.phases).to.eql([]); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/tournaments/{{ovQaId}}/overview",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tournaments",
+                "{{ovQaId}}",
+                "overview"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Z-01 Cleanup: torneo QA",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 204', () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/tournaments/{{ovQaId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tournaments",
+                "{{ovQaId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Z-02 Cleanup: deporte QA",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 204', () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/sports/{{ovSportId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "sports",
+                "{{ovSportId}}"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
       "name": "99 Cleanup",
       "item": [
         {

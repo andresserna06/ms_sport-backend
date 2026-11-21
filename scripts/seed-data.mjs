@@ -24,7 +24,16 @@ const db = await mysql.createConnection({
   database: process.env.DB_NAME,
 });
 
-const created = { sports: 0, teams: 0, teamSports: 0, tournaments: 0 };
+const created = {
+  sports: 0,
+  teams: 0,
+  teamSports: 0,
+  tournaments: 0,
+  phases: 0,
+  matches: 0,
+  players: 0,
+  scoringEvents: 0,
+};
 
 // Returns the id of the row with that name, inserting it first when missing.
 async function ensure(table, counter, name, columns) {
@@ -108,7 +117,12 @@ await link(campestre, tennis);
 await link(campestre, swimming);
 
 // ---- Tournaments -----------------------------------------------------------
-await tournament('Copa Colombia de Fútbol 2027', '2027-03-06', '2027-02-20', football);
+const copaColombia = await tournament(
+  'Copa Colombia de Fútbol 2027',
+  '2027-03-06',
+  '2027-02-20',
+  football,
+);
 await tournament('Liga Profesional de Fútbol 2027', '2027-02-05', '2027-01-20', football);
 await tournament('Liga Nacional de Baloncesto 2027', '2027-04-10', '2027-03-25', basketball);
 await tournament('Copa de Baloncesto 2027', '2027-06-12', '2027-05-28', basketball);
@@ -116,6 +130,82 @@ await tournament('Torneo Relámpago de Baloncesto 2027', '2027-08-14', '2027-08-
 await tournament('Campeonato Nacional de Atletismo 2027', '2027-05-08', '2027-04-22', athletics);
 await tournament('Gran Premio de Atletismo 2027', '2027-07-17', '2027-07-01', athletics);
 await tournament('Copa Ciudad de Atletismo 2027', '2027-09-04', '2027-08-18', athletics);
+
+// ---- Competition of the Copa Colombia (phases, matches, goals) -------------
+// Sample data for the tournament overview (HU-GC-08). The other tournaments
+// are left without phases on purpose, to show the empty case.
+async function insertOnce(table, counter, where, params, columns) {
+  const [rows] = await db.query(
+    `SELECT id FROM \`${table}\` WHERE ${where}`,
+    params,
+  );
+  if (rows.length > 0) return rows[0].id;
+  const entries = Object.entries(columns);
+  const [result] = await db.query(
+    `INSERT INTO \`${table}\` (${entries.map(([k]) => `\`${k}\``).join(', ')}) VALUES (${entries.map(() => '?').join(', ')})`,
+    entries.map(([, v]) => v),
+  );
+  created[counter] += 1;
+  return result.insertId;
+}
+
+const phase = (name, order, type) =>
+  insertOnce('phases', 'phases', 'name = ? AND tournament_id = ?', [name, copaColombia], {
+    name,
+    phase_order: order,
+    phase_type: type,
+    tournament_id: copaColombia,
+  });
+
+const match = (phaseId, scheduledAt, status, home, away, homeScore, awayScore) =>
+  insertOnce(
+    'matches',
+    'matches',
+    'phase_id = ? AND scheduled_at = ?',
+    [phaseId, scheduledAt],
+    {
+      scheduled_at: scheduledAt,
+      status,
+      home_score: homeScore,
+      away_score: awayScore,
+      home_team_id: home,
+      away_team_id: away,
+      phase_id: phaseId,
+    },
+  );
+
+const player = (userId, document, position, jerseyNumber) =>
+  insertOnce('players', 'players', 'document = ?', [document], {
+    user_id: userId,
+    document,
+    position,
+    jersey_number: jerseyNumber,
+    active: 1,
+  });
+
+const goal = (matchId, playerId, teamId, minute) =>
+  insertOnce(
+    'scoring_events',
+    'scoringEvents',
+    'match_id = ? AND player_id = ? AND minute = ?',
+    [matchId, playerId, minute],
+    { match_id: matchId, player_id: playerId, team_id: teamId, minute, type: 'GOAL' },
+  );
+
+const groupPhase = await phase('Fase de grupos', 1, 'GROUP');
+const finalPhase = await phase('Final', 2, 'FINAL');
+
+const played1 = await match(groupPhase, '2027-03-06 15:00:00', 'FINISHED', nacional, millonarios, 2, 1);
+await match(groupPhase, '2027-03-06 17:30:00', 'FINISHED', america, deportivoCali, 0, 0);
+await match(groupPhase, '2027-03-13 15:00:00', 'SCHEDULED', junior, santaFe, null, null);
+await match(finalPhase, '2027-04-03 16:00:00', 'SCHEDULED', null, null, null, null);
+
+const strikerNacional = await player(900001, 'SEED-1001', 'Delantero', 9);
+const midfielderNacional = await player(900002, 'SEED-1002', 'Mediocampista', 10);
+const strikerMillonarios = await player(900003, 'SEED-2001', 'Delantero', 11);
+await goal(played1, strikerNacional, nacional, 12);
+await goal(played1, strikerMillonarios, millonarios, 40);
+await goal(played1, midfielderNacional, nacional, 78);
 
 console.log('Seed finished. New rows:', JSON.stringify(created));
 await db.end();
