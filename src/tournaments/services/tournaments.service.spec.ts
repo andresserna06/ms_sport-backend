@@ -3,7 +3,9 @@ import { ErrorCase } from '../../exception/error-case.enum';
 import { Sport } from '../../sports/entities/sport.entity';
 import type { SportsService } from '../../sports/services/sports.service';
 import { Tournament } from '../entities/tournament.entity';
+import { TournamentOverviewMapper } from '../mappers/tournament-overview.mapper';
 import { TournamentMapper } from '../mappers/tournament.mapper';
+import type { TournamentOverviewReader } from '../repositories/tournament-overview.reader';
 import {
   DuplicateTournamentNameError,
   TournamentInUseError,
@@ -42,6 +44,7 @@ const notFound = () =>
 describe('TournamentsService', () => {
   let repository: jest.Mocked<TournamentRepository>;
   let sportsService: { findOne: jest.Mock };
+  let overviewReader: jest.Mocked<TournamentOverviewReader>;
   let service: TournamentsService;
 
   beforeEach(() => {
@@ -62,10 +65,17 @@ describe('TournamentsService', () => {
         .fn()
         .mockResolvedValue({ id: 5, name: 'Fútbol', active: true }),
     };
+    overviewReader = {
+      findPhases: jest.fn().mockResolvedValue([]),
+      findMatches: jest.fn().mockResolvedValue([]),
+      findScoringEvents: jest.fn().mockResolvedValue([]),
+    };
     service = new TournamentsService(
       repository,
       new TournamentMapper(),
       sportsService as unknown as SportsService,
+      overviewReader,
+      new TournamentOverviewMapper(),
     );
   });
 
@@ -181,6 +191,64 @@ describe('TournamentsService', () => {
       repository.findOpenEnrollment.mockResolvedValue([buildTournament()]);
 
       await expect(service.getOpenEnrollmentReport()).resolves.toHaveLength(1);
+    });
+  });
+
+  describe('getOverview', () => {
+    it('answers 404 for an unknown tournament without reading anything else', async () => {
+      repository.findDetail.mockResolvedValue(null);
+
+      await expect(service.getOverview(1)).rejects.toMatchObject({
+        errorCase: ErrorCase.NOT_FOUND,
+        message: 'No existe el torneo con id 1',
+      });
+      expect(overviewReader.findPhases).not.toHaveBeenCalled();
+    });
+
+    it('answers 200 with a message when the tournament has no phases', async () => {
+      const overview = await service.getOverview(1);
+
+      expect(overview.phases).toEqual([]);
+      expect(overview.message).toBe(
+        'El torneo aún no tiene fases configuradas',
+      );
+      expect(overview.tournament.id).toBe(1);
+      expect(overviewReader.findMatches).toHaveBeenCalledWith([]);
+    });
+
+    it('reads phases, then matches of those phases, then their events', async () => {
+      overviewReader.findPhases.mockResolvedValue([
+        { id: 10, name: 'Grupos', order: 1, phaseType: 'GROUP' },
+      ]);
+      overviewReader.findMatches.mockResolvedValue([
+        {
+          id: 77,
+          phaseId: 10,
+          scheduledAt: new Date('2027-03-01T15:00:00Z'),
+          status: 'FINISHED',
+          homeScore: 2,
+          awayScore: 1,
+          homeTeam: { id: 1, name: 'A' },
+          awayTeam: { id: 2, name: 'B' },
+        },
+      ]);
+
+      const overview = await service.getOverview(1);
+
+      expect(overviewReader.findMatches).toHaveBeenCalledWith([10]);
+      expect(overviewReader.findScoringEvents).toHaveBeenCalledWith([77]);
+      expect(overview.message).toBeUndefined();
+      expect(overview.phases[0].matches).toHaveLength(1);
+    });
+
+    it('still answers for an inactive tournament', async () => {
+      repository.findDetail.mockResolvedValue(
+        buildTournament({ active: false }),
+      );
+
+      await expect(service.getOverview(1)).resolves.toMatchObject({
+        tournament: { active: false },
+      });
     });
   });
 

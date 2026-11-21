@@ -3,10 +3,16 @@ import { ApplicationException } from '../../exception/application.exception';
 import { ErrorCase } from '../../exception/error-case.enum';
 import { SportsService } from '../../sports/services/sports.service';
 import { CreateTournamentDto } from '../dtos/create-tournament.dto';
+import { TournamentOverviewDto } from '../dtos/tournament-overview.dto';
 import { TournamentResponseDto } from '../dtos/tournament-response.dto';
 import { UpdateTournamentDto } from '../dtos/update-tournament.dto';
 import { Tournament } from '../entities/tournament.entity';
+import { TournamentOverviewMapper } from '../mappers/tournament-overview.mapper';
 import { TournamentMapper } from '../mappers/tournament.mapper';
+import {
+  TOURNAMENT_OVERVIEW_READER,
+  type TournamentOverviewReader,
+} from '../repositories/tournament-overview.reader';
 import {
   DuplicateTournamentNameError,
   TOURNAMENT_REPOSITORY,
@@ -23,6 +29,9 @@ export class TournamentsService {
     private readonly repository: TournamentRepository,
     private readonly mapper: TournamentMapper,
     private readonly sportsService: SportsService,
+    @Inject(TOURNAMENT_OVERVIEW_READER)
+    private readonly overviewReader: TournamentOverviewReader,
+    private readonly overviewMapper: TournamentOverviewMapper,
   ) {}
 
   async create(dto: CreateTournamentDto): Promise<TournamentResponseDto> {
@@ -99,6 +108,27 @@ export class TournamentsService {
       }
       throw error;
     }
+  }
+
+  // HU-GC-08: the tournament with its phases, matches and scoring events.
+  // Read only, in four queries at most; only data of this tournament.
+  async getOverview(id: number): Promise<TournamentOverviewDto> {
+    const tournament = await this.getDetailOrFail(id);
+
+    const phases = await this.overviewReader.findPhases(id);
+    const matches = await this.overviewReader.findMatches(
+      phases.map((phase) => phase.id),
+    );
+    const scoringEvents = await this.overviewReader.findScoringEvents(
+      matches.map((match) => match.id),
+    );
+
+    return this.overviewMapper.toOverview(
+      tournament,
+      phases,
+      matches,
+      scoringEvents,
+    );
   }
 
   async getOpenEnrollmentReport(): Promise<TournamentResponseDto[]> {

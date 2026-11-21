@@ -36,6 +36,11 @@ export class TournamentsController {
     return this.tournamentsService.getOpenEnrollmentReport();
   }
 
+  @Get(':id/overview')
+  overview(@IdParam(idParamPipe()) id: number) {
+    return this.tournamentsService.getOverview(id);
+  }
+
   @Get(':id')
   findOne(@IdParam(idParamPipe()) id: number) {
     return this.tournamentsService.findOne(id);
