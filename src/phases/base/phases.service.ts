@@ -30,6 +30,17 @@ export class PhasesService {
   }
 
   async findOne(id: number): Promise<PhaseResponseDto> {
+    return this.phaseMapper.toResponseDto(await this.getPhaseOrFail(id));
+  }
+
+  async findOneEntity(id: number): Promise<Phase | null> {
+    return this.phasesRepository.findOne({
+      where: { id },
+      relations: { tournament: true },
+    });
+  }
+
+  private async getPhaseOrFail(id: number): Promise<Phase> {
     const phase = await this.phasesRepository.findOne({
       where: { id },
       relations: { tournament: true, matches: true },
@@ -37,10 +48,10 @@ export class PhasesService {
     if (!phase) {
       throw new ApplicationException(
         ErrorCase.NOT_FOUND,
-        `Phase with id ${id} not found`,
+        `No existe una fase con el id ${id}`,
       );
     }
-    return this.phaseMapper.toResponseDto(phase);
+    return phase;
   }
 
   async hasMatches(id: number): Promise<boolean> {

@@ -1,4 +1,5 @@
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import type { Relation } from 'typeorm';
 import { Phase } from '../../phases/base/entities/phase.entity';
 import { Registration } from '../../registrations/entities/registration.entity';
 
@@ -32,10 +33,10 @@ export class Tournament {
   active!: boolean;
 
   @OneToMany(() => Phase, (phase) => phase.tournament)
-  phases?: Phase[];
+  phases?: Relation<Phase[]>;
 
   @OneToMany(() => Registration, (registration) => registration.tournament)
-  registrations?: Registration[];
+  registrations?: Relation<Registration[]>;
 
   canChangeRegistrations(today: string): boolean {
     return this.status === TournamentStatus.SCHEDULED && today <= this.registrationDeadline;

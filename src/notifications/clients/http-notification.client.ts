@@ -28,7 +28,7 @@ export class HttpNotificationClient implements NotificationClient {
       },
       {
         headers: { 'Content-Type': 'application/json' },
-        timeout: 5000,
+        timeout: 15000,
       },
     );
   }

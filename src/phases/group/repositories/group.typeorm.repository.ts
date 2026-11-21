@@ -49,7 +49,7 @@ export class GroupTypeOrmRepository implements GroupRepository {
   findTeamById(teamId: number): Promise<Team | null> {
     return this.teamsRepository.findOne({
       where: { id: teamId },
-      relations: { group: true },
+      relations: { group: { tournament: true } },
     });
   }
 

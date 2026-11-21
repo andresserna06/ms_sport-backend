@@ -6,6 +6,7 @@ import {
   OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
+import type { Relation } from 'typeorm';
 import { Group } from '../../phases/group/entities/group.entity';
 import { Registration } from '../../registrations/entities/registration.entity';
 
@@ -34,8 +35,8 @@ export class Team {
     onDelete: 'SET NULL',
   })
   @JoinColumn({ name: 'group_id' })
-  group!: Group | null;
+  group!: Relation<Group | null>;
 
   @OneToMany(() => Registration, (registration) => registration.team)
-  registrations?: Registration[];
+  registrations?: Relation<Registration[]>;
 }

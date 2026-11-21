@@ -7,8 +7,9 @@ import {
   PrimaryGeneratedColumn,
   TableInheritance,
 } from 'typeorm';
-import { Match } from '../../../matches/entities/match.entity';
-import { Tournament } from '../../../tournaments/entities/tournament.entity';
+import type { Relation } from 'typeorm';
+import type { Match } from '../../../matches/entities/match.entity';
+import type { Tournament } from '../../../tournaments/entities/tournament.entity';
 
 @Entity('phases')
 @TableInheritance({ column: { type: 'varchar', name: 'phase_type', length: 10 } })
@@ -24,13 +25,13 @@ export abstract class Phase {
 
   abstract readonly phaseType: 'GROUP' | 'FINAL';
 
-  @ManyToOne(() => Tournament, (tournament) => tournament.phases, {
+  @ManyToOne('Tournament', 'phases', {
     nullable: true,
     onDelete: 'RESTRICT',
   })
   @JoinColumn({ name: 'tournament_id' })
-  tournament!: Tournament | null;
+  tournament!: Relation<Tournament | null>;
 
-  @OneToMany(() => Match, (match) => match.phase, { cascade: false })
-  matches?: Match[];
+  @OneToMany('Match', 'phase', { cascade: false })
+  matches?: Relation<Match[]>;
 }

@@ -1,0 +1,642 @@
+{
+  "info": {
+    "name": "Integrante 3 - Gestión de competencias",
+    "description": "Colección Postman v2.1 para las historias GC-02 a GC-06 asignadas al integrante 3. Contiene una petición por cada método HTTP disponible en cada carpeta. Reemplaza los IDs de ejemplo por IDs existentes. Para otras rutas del mismo método, edita la URL y el body según corresponda.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "runId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "tournamentId",
+      "value": "1",
+      "type": "string",
+      "description": "Reemplazar por el ID de un torneo existente."
+    },
+    {
+      "key": "teamId",
+      "value": "1",
+      "type": "string",
+      "description": "Reemplazar por el ID de un equipo existente."
+    },
+    {
+      "key": "homeTeamId",
+      "value": "1",
+      "type": "string",
+      "description": "Reemplazar por el ID de un equipo inscrito en el torneo."
+    },
+    {
+      "key": "awayTeamId",
+      "value": "2",
+      "type": "string",
+      "description": "Reemplazar por el ID de otro equipo inscrito en el torneo."
+    },
+    {
+      "key": "phaseId",
+      "value": "1",
+      "type": "string",
+      "description": "Reemplazar por el ID de una fase existente."
+    },
+    {
+      "key": "groupId",
+      "value": "1",
+      "type": "string",
+      "description": "Se actualiza automáticamente al crear un grupo."
+    },
+    {
+      "key": "finalId",
+      "value": "1",
+      "type": "string",
+      "description": "Se actualiza automáticamente al crear una fase final."
+    },
+    {
+      "key": "matchId",
+      "value": "1",
+      "type": "string",
+      "description": "Se actualiza automáticamente al crear un partido."
+    }
+  ],
+  "item": [
+    {
+      "name": "GC-02 Inscripciones",
+      "item": [
+        {
+          "name": "Create registration (POST)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"teamId\": {{teamId}}\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{baseUrl}}/tournaments/{{tournamentId}}/registrations",
+            "description": "El torneo y el equipo deben existir, estar activos y el equipo debe estar asociado con el deporte del torneo."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 201 Created', function () {",
+                  "  pm.response.to.have.status(201);",
+                  "});",
+                  "const body = pm.response.json();",
+                  "pm.test('Returns the created registration', function () {",
+                  "  pm.expect(body.id).to.be.a('number');",
+                  "  pm.expect(body.team.id).to.eql(Number(pm.collectionVariables.get('teamId')));",
+                  "});",
+                  "pm.collectionVariables.set('registrationId', body.id);"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "List tournament registrations (GET)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/tournaments/{{tournamentId}}/registrations",
+            "description": "Para consultar torneos por equipo, cambia la URL a /teams/{{teamId}}/tournaments."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200 OK', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('Returns a registration list', function () {",
+                  "  pm.expect(pm.response.json()).to.be.an('array');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "Remove registration (DELETE)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/tournaments/{{tournamentId}}/registrations/{{teamId}}",
+            "description": "Solo se permite retirar la inscripción mientras el estado y la fecha límite del torneo lo permitan."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 204 No Content', function () {",
+                  "  pm.response.to.have.status(204);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "GC-03 Fases",
+      "item": [
+        {
+          "name": "List tournament phases (GET)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/phases?tournamentId={{tournamentId}}",
+            "description": "Para consultar una fase por ID, cambia la URL a /phases/{{phaseId}}. Las fases se crean desde las carpetas Grupos o Fases finales."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200 OK', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('Returns a phase list', function () {",
+                  "  pm.expect(pm.response.json()).to.be.an('array');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "GC-04 Grupos",
+      "item": [
+        {
+          "name": "Create group (POST)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Group-{{runId}}\",\n  \"order\": 1,\n  \"tournamentId\": {{tournamentId}}\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{baseUrl}}/groups",
+            "description": "Se requiere un torneo existente. Para asignar un equipo, cambia la URL a /groups/{{groupId}}/teams/{{teamId}} y elimina el body."
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.collectionVariables.set('runId', String(Date.now()));"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 201 Created', function () {",
+                  "  pm.response.to.have.status(201);",
+                  "});",
+                  "const body = pm.response.json();",
+                  "pm.test('Returns a group phase', function () {",
+                  "  pm.expect(body.id).to.be.a('number');",
+                  "  pm.expect(body.phaseType).to.eql('GROUP');",
+                  "});",
+                  "pm.collectionVariables.set('groupId', body.id);"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "List groups (GET)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/groups?tournamentId={{tournamentId}}",
+            "description": "Para consultar los equipos del grupo, cambia la URL a /groups/{{groupId}}/teams."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200 OK', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('Returns a group list', function () {",
+                  "  pm.expect(pm.response.json()).to.be.an('array');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "Update group (PATCH)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Group-Updated-{{runId}}\",\n  \"order\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{baseUrl}}/groups/{{groupId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200 OK', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "const body = pm.response.json();",
+                  "pm.test('Returns the updated group', function () {",
+                  "  pm.expect(body.id).to.eql(Number(pm.collectionVariables.get('groupId')));",
+                  "  pm.expect(body.phaseType).to.eql('GROUP');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "Delete group (DELETE)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/groups/{{groupId}}",
+            "description": "Para quitar un equipo del grupo, cambia la URL a /groups/{{groupId}}/teams/{{teamId}}."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200 OK', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('Returns a deletion message', function () {",
+                  "  pm.expect(pm.response.json().message).to.be.a('string');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "GC-05 Fases finales",
+      "item": [
+        {
+          "name": "Create final phase (POST)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Final-{{runId}}\",\n  \"order\": 2,\n  \"tournamentId\": {{tournamentId}}\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{baseUrl}}/finals",
+            "description": "Se requiere un torneo existente. La fase final se crea como tipo FINAL."
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.collectionVariables.set('runId', String(Date.now()));"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 201 Created', function () {",
+                  "  pm.response.to.have.status(201);",
+                  "});",
+                  "const body = pm.response.json();",
+                  "pm.test('Returns a final phase', function () {",
+                  "  pm.expect(body.id).to.be.a('number');",
+                  "  pm.expect(body.phaseType).to.eql('FINAL');",
+                  "});",
+                  "pm.collectionVariables.set('finalId', body.id);"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "List final phases (GET)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/finals?tournamentId={{tournamentId}}",
+            "description": "Para consultar una fase final por ID, cambia la URL a /finals/{{finalId}}."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200 OK', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('Returns a final phase list', function () {",
+                  "  pm.expect(pm.response.json()).to.be.an('array');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "Update final phase (PATCH)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Final-Updated-{{runId}}\",\n  \"order\": 2\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{baseUrl}}/finals/{{finalId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200 OK', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "const body = pm.response.json();",
+                  "pm.test('Returns the updated final phase', function () {",
+                  "  pm.expect(body.id).to.eql(Number(pm.collectionVariables.get('finalId')));",
+                  "  pm.expect(body.phaseType).to.eql('FINAL');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "Delete final phase (DELETE)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/finals/{{finalId}}",
+            "description": "Solo se elimina si no tiene partidos asociados."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200 OK', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('Returns a deletion message', function () {",
+                  "  pm.expect(pm.response.json().message).to.be.a('string');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "GC-06 Partidos",
+      "item": [
+        {
+          "name": "Create match (POST)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"scheduledAt\": \"2030-01-15T10:00:00.000Z\",\n  \"homeTeamId\": {{homeTeamId}},\n  \"awayTeamId\": {{awayTeamId}}\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{baseUrl}}/phases/{{phaseId}}/matches",
+            "description": "La fase y ambos equipos deben existir; los equipos deben estar inscritos en el torneo de la fase. Sustituye scheduledAt y los IDs por datos válidos. La creación emite el evento de correo, pero el partido debe guardarse aunque ms_notificaciones no esté disponible."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 201 Created', function () {",
+                  "  pm.response.to.have.status(201);",
+                  "});",
+                  "const body = pm.response.json();",
+                  "pm.test('Returns a scheduled match', function () {",
+                  "  pm.expect(body.id).to.be.a('number');",
+                  "  pm.expect(body.phaseId).to.eql(Number(pm.collectionVariables.get('phaseId')));",
+                  "  pm.expect(body.status).to.eql('SCHEDULED');",
+                  "});",
+                  "pm.collectionVariables.set('matchId', body.id);"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "List matches (GET)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/matches",
+            "description": "Para consultar un partido por ID, cambia la URL a /matches/{{matchId}}. Para listar por fase, cambia a /phases/{{phaseId}}/matches."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200 OK', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('Returns a match list', function () {",
+                  "  pm.expect(pm.response.json()).to.be.an('array');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "Update match (PUT)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"scheduledAt\": \"2030-01-15T11:00:00.000Z\",\n  \"homeTeamId\": {{homeTeamId}},\n  \"awayTeamId\": {{awayTeamId}}\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{baseUrl}}/matches/{{matchId}}",
+            "description": "Solo se puede actualizar un partido en estado SCHEDULED. Los campos del body son opcionales."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200 OK', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "const body = pm.response.json();",
+                  "pm.test('Returns the updated match', function () {",
+                  "  pm.expect(body.id).to.eql(Number(pm.collectionVariables.get('matchId')));",
+                  "  pm.expect(body.status).to.eql('SCHEDULED');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "Delete match (DELETE)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/matches/{{matchId}}",
+            "description": "Solo se elimina si está SCHEDULED y no tiene anotaciones registradas."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 204 No Content', function () {",
+                  "  pm.response.to.have.status(204);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "response": []
+        }
+      ]
+    }
+  ]
+}

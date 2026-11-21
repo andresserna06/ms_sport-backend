@@ -1,4 +1,5 @@
-﻿import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn, Unique } from 'typeorm';
+import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn, Unique } from 'typeorm';
+import type { Relation } from 'typeorm';
 import { Team } from '../../teams/entities/team.entity';
 import { Tournament } from '../../tournaments/entities/tournament.entity';
 
@@ -14,7 +15,7 @@ export class Registration {
     onDelete: 'RESTRICT',
   })
   @JoinColumn({ name: 'team_id' })
-  team!: Team;
+  team!: Relation<Team>;
 
   @ManyToOne(() => Tournament, (tournament) => tournament.registrations, {
     cascade: false,
@@ -22,7 +23,7 @@ export class Registration {
     onDelete: 'RESTRICT',
   })
   @JoinColumn({ name: 'tournament_id' })
-  tournament!: Tournament;
+  tournament!: Relation<Tournament>;
 
   @CreateDateColumn({ name: 'registered_at' })
   registeredAt!: Date;

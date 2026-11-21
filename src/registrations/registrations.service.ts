@@ -70,6 +70,19 @@ export class RegistrationsService {
     }));
   }
 
+  async assertTeamRegisteredInTournament(teamId: number, tournamentId: number): Promise<void> {
+    const registration = await this.registrationsRepository.findByTournamentAndTeam(
+      tournamentId,
+      teamId,
+    );
+    if (!registration) {
+      throw new ApplicationException(
+        ErrorCase.INVALID_STATE,
+        `El equipo ${teamId} no está inscrito activamente en el torneo ${tournamentId}`,
+      );
+    }
+  }
+
   async remove(tournamentId: number, teamId: number): Promise<void> {
     const tournament = await this.getTournamentOrFail(tournamentId);
     await this.getTeamOrFail(teamId);

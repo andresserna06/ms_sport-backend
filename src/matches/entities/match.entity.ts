@@ -7,6 +7,7 @@ import {
   ManyToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
+import type { Relation } from 'typeorm';
 import { Phase } from '../../phases/base/entities/phase.entity';
 import { Team } from '../../teams/entities/team.entity';
 
@@ -48,11 +49,11 @@ export class Match {
 
   @ManyToOne(() => Team, { nullable: true, onDelete: 'RESTRICT' })
   @JoinColumn({ name: 'home_team_id' })
-  homeTeam!: Team | null;
+  homeTeam!: Relation<Team | null>;
 
   @ManyToOne(() => Team, { nullable: true, onDelete: 'RESTRICT' })
   @JoinColumn({ name: 'away_team_id' })
-  awayTeam!: Team | null;
+  awayTeam!: Relation<Team | null>;
 
   @ManyToOne(() => Phase, (phase) => phase.matches, {
     cascade: false,
@@ -60,5 +61,5 @@ export class Match {
     onDelete: 'RESTRICT',
   })
   @JoinColumn({ name: 'phase_id' })
-  phase!: Phase;
+  phase!: Relation<Phase>;
 }

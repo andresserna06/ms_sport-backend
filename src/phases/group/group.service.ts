@@ -152,9 +152,25 @@ export class GroupService {
     await this.groupRepository.saveTeam(team);
   }
 
-  async isTeamInGroup(_teamId: number, _tournamentId: number): Promise<boolean> {
-    // TODO: implement real check against groups
-    return false;
+  async isTeamInGroup(teamId: number, tournamentId: number): Promise<boolean> {
+    const team = await this.groupRepository.findTeamById(teamId);
+    return team?.group?.tournament?.id === tournamentId;
+  }
+
+  async assertTeamBelongsToGroup(teamId: number, groupId: number): Promise<void> {
+    const team = await this.groupRepository.findTeamById(teamId);
+    if (!team) {
+      throw new ApplicationException(
+        ErrorCase.NOT_FOUND,
+        `No existe un equipo con el id ${teamId}`,
+      );
+    }
+    if (team.group?.id !== groupId) {
+      throw new ApplicationException(
+        ErrorCase.INVALID_STATE,
+        `El equipo ${teamId} no pertenece al grupo ${groupId}`,
+      );
+    }
   }
 
   async findTeams(groupId: number): Promise<GroupTeamResponseDto[]> {

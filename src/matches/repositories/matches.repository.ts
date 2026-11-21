@@ -1,26 +1,11 @@
-import { Injectable } from '@nestjs/common';
-import { InjectDataSource } from '@nestjs/typeorm';
-import { DataSource } from 'typeorm';
-import { MatchStatus } from '../entities/match.entity';
-import { MatchResponseDto } from '../dto/match-response.dto';
+﻿import { Match, MatchStatus } from '../entities/match.entity';
 
-@Injectable()
-export class MatchesRepository {
-  constructor(@InjectDataSource() private readonly dataSource: DataSource) {}
+export const MATCH_REPOSITORY = Symbol('MATCH_REPOSITORY');
 
-  async findByStatusReport(status: MatchStatus): Promise<MatchResponseDto[]> {
-    const rows = await this.dataSource.query(
-      `SELECT id,
-              scheduled_at AS scheduledAt,
-              status,
-              home_score AS homeScore,
-              away_score AS awayScore,
-              phase_id AS phaseId
-       FROM matches
-       WHERE status = ?
-       ORDER BY scheduled_at ASC`,
-      [status],
-    );
-    return rows as MatchResponseDto[];
-  }
+export interface MatchRepository {
+  findById(id: number): Promise<Match | null>;
+  findAll(): Promise<Match[]>;
+  findByPhase(phaseId: number): Promise<Match[]>;
+  save(match: Match): Promise<Match>;
+  remove(match: Match): Promise<void>;
 }

@@ -1,4 +1,4 @@
-import { Team } from '../../../teams/entities/team.entity';
+﻿import { Team } from '../../../teams/entities/team.entity';
 import { Tournament } from '../../../tournaments/entities/tournament.entity';
 import { CreateGroupDto } from '../dto/create-group.dto';
 import { Group } from '../entities/group.entity';
@@ -23,7 +23,7 @@ describe('GroupMapper', () => {
     expect(entity).toBeInstanceOf(Group);
     expect(entity.name).toBe('Group A');
     expect(entity.order).toBe(1);
-    expect(entity.tournament.id).toBe(7);
+    expect(entity.tournament?.id).toBe(7);
   });
 
   it('should map a Group entity with teams to the response DTO', () => {

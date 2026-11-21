@@ -1,5 +1,4 @@
-import { IsDateString, IsEnum, IsInt, IsOptional, Min } from 'class-validator';
-import { MatchStatus } from '../entities/match.entity';
+﻿import { IsDateString, IsInt, IsOptional, Min } from 'class-validator';
 
 export class UpdateMatchDto {
   @IsOptional()
@@ -10,20 +9,6 @@ export class UpdateMatchDto {
   @IsInt()
   @Min(1)
   phaseId?: number;
-
-  @IsOptional()
-  @IsEnum(MatchStatus)
-  status?: MatchStatus;
-
-  @IsOptional()
-  @IsInt()
-  @Min(0)
-  homeScore?: number;
-
-  @IsOptional()
-  @IsInt()
-  @Min(0)
-  awayScore?: number;
 
   @IsOptional()
   @IsInt()

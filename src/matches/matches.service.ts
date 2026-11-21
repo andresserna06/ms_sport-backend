@@ -1,9 +1,10 @@
-import { Inject, Injectable, NotFoundException } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+﻿import { Inject, Injectable } from '@nestjs/common';
 import { ApplicationException } from '../exception/application.exception';
 import { ErrorCase } from '../exception/error-case.enum';
 import { Phase } from '../phases/base/entities/phase.entity';
+import { PhasesService } from '../phases/base/phases.service';
+import { GroupService } from '../phases/group/group.service';
+import { RegistrationsService } from '../registrations/registrations.service';
 import { TeamsService } from '../teams/teams.service';
 import { CreateMatchDto } from './dto/create-match.dto';
 import { MatchResponseDto } from './dto/match-response.dto';
@@ -14,241 +15,157 @@ import {
   MATCH_DEPENDENCIES_CHECKER,
   type MatchDependenciesChecker,
 } from './repositories/match-dependencies.port';
-import { MatchesRepository } from './repositories/matches.repository';
+import { MATCH_REPOSITORY, type MatchRepository } from './repositories/matches.repository';
 
 @Injectable()
 export class MatchesService {
   constructor(
-    @InjectRepository(Match)
-    private readonly matchesRepository: Repository<Match>,
-    @InjectRepository(Phase)
-    private readonly phasesRepository: Repository<Phase>,
-    private readonly customMatchesRepository: MatchesRepository,
-    private readonly matchMapper: MatchMapper,
+    @Inject(MATCH_REPOSITORY)
+    private readonly matchesRepository: MatchRepository,
+    private readonly phasesService: PhasesService,
+    private readonly groupService: GroupService,
+    private readonly registrationsService: RegistrationsService,
     private readonly teamsService: TeamsService,
+    private readonly matchMapper: MatchMapper,
     @Inject(MATCH_DEPENDENCIES_CHECKER)
     private readonly dependenciesChecker: MatchDependenciesChecker,
   ) {}
 
-  async create(dto: CreateMatchDto): Promise<MatchResponseDto> {
-    await this.validateMatchTeams(dto.homeTeamId, dto.awayTeamId);
-    const phase = await this.findPhase(dto.phaseId);
-    const saved = await this.matchesRepository.save(
-      this.matchMapper.toEntity(dto, phase),
-    );
+  async create(phaseId: number, dto: CreateMatchDto): Promise<MatchResponseDto> {
+    const phase = await this.getPhaseOrFail(phaseId);
+    await this.validateTeamsForPhase(phase, dto.homeTeamId, dto.awayTeamId);
+    const saved = await this.matchesRepository.save(this.matchMapper.toEntity(dto, phase));
     return this.findOne(saved.id);
   }
 
   async findAll(): Promise<MatchResponseDto[]> {
-    const matches = await this.matchesRepository.find({
-      relations: { phase: true },
-      order: { scheduledAt: 'ASC' },
-    });
-    return this.matchMapper.toResponseDtoList(matches);
+    return this.matchMapper.toResponseDtoList(await this.matchesRepository.findAll());
   }
 
   async findOne(id: number): Promise<MatchResponseDto> {
-    return this.matchMapper.toResponseDto(await this.findMatch(id));
+    return this.matchMapper.toResponseDto(await this.getMatchOrFail(id));
   }
 
   async findByPhase(phaseId: number): Promise<MatchResponseDto[]> {
-    await this.findPhase(phaseId);
-    const matches = await this.matchesRepository.find({
-      where: { phase: { id: phaseId } },
-      order: { scheduledAt: 'ASC' },
-    });
-    return this.matchMapper.toResponseDtoList(matches, phaseId);
+    await this.getPhaseOrFail(phaseId);
+    return this.matchMapper.toResponseDtoList(await this.matchesRepository.findByPhase(phaseId), phaseId);
   }
 
   async update(id: number, dto: UpdateMatchDto): Promise<MatchResponseDto> {
-    const match = await this.findMatch(id);
-
+    const match = await this.getMatchOrFail(id);
     if (match.status !== MatchStatus.SCHEDULED) {
       throw new ApplicationException(
-        ErrorCase.INVALID_OPERATION,
-        `El partido #${id} está en estado ${match.status} y ya no puede modificarse`,
+        ErrorCase.INVALID_STATE,
+        `El partido ${id} no se puede modificar porque su estado es ${match.status}`,
       );
     }
 
-    const nextHomeTeamId =
-      dto.homeTeamId !== undefined ? dto.homeTeamId : (match.homeTeamId ?? undefined);
-    const nextAwayTeamId =
-      dto.awayTeamId !== undefined ? dto.awayTeamId : (match.awayTeamId ?? undefined);
-    await this.validateMatchTeams(nextHomeTeamId, nextAwayTeamId);
+    const targetPhase = dto.phaseId !== undefined ? await this.getPhaseOrFail(dto.phaseId) : match.phase;
+    const homeTeamId = dto.homeTeamId !== undefined ? dto.homeTeamId : (match.homeTeamId ?? undefined);
+    const awayTeamId = dto.awayTeamId !== undefined ? dto.awayTeamId : (match.awayTeamId ?? undefined);
+    await this.validateTeamsForPhase(targetPhase, homeTeamId, awayTeamId);
 
-    if (dto.phaseId !== undefined) {
-      match.phase = await this.findPhase(dto.phaseId);
-    }
-
-    const merged = this.matchMapper.mergeEntity(match, dto);
-    this.validateResult(merged);
-
-    const saved = await this.matchesRepository.save(merged);
+    if (dto.phaseId !== undefined) match.phase = targetPhase;
+    const saved = await this.matchesRepository.save(this.matchMapper.mergeEntity(match, dto));
     return this.matchMapper.toResponseDto(saved);
   }
 
-  async remove(id: number): Promise<{ message: string }> {
-    const match = await this.findMatch(id);
-
+  async remove(id: number): Promise<void> {
+    const match = await this.getMatchOrFail(id);
     if (match.status !== MatchStatus.SCHEDULED) {
       throw new ApplicationException(
         ErrorCase.INVALID_STATE,
-        `No se puede eliminar el partido #${id} porque su estado es ${match.status}`,
+        `No se puede eliminar el partido ${id} porque su estado es ${match.status}`,
       );
     }
-
-    const hasScoringEvents = await this.dependenciesChecker.hasScoringEvents(id);
-    if (hasScoringEvents) {
+    if (await this.dependenciesChecker.hasScoringEvents(id)) {
       throw new ApplicationException(
         ErrorCase.INVALID_STATE,
-        `No se puede eliminar el partido #${id} porque tiene anotaciones registradas`,
+        `No se puede eliminar el partido ${id} porque tiene anotaciones registradas`,
       );
     }
-
     await this.matchesRepository.remove(match);
-    return { message: `Partido #${id} eliminado correctamente` };
   }
 
-  async updateResult(
-    id: number,
-    homeScore: number,
-    awayScore: number,
-  ): Promise<MatchResponseDto> {
-    const match = await this.findMatch(id);
-    if (match.status === MatchStatus.CANCELLED) {
-      throw new ApplicationException(
-        ErrorCase.INVALID_STATE,
-        `No se puede registrar resultado en el partido #${id} porque está cancelado`,
-      );
-    }
-    if (match.homeTeamId === null || match.awayTeamId === null) {
-      throw new ApplicationException(
-        ErrorCase.INVALID_STATE,
-        `El partido #${id} no tiene equipos participantes asignados`,
-      );
-    }
-
+  async updateResult(id: number, homeScore: number, awayScore: number): Promise<MatchResponseDto> {
+    const match = await this.getMatchOrFail(id);
+    this.assertMatchNotCancelled(match, 'registrar resultado');
+    this.assertTeamsAssigned(match);
     match.homeScore = homeScore;
     match.awayScore = awayScore;
-    const saved = await this.matchesRepository.save(match);
-    return this.matchMapper.toResponseDto(saved);
+    return this.matchMapper.toResponseDto(await this.matchesRepository.save(match));
   }
 
-  async finishMatch(
-    id: number,
-    homeScore?: number,
-    awayScore?: number,
-  ): Promise<MatchResponseDto> {
-    const match = await this.findMatch(id);
+  async finishMatch(id: number, homeScore?: number, awayScore?: number): Promise<MatchResponseDto> {
+    const match = await this.getMatchOrFail(id);
     if (match.status === MatchStatus.CANCELLED) {
-      throw new ApplicationException(
-        ErrorCase.INVALID_STATE,
-        `No se puede finalizar el partido #${id} porque está cancelado`,
-      );
+      throw new ApplicationException(ErrorCase.INVALID_STATE, `No se puede finalizar el partido ${id} porque está cancelado`);
     }
     if (match.status === MatchStatus.FINISHED) {
-      throw new ApplicationException(
-        ErrorCase.INVALID_STATE,
-        `El partido #${id} ya se encuentra finalizado`,
-      );
+      throw new ApplicationException(ErrorCase.INVALID_STATE, `El partido ${id} ya se encuentra finalizado`);
     }
-    if (match.homeTeamId === null || match.awayTeamId === null) {
-      throw new ApplicationException(
-        ErrorCase.INVALID_STATE,
-        `El partido #${id} no tiene equipos participantes asignados`,
-      );
-    }
-
+    this.assertTeamsAssigned(match);
     const finalHomeScore = homeScore ?? match.homeScore;
     const finalAwayScore = awayScore ?? match.awayScore;
     if (finalHomeScore === null || finalAwayScore === null) {
-      throw new ApplicationException(
-        ErrorCase.INVALID_STATE,
-        `Para finalizar el partido #${id} se requiere registrar el marcador de ambos equipos`,
-      );
+      throw new ApplicationException(ErrorCase.INVALID_STATE, `Para finalizar el partido ${id} se requiere registrar el marcador de ambos equipos`);
     }
-
     match.homeScore = finalHomeScore;
     match.awayScore = finalAwayScore;
     match.status = MatchStatus.FINISHED;
-    const saved = await this.matchesRepository.save(match);
-    return this.matchMapper.toResponseDto(saved);
+    return this.matchMapper.toResponseDto(await this.matchesRepository.save(match));
   }
 
-  async getStatusReport(status: MatchStatus): Promise<MatchResponseDto[]> {
-    return this.customMatchesRepository.findByStatusReport(status);
-  }
-
-  private async validateMatchTeams(
-    homeTeamId?: number,
-    awayTeamId?: number,
-  ): Promise<void> {
-    if (homeTeamId !== undefined) {
-      await this.ensureTeamExists(homeTeamId);
-    }
-    if (awayTeamId !== undefined) {
-      await this.ensureTeamExists(awayTeamId);
-    }
-    if (
-      homeTeamId !== undefined &&
-      awayTeamId !== undefined &&
-      homeTeamId === awayTeamId
-    ) {
-      throw new ApplicationException(
-        ErrorCase.INVALID_OPERATION,
-        'Un equipo no puede competir contra sí mismo',
-      );
-    }
-  }
-
-  private async ensureTeamExists(teamId: number): Promise<void> {
-    try {
-      await this.teamsService.findOne(teamId);
-    } catch (error) {
-      if (error instanceof NotFoundException) {
-        throw new ApplicationException(
-          ErrorCase.NOT_FOUND,
-          `No existe un equipo con el id ${teamId}`,
-        );
-      }
-      throw error;
-    }
-  }
-
-  private async findMatch(id: number): Promise<Match> {
-    const match = await this.matchesRepository.findOne({
-      where: { id },
-      relations: { phase: true },
-    });
-    if (!match) {
-      throw new ApplicationException(
-        ErrorCase.NOT_FOUND,
-        `No existe un partido con el id ${id}`,
-      );
-    }
+  private async getMatchOrFail(id: number): Promise<Match> {
+    const match = await this.matchesRepository.findById(id);
+    if (!match) throw new ApplicationException(ErrorCase.NOT_FOUND, `No existe un partido con el id ${id}`);
     return match;
   }
 
-  private async findPhase(id: number): Promise<Phase> {
-    const phase = await this.phasesRepository.findOneBy({ id });
-    if (!phase) {
-      throw new ApplicationException(
-        ErrorCase.NOT_FOUND,
-        `No existe una fase con el id ${id}`,
-      );
+  private async getPhaseOrFail(id: number): Promise<Phase> {
+    const phase = await this.phasesService.findOneEntity(id);
+    if (!phase) throw new ApplicationException(ErrorCase.NOT_FOUND, `No existe una fase con el id ${id}`);
+    if (!phase.tournament?.id) {
+      throw new ApplicationException(ErrorCase.INVALID_STATE, `La fase ${id} no tiene un torneo asociado`);
     }
     return phase;
   }
 
-  private validateResult(match: Match): void {
-    if (
-      match.status === MatchStatus.FINISHED &&
-      (match.homeScore === null || match.awayScore === null)
-    ) {
-      throw new ApplicationException(
-        ErrorCase.INVALID_OPERATION,
-        'Un partido finalizado requiere registrar ambos marcadores',
-      );
+  private async validateTeamsForPhase(phase: Phase, homeTeamId?: number, awayTeamId?: number): Promise<void> {
+    const isGroup = phase.phaseType === 'GROUP';
+    if (isGroup && (homeTeamId === undefined || awayTeamId === undefined)) {
+      throw new ApplicationException(ErrorCase.INVALID_OPERATION, 'Los partidos de fase de grupos requieren equipo local y visitante');
+    }
+    if (homeTeamId === undefined && awayTeamId === undefined) return;
+    if (homeTeamId !== undefined && awayTeamId !== undefined && homeTeamId === awayTeamId) {
+      throw new ApplicationException(ErrorCase.INVALID_OPERATION, 'Un equipo no puede competir contra sí mismo');
+    }
+    const tournamentId = phase.tournament!.id;
+    for (const [label, teamId] of [['local', homeTeamId], ['visitante', awayTeamId]] as const) {
+      if (teamId === undefined) continue;
+      await this.assertTeamCanParticipate(teamId, tournamentId, phase, label);
+    }
+  }
+
+  private async assertTeamCanParticipate(teamId: number, tournamentId: number, phase: Phase, label: 'local' | 'visitante'): Promise<void> {
+    const team = await this.teamsService.findOneEntity(teamId);
+    if (!team) throw new ApplicationException(ErrorCase.NOT_FOUND, `No existe un equipo con el id ${teamId}`);
+    if (!team.active) throw new ApplicationException(ErrorCase.INVALID_STATE, `El equipo ${label} ${teamId} está inactivo`);
+    await this.registrationsService.assertTeamRegisteredInTournament(teamId, tournamentId);
+    if (phase.phaseType === 'GROUP') {
+      await this.groupService.assertTeamBelongsToGroup(teamId, phase.id);
+    }
+  }
+
+  private assertMatchNotCancelled(match: Match, action: string): void {
+    if (match.status === MatchStatus.CANCELLED) {
+      throw new ApplicationException(ErrorCase.INVALID_STATE, `No se puede ${action} en el partido ${match.id} porque está cancelado`);
+    }
+  }
+
+  private assertTeamsAssigned(match: Match): void {
+    if (match.homeTeamId === null || match.awayTeamId === null) {
+      throw new ApplicationException(ErrorCase.INVALID_STATE, `El partido ${match.id} no tiene equipos participantes asignados`);
     }
   }
 }

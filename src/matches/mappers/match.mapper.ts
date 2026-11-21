@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+﻿import { Injectable } from '@nestjs/common';
 import { Phase } from '../../phases/base/entities/phase.entity';
 import { CreateMatchDto } from '../dto/create-match.dto';
 import { MatchResponseDto } from '../dto/match-response.dto';
@@ -21,9 +21,6 @@ export class MatchMapper {
 
   mergeEntity(entity: Match, dto: UpdateMatchDto): Match {
     if (dto.scheduledAt !== undefined) entity.scheduledAt = new Date(dto.scheduledAt);
-    if (dto.status !== undefined) entity.status = dto.status;
-    if (dto.homeScore !== undefined) entity.homeScore = dto.homeScore;
-    if (dto.awayScore !== undefined) entity.awayScore = dto.awayScore;
     if (dto.homeTeamId !== undefined) entity.homeTeamId = dto.homeTeamId;
     if (dto.awayTeamId !== undefined) entity.awayTeamId = dto.awayTeamId;
     return entity;
