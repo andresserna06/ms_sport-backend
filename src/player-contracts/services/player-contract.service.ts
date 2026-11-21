@@ -181,6 +181,24 @@ export class PlayerContractService {
       );
   }
 
+  async hasActiveContractOnDate(
+    playerId: number,
+    teamId: number,
+    date: string,
+  ): Promise<boolean> {
+    const normalizedDate = this.normalizeDate(date);
+    const contracts = await this.contractRepository.findByPlayerAndTeam(
+      playerId,
+      teamId,
+    );
+    return contracts.some((contract) => {
+      const start = this.normalizeDate(contract.startDate);
+      const end =
+        contract.endDate != null ? this.normalizeDate(contract.endDate) : null;
+      return start <= normalizedDate && (end === null || end >= normalizedDate);
+    });
+  }
+
   private async getTeamOrFail(teamId: number): Promise<TeamResponseDto> {
     try {
       return await this.teamsService.findOne(teamId);

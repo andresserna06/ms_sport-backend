@@ -12,6 +12,8 @@ import { PlayersModule } from './players/players.module';
 import { PlayerSkillsModule } from './player-skills/player-skills.module';
 import { PlayerContractsModule } from './player-contracts/player-contracts.module';
 import { PlayerProfileModule } from './player-profile/player-profile.module';
+import { NotificationsModule } from './notifications/notifications.module';
+import { ScoringEventsModule } from './scoring-events/scoring-events.module';
 
 @Module({
   imports: [
@@ -41,6 +43,8 @@ import { PlayerProfileModule } from './player-profile/player-profile.module';
     PlayerSkillsModule,
     PlayerContractsModule,
     PlayerProfileModule,
+    NotificationsModule,
+    ScoringEventsModule,
   ],
 })
 export class AppModule {}

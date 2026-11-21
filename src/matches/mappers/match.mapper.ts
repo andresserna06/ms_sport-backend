@@ -13,6 +13,8 @@ export class MatchMapper {
     entity.status = MatchStatus.SCHEDULED;
     entity.homeScore = null;
     entity.awayScore = null;
+    entity.homeTeamId = dto.homeTeamId ?? null;
+    entity.awayTeamId = dto.awayTeamId ?? null;
     entity.phase = phase;
     return entity;
   }
@@ -22,6 +24,8 @@ export class MatchMapper {
     if (dto.status !== undefined) entity.status = dto.status;
     if (dto.homeScore !== undefined) entity.homeScore = dto.homeScore;
     if (dto.awayScore !== undefined) entity.awayScore = dto.awayScore;
+    if (dto.homeTeamId !== undefined) entity.homeTeamId = dto.homeTeamId;
+    if (dto.awayTeamId !== undefined) entity.awayTeamId = dto.awayTeamId;
     return entity;
   }
 
@@ -32,6 +36,8 @@ export class MatchMapper {
       status: entity.status,
       homeScore: entity.homeScore,
       awayScore: entity.awayScore,
+      homeTeamId: entity.homeTeamId ?? null,
+      awayTeamId: entity.awayTeamId ?? null,
       phaseId: phaseId!,
     };
   }
