@@ -67,7 +67,7 @@ Referencia: `docs/guia-relaciones.md` (sección 1) y skill `modelo-relacional`.
 | R8 | Un equipo solo puede pertenecer a un grupo a la vez (`teams.group_id`). Si ya tiene grupo, no se sobrescribe: primero se le quita. | Criterio 9 (`guia-relaciones`: 1:N) | `409 Conflict` (`INVALID_STATE`) |
 | R9 | El equipo debe existir y estar activo para asignarlo. | `reglas-dominio`: Reglas transversales | `404` / `409 Conflict` (`INVALID_STATE`) |
 | R10 | Consultar los equipos de un grupo devuelve resúmenes `{ id, name }` ordenados por nombre. | Criterio 10 | `404` si el grupo no existe |
-| R11 | *(Diferida)* El equipo debe estar inscrito en el torneo del grupo. | `reglas-dominio`: Grupos | Se implementará con `HU-GC-02` (`Registration`) |
+| R11 | El equipo debe estar inscrito en el torneo del grupo. | `reglas-dominio`: Grupos / HU-GC-02 | `409 Conflict` (`INVALID_STATE`) |
 
 ## Trazabilidad de criterios
 

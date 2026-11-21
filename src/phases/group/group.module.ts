@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { RegistrationsModule } from '../../registrations/registrations.module';
 import { Team } from '../../teams/entities/team.entity';
 import { TournamentsModule } from '../../tournaments/tournaments.module';
 import { PhasesModule } from '../base/phases.module';
@@ -15,6 +16,7 @@ import { GroupTypeOrmRepository } from './repositories/group.typeorm.repository'
     TypeOrmModule.forFeature([Group, Team]),
     PhasesModule,
     TournamentsModule,
+    RegistrationsModule,
   ],
   controllers: [GroupController],
   providers: [

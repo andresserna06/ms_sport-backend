@@ -236,7 +236,7 @@
               }
             },
             "url": "{{baseUrl}}/groups",
-            "description": "Crea grupo/fase GROUP. Variante POST: asignar equipo a grupo con /groups/{{groupId}}/teams/{{teamId}} sin body."
+            "description": "Crea grupo/fase GROUP. Variante POST: asignar equipo a grupo con /groups/{{groupId}}/teams/{{teamId}} sin body; requiere equipo inscrito en el torneo del grupo (R11), si no 409 INVALID_STATE."
           },
           "event": [
             {
@@ -363,7 +363,7 @@
           "response": []
         }
       ],
-      "description": "HU-GC-04. CRUD basico de grupos. Variantes mismo metodo: GET {{baseUrl}}/groups/{{groupId}} o {{baseUrl}}/groups/{{groupId}}/teams; POST {{baseUrl}}/groups/{{groupId}}/teams/{{teamId}} (asignar equipo); DELETE {{baseUrl}}/groups/{{groupId}}/teams/{{teamId}} (quitar equipo, 204)."
+      "description": "HU-GC-04. CRUD basico de grupos. R11: asignar equipo requiere inscripcion activa en el torneo del grupo (409 INVALID_STATE si no). Variantes mismo metodo: GET {{baseUrl}}/groups/{{groupId}} o {{baseUrl}}/groups/{{groupId}}/teams; POST {{baseUrl}}/groups/{{groupId}}/teams/{{teamId}} (asignar equipo); DELETE {{baseUrl}}/groups/{{groupId}}/teams/{{teamId}} (quitar equipo, 204)."
     },
     {
       "name": "GC-05 Fases finales",

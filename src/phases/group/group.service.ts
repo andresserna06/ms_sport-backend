@@ -1,5 +1,6 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { PhasesService } from '../base/phases.service';
+import { RegistrationsService } from '../../registrations/registrations.service';
 import { TournamentsService } from '../../tournaments/tournaments.service';
 import { CreateGroupDto } from './dto/create-group.dto';
 import { GroupResponseDto } from './dto/group-response.dto';
@@ -20,6 +21,7 @@ export class GroupService {
     private readonly groupMapper: GroupMapper,
     private readonly phasesService: PhasesService,
     private readonly tournamentsService: TournamentsService,
+    private readonly registrationsService: RegistrationsService,
   ) {}
 
   async create(dto: CreateGroupDto): Promise<GroupResponseDto> {
@@ -121,9 +123,21 @@ export class GroupService {
     if (team.group) {
       throw new ApplicationException(
         ErrorCase.INVALID_STATE,
-        `El equipo #${teamId} ya pertenece al grupo #${team.group.id}; retírelo antes de asignarlo a otro grupo`,
+        `El equipo #${teamId} ya pertenece al grupo #${team.group.id}; ret��relo antes de asignarlo a otro grupo`,
       );
     }
+
+    const tournamentId = group.tournament?.id;
+    if (tournamentId == null) {
+      throw new ApplicationException(
+        ErrorCase.INVALID_STATE,
+        `El grupo #${groupId} no tiene un torneo asociado`,
+      );
+    }
+    await this.registrationsService.assertTeamRegisteredInTournament(
+      teamId,
+      tournamentId,
+    );
 
     team.group = group;
     await this.groupRepository.saveTeam(team);

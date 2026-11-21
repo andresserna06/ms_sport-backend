@@ -1,5 +1,6 @@
 import { NotFoundException } from '@nestjs/common';
 import { ErrorCase } from '../../exception/error-case.enum';
+import { RegistrationsService } from '../../registrations/registrations.service';
 import { Team } from '../../teams/entities/team.entity';
 import { Tournament } from '../../tournaments/entities/tournament.entity';
 import { TournamentsService } from '../../tournaments/tournaments.service';
@@ -39,6 +40,9 @@ describe('GroupService', () => {
     Pick<PhasesService, 'existsByNameInTournament' | 'hasMatches'>
   >;
   let tournamentsService: jest.Mocked<Pick<TournamentsService, 'findOne'>>;
+  let registrationsService: jest.Mocked<
+    Pick<RegistrationsService, 'assertTeamRegisteredInTournament'>
+  >;
   let mapper: GroupMapper;
 
   beforeEach(() => {
@@ -56,12 +60,14 @@ describe('GroupService', () => {
       hasMatches: jest.fn(),
     };
     tournamentsService = { findOne: jest.fn() };
+    registrationsService = { assertTeamRegisteredInTournament: jest.fn() };
     mapper = new GroupMapper();
     service = new GroupService(
       repository,
       mapper,
       phasesService as unknown as PhasesService,
       tournamentsService as unknown as TournamentsService,
+      registrationsService as unknown as RegistrationsService,
     );
   });
 
@@ -155,10 +161,16 @@ describe('GroupService', () => {
         .mockResolvedValueOnce(group)
         .mockResolvedValueOnce(updatedGroup);
       repository.findTeamById.mockResolvedValue(team);
+      registrationsService.assertTeamRegisteredInTournament.mockResolvedValue(
+        undefined,
+      );
       repository.saveTeam.mockResolvedValue(team);
 
       const result = await service.assignTeam(3, 1);
 
+      expect(
+        registrationsService.assertTeamRegisteredInTournament,
+      ).toHaveBeenCalledWith(1, 7);
       expect(team.group).toBe(group);
       expect(repository.saveTeam).toHaveBeenCalledWith(team);
       expect(result.teams).toEqual([{ id: 1, name: 'Lions' }]);
@@ -202,6 +214,19 @@ describe('GroupService', () => {
       await expect(service.assignTeam(3, 1)).rejects.toMatchObject({
         errorCase: ErrorCase.INVALID_STATE,
       });
+    });
+
+    it('should throw INVALID_STATE when the team is not registered in tournament', async () => {
+      repository.findById.mockResolvedValue(makeGroup());
+      repository.findTeamById.mockResolvedValue(makeTeam());
+      registrationsService.assertTeamRegisteredInTournament.mockRejectedValue({
+        errorCase: ErrorCase.INVALID_STATE,
+      });
+
+      await expect(service.assignTeam(3, 1)).rejects.toMatchObject({
+        errorCase: ErrorCase.INVALID_STATE,
+      });
+      expect(repository.saveTeam).not.toHaveBeenCalled();
     });
   });
 
