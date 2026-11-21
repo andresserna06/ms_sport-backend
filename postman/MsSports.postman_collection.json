@@ -34464,6 +34464,1551 @@
       ]
     },
     {
+      "name": "GD-03 Equipos y deportes",
+      "item": [
+        {
+          "name": "S-00 Setup: equipo A",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.collectionVariables.set('tgRun', 'QA' + Date.now() + 'G');"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 201', () => pm.response.to.have.status(201));",
+                  "pm.collectionVariables.set('tgTeamA', pm.response.json().id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"{{tgRun}}-A\",\n  \"city\": \"Medellín\",\n  \"contactEmail\": \"qa@example.com\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/teams",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "teams"
+              ]
+            }
+          }
+        },
+        {
+          "name": "S-01 Setup: equipo inactivo",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 201', () => pm.response.to.have.status(201));",
+                  "pm.collectionVariables.set('tgTeamI', pm.response.json().id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"{{tgRun}}-I\",\n  \"city\": \"Medellín\",\n  \"contactEmail\": \"qa@example.com\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/teams",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "teams"
+              ]
+            }
+          }
+        },
+        {
+          "name": "S-02 Setup: desactivar equipo inactivo",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/teams/{{tgTeamI}}/deactivate",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "teams",
+                "{{tgTeamI}}",
+                "deactivate"
+              ]
+            }
+          }
+        },
+        {
+          "name": "S-03 Setup: deporte X",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 201', () => pm.response.to.have.status(201));",
+                  "pm.collectionVariables.set('tgSportX', pm.response.json().id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"{{tgRun}} Bx\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/sports",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "sports"
+              ]
+            }
+          }
+        },
+        {
+          "name": "S-04 Setup: deporte Y",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 201', () => pm.response.to.have.status(201));",
+                  "pm.collectionVariables.set('tgSportY', pm.response.json().id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"{{tgRun}} By\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/sports",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "sports"
+              ]
+            }
+          }
+        },
+        {
+          "name": "S-05 Setup: deporte inactivo",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 201', () => pm.response.to.have.status(201));",
+                  "pm.collectionVariables.set('tgSportZ', pm.response.json().id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"{{tgRun}} Bz\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/sports",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "sports"
+              ]
+            }
+          }
+        },
+        {
+          "name": "S-06 Setup: desactivar deporte inactivo",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/sports/{{tgSportZ}}/deactivate",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "sports",
+                "{{tgSportZ}}",
+                "deactivate"
+              ]
+            }
+          }
+        },
+        {
+          "name": "A-01 Asociar equipo con deporte",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 201', () => pm.response.to.have.status(201));",
+                  "const b = pm.response.json(); pm.test('shape', () => { pm.expect(b.id).to.be.a('number'); pm.expect(b.team.id).to.eql(Number(pm.collectionVariables.get('tgTeamA'))); pm.expect(b.sport.id).to.eql(Number(pm.collectionVariables.get('tgSportX'))); pm.expect(b.team.name).to.be.a('string'); pm.expect(b.sport.name).to.be.a('string'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/teams/{{tgTeamA}}/sports/{{tgSportX}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "teams",
+                "{{tgTeamA}}",
+                "sports",
+                "{{tgSportX}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "A-02 Asociacion duplicada",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 409', () => pm.response.to.have.status(409));",
+                  "pm.test('errorCase is ALREADY_EXISTS', () => pm.expect(pm.response.json().errorCase).to.eql('ALREADY_EXISTS'));",
+                  "pm.test('Spanish message', () => pm.expect(pm.response.json().message).to.match(/ya está asociado/));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/teams/{{tgTeamA}}/sports/{{tgSportX}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "teams",
+                "{{tgTeamA}}",
+                "sports",
+                "{{tgSportX}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "A-03 El mismo equipo con otro deporte",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 201', () => pm.response.to.have.status(201));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/teams/{{tgTeamA}}/sports/{{tgSportY}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "teams",
+                "{{tgTeamA}}",
+                "sports",
+                "{{tgSportY}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "A-04 Equipo inexistente",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 404', () => pm.response.to.have.status(404));",
+                  "pm.test('errorCase is NOT_FOUND', () => pm.expect(pm.response.json().errorCase).to.eql('NOT_FOUND'));",
+                  "pm.test('Spanish message', () => pm.expect(pm.response.json().message).to.match(/No existe un equipo/));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/teams/999999/sports/{{tgSportX}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "teams",
+                "999999",
+                "sports",
+                "{{tgSportX}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "A-05 Deporte inexistente",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 404', () => pm.response.to.have.status(404));",
+                  "pm.test('errorCase is NOT_FOUND', () => pm.expect(pm.response.json().errorCase).to.eql('NOT_FOUND'));",
+                  "pm.test('Spanish message', () => pm.expect(pm.response.json().message).to.match(/No existe el deporte/));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/teams/{{tgTeamA}}/sports/999999",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "teams",
+                "{{tgTeamA}}",
+                "sports",
+                "999999"
+              ]
+            }
+          }
+        },
+        {
+          "name": "A-06 Equipo y deporte inexistentes: gana el equipo",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 404', () => pm.response.to.have.status(404));",
+                  "pm.test('errorCase is NOT_FOUND', () => pm.expect(pm.response.json().errorCase).to.eql('NOT_FOUND'));",
+                  "pm.test('Spanish message', () => pm.expect(pm.response.json().message).to.match(/No existe un equipo/));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/teams/999999/sports/999999",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "teams",
+                "999999",
+                "sports",
+                "999999"
+              ]
+            }
+          }
+        },
+        {
+          "name": "A-07 Equipo inactivo",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 409', () => pm.response.to.have.status(409));",
+                  "pm.test('errorCase is INVALID_STATE', () => pm.expect(pm.response.json().errorCase).to.eql('INVALID_STATE'));",
+                  "pm.test('Spanish message', () => pm.expect(pm.response.json().message).to.match(/inactivo/));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/teams/{{tgTeamI}}/sports/{{tgSportX}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "teams",
+                "{{tgTeamI}}",
+                "sports",
+                "{{tgSportX}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "A-08 Deporte inactivo",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 409', () => pm.response.to.have.status(409));",
+                  "pm.test('errorCase is INVALID_STATE', () => pm.expect(pm.response.json().errorCase).to.eql('INVALID_STATE'));",
+                  "pm.test('Spanish message', () => pm.expect(pm.response.json().message).to.match(/inactivo/));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/teams/{{tgTeamA}}/sports/{{tgSportZ}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "teams",
+                "{{tgTeamA}}",
+                "sports",
+                "{{tgSportZ}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "A-09 Equipo inactivo y deporte inexistente: 404",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 404', () => pm.response.to.have.status(404));",
+                  "pm.test('errorCase is NOT_FOUND', () => pm.expect(pm.response.json().errorCase).to.eql('NOT_FOUND'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/teams/{{tgTeamI}}/sports/999999",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "teams",
+                "{{tgTeamI}}",
+                "sports",
+                "999999"
+              ]
+            }
+          }
+        },
+        {
+          "name": "A-10 Id de equipo no numerico",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 400', () => pm.response.to.have.status(400));",
+                  "pm.test('errorCase is INVALID_OPERATION', () => pm.expect(pm.response.json().errorCase).to.eql('INVALID_OPERATION'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/teams/abc/sports/{{tgSportX}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "teams",
+                "abc",
+                "sports",
+                "{{tgSportX}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "A-11 Id de deporte con notacion exponencial",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 400', () => pm.response.to.have.status(400));",
+                  "pm.test('errorCase is INVALID_OPERATION', () => pm.expect(pm.response.json().errorCase).to.eql('INVALID_OPERATION'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/teams/{{tgTeamA}}/sports/1e2",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "teams",
+                "{{tgTeamA}}",
+                "sports",
+                "1e2"
+              ]
+            }
+          }
+        },
+        {
+          "name": "A-12 Id cero",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 404', () => pm.response.to.have.status(404));",
+                  "pm.test('errorCase is NOT_FOUND', () => pm.expect(pm.response.json().errorCase).to.eql('NOT_FOUND'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/teams/0/sports/{{tgSportX}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "teams",
+                "0",
+                "sports",
+                "{{tgSportX}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "L-01 Deportes de un equipo (ordenados, con active)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('names Bx,By', () => pm.expect(pm.response.json().map((x) => x.name.replace(pm.collectionVariables.get('tgRun'), '').replace(/^[ -]/, ''))).to.eql([\"Bx\",\"By\"]));",
+                  "pm.test('has active flag', () => pm.expect(pm.response.json().every((x) => x.active === true)).to.eql(true));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/teams/{{tgTeamA}}/sports",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "teams",
+                "{{tgTeamA}}",
+                "sports"
+              ]
+            }
+          }
+        },
+        {
+          "name": "L-02 Filtro active=true",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('names Bx,By', () => pm.expect(pm.response.json().map((x) => x.name.replace(pm.collectionVariables.get('tgRun'), '').replace(/^[ -]/, ''))).to.eql([\"Bx\",\"By\"]));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/teams/{{tgTeamA}}/sports?active=true",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "teams",
+                "{{tgTeamA}}",
+                "sports"
+              ],
+              "query": [
+                {
+                  "key": "active",
+                  "value": "true"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "L-03 Filtro active=false no devuelve activos",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('empty', () => pm.expect(pm.response.json()).to.eql([]));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/teams/{{tgTeamA}}/sports?active=false",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "teams",
+                "{{tgTeamA}}",
+                "sports"
+              ],
+              "query": [
+                {
+                  "key": "active",
+                  "value": "false"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "L-04 Filtro active invalido",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 400', () => pm.response.to.have.status(400));",
+                  "pm.test('flat error', () => pm.expect(pm.response.json()).to.have.property('active'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/teams/{{tgTeamA}}/sports?active=abc",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "teams",
+                "{{tgTeamA}}",
+                "sports"
+              ],
+              "query": [
+                {
+                  "key": "active",
+                  "value": "abc"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "L-05 Equipos de un deporte",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('only team A', () => { const b = pm.response.json(); pm.expect(b).to.have.lengthOf(1); pm.expect(b[0].id).to.eql(Number(pm.collectionVariables.get('tgTeamA'))); pm.expect(b[0].active).to.eql(true); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/sports/{{tgSportX}}/teams",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "sports",
+                "{{tgSportX}}",
+                "teams"
+              ]
+            }
+          }
+        },
+        {
+          "name": "L-06 Equipo sin asociaciones devuelve lista vacia",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('empty', () => pm.expect(pm.response.json()).to.eql([]));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/teams/{{tgTeamI}}/sports",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "teams",
+                "{{tgTeamI}}",
+                "sports"
+              ]
+            }
+          }
+        },
+        {
+          "name": "L-07 Deporte sin equipos devuelve lista vacia",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('empty', () => pm.expect(pm.response.json()).to.eql([]));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/sports/{{tgSportZ}}/teams",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "sports",
+                "{{tgSportZ}}",
+                "teams"
+              ]
+            }
+          }
+        },
+        {
+          "name": "L-08 Deportes de un equipo inexistente",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 404', () => pm.response.to.have.status(404));",
+                  "pm.test('errorCase is NOT_FOUND', () => pm.expect(pm.response.json().errorCase).to.eql('NOT_FOUND'));",
+                  "pm.test('Spanish message', () => pm.expect(pm.response.json().message).to.match(/No existe un equipo/));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/teams/999999/sports",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "teams",
+                "999999",
+                "sports"
+              ]
+            }
+          }
+        },
+        {
+          "name": "L-09 Equipos de un deporte inexistente",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 404', () => pm.response.to.have.status(404));",
+                  "pm.test('errorCase is NOT_FOUND', () => pm.expect(pm.response.json().errorCase).to.eql('NOT_FOUND'));",
+                  "pm.test('Spanish message', () => pm.expect(pm.response.json().message).to.match(/No existe el deporte/));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/sports/999999/teams",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "sports",
+                "999999",
+                "teams"
+              ]
+            }
+          }
+        },
+        {
+          "name": "L-10 Los equipos del seed siguen intactos (Futbol)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 200', () => pm.response.to.have.status(200));",
+                  "const f = pm.response.json().find((s) => s.name === 'Fútbol'); pm.test('seed sport exists: run npm run seed', () => pm.expect(f).to.exist); pm.collectionVariables.set('tgSeedFootball', f ? f.id : 'setup-failed');"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/sports?name=Fútbol",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "sports"
+              ],
+              "query": [
+                {
+                  "key": "name",
+                  "value": "Fútbol"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "L-11 Equipos del deporte Futbol incluyen a Atletico Nacional",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('seed teams', () => pm.expect(pm.response.json().map((t) => t.name)).to.include('Atlético Nacional'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/sports/{{tgSeedFootball}}/teams",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "sports",
+                "{{tgSeedFootball}}",
+                "teams"
+              ]
+            }
+          }
+        },
+        {
+          "name": "R-01 Retirar una asociacion",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 204', () => pm.response.to.have.status(204));",
+                  "pm.test('empty body', () => pm.expect(pm.response.text()).to.eql(''));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/teams/{{tgTeamA}}/sports/{{tgSportX}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "teams",
+                "{{tgTeamA}}",
+                "sports",
+                "{{tgSportX}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "R-02 Retirar de nuevo: 404",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 404', () => pm.response.to.have.status(404));",
+                  "pm.test('errorCase is NOT_FOUND', () => pm.expect(pm.response.json().errorCase).to.eql('NOT_FOUND'));",
+                  "pm.test('Spanish message', () => pm.expect(pm.response.json().message).to.match(/no está asociado/));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/teams/{{tgTeamA}}/sports/{{tgSportX}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "teams",
+                "{{tgTeamA}}",
+                "sports",
+                "{{tgSportX}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "R-03 El equipo sigue existiendo",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/teams/{{tgTeamA}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "teams",
+                "{{tgTeamA}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "R-04 El deporte sigue existiendo",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/sports/{{tgSportX}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "sports",
+                "{{tgSportX}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "R-05 La lista ya no incluye el deporte retirado",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('names By', () => pm.expect(pm.response.json().map((x) => x.name.replace(pm.collectionVariables.get('tgRun'), '').replace(/^[ -]/, ''))).to.eql([\"By\"]));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/teams/{{tgTeamA}}/sports",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "teams",
+                "{{tgTeamA}}",
+                "sports"
+              ]
+            }
+          }
+        },
+        {
+          "name": "R-06 Retirar con equipo o deporte inexistente",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 404', () => pm.response.to.have.status(404));",
+                  "pm.test('errorCase is NOT_FOUND', () => pm.expect(pm.response.json().errorCase).to.eql('NOT_FOUND'));",
+                  "pm.test('Spanish message', () => pm.expect(pm.response.json().message).to.match(/No existe el deporte/));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/teams/{{tgTeamA}}/sports/999999",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "teams",
+                "{{tgTeamA}}",
+                "sports",
+                "999999"
+              ]
+            }
+          }
+        },
+        {
+          "name": "R-07 Retirar con id invalido",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 400', () => pm.response.to.have.status(400));",
+                  "pm.test('errorCase is INVALID_OPERATION', () => pm.expect(pm.response.json().errorCase).to.eql('INVALID_OPERATION'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/teams/{{tgTeamA}}/sports/abc",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "teams",
+                "{{tgTeamA}}",
+                "sports",
+                "abc"
+              ]
+            }
+          }
+        },
+        {
+          "name": "R-08 Setup: desactivar el deporte Y asociado",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/sports/{{tgSportY}}/deactivate",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "sports",
+                "{{tgSportY}}",
+                "deactivate"
+              ]
+            }
+          }
+        },
+        {
+          "name": "R-09 Retirar con el deporte inactivo esta permitido",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 204', () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/teams/{{tgTeamA}}/sports/{{tgSportY}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "teams",
+                "{{tgTeamA}}",
+                "sports",
+                "{{tgSportY}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "B-01 Setup: asociar de nuevo A con X",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 201', () => pm.response.to.have.status(201));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/teams/{{tgTeamA}}/sports/{{tgSportX}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "teams",
+                "{{tgTeamA}}",
+                "sports",
+                "{{tgSportX}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "B-02 Un equipo con asociaciones no se elimina",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 409', () => pm.response.to.have.status(409));",
+                  "pm.test('errorCase is INVALID_STATE', () => pm.expect(pm.response.json().errorCase).to.eql('INVALID_STATE'));",
+                  "pm.test('Spanish message', () => pm.expect(pm.response.json().message).to.match(/tiene 1 deporte asociado/));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/teams/{{tgTeamA}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "teams",
+                "{{tgTeamA}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "B-03 Un deporte con equipos no se elimina",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 409', () => pm.response.to.have.status(409));",
+                  "pm.test('errorCase is INVALID_STATE', () => pm.expect(pm.response.json().errorCase).to.eql('INVALID_STATE'));",
+                  "pm.test('Spanish message', () => pm.expect(pm.response.json().message).to.match(/tiene 1 equipo asociado/));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/sports/{{tgSportX}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "sports",
+                "{{tgSportX}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "B-04 Retirar libera el borrado",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 204', () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/teams/{{tgTeamA}}/sports/{{tgSportX}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "teams",
+                "{{tgTeamA}}",
+                "sports",
+                "{{tgSportX}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "B-05 Ahora el equipo se puede eliminar",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 204', () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/teams/{{tgTeamA}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "teams",
+                "{{tgTeamA}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "B-06 Ahora el deporte se puede eliminar",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 204', () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/sports/{{tgSportX}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "sports",
+                "{{tgSportX}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Z-01 Cleanup: equipo inactivo",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 204', () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/teams/{{tgTeamI}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "teams",
+                "{{tgTeamI}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Z-02 Cleanup: deporte Y",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 204', () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/sports/{{tgSportY}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "sports",
+                "{{tgSportY}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Z-03 Cleanup: deporte inactivo",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 204', () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/sports/{{tgSportZ}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "sports",
+                "{{tgSportZ}}"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
       "name": "GD-02 Equipos",
       "item": [
         {
@@ -34474,7 +36019,7 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.collectionVariables.set('tRun', 'QAT' + Date.now());"
+                  "pm.collectionVariables.set('tRun', 'QA' + Date.now() + 'T');"
                 ]
               }
             },
@@ -35356,7 +36901,7 @@
           }
         },
         {
-          "name": "T-24 Setup: buscar equipo fixture Club Campestre de Medellín",
+          "name": "T-24 Setup: buscar equipo real Club Campestre de Medellín",
           "event": [
             {
               "listen": "test",

@@ -11,8 +11,7 @@ import {
 import { Sport } from '../../sports/entities/sport.entity';
 import { Team } from '../../teams/entities/team.entity';
 
-// Explicit association entity between Team and Sport.
-// Minimal version: HU-GD-03 completes it (service, controller, DTOs, rules).
+// Explicit association entity between Team and Sport (managed by HU-GD-03).
 @Entity('team_sports')
 @Unique('UQ_team_sports_team_sport', ['teamId', 'sportId'])
 @Index('IDX_team_sports_sport_id', ['sportId'])
