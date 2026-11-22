@@ -1,4 +1,4 @@
-﻿import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+﻿import { Inject, Injectable } from '@nestjs/common';
 import { PhasesService } from '../base/phases.service';
 import { RegistrationsService } from '../../registrations/registrations.service';
 import { TournamentsService } from '../../tournaments/services/tournaments.service';
@@ -204,17 +204,7 @@ export class GroupService {
   }
 
   private async getTournamentOrFail(id: number): Promise<void> {
-    try {
-      await this.tournamentsService.findOne(id);
-    } catch (error) {
-      if (error instanceof NotFoundException) {
-        throw new ApplicationException(
-          ErrorCase.NOT_FOUND,
-          `No existe un torneo con el id ${id}`,
-        );
-      }
-      throw error;
-    }
+    await this.tournamentsService.findOne(id);
   }
 }
 

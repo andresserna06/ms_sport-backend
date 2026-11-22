@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+﻿import { Injectable } from '@nestjs/common';
 import { CreateTournamentDto } from '../dtos/create-tournament.dto';
 import { TournamentResponseDto } from '../dtos/tournament-response.dto';
 import { UpdateTournamentDto } from '../dtos/update-tournament.dto';
@@ -11,7 +11,7 @@ export class TournamentMapper {
     entity.name = dto.name;
     entity.sportId = dto.sportId;
     entity.startDate = dto.startDate;
-    entity.registrationDeadline = dto.enrollmentDeadline;
+    entity.enrollmentDeadline = dto.enrollmentDeadline;
     entity.active = true;
     return entity;
   }
@@ -20,7 +20,7 @@ export class TournamentMapper {
     entity.name = dto.name;
     entity.sportId = dto.sportId;
     entity.startDate = dto.startDate;
-    entity.registrationDeadline = dto.enrollmentDeadline;
+    entity.enrollmentDeadline = dto.enrollmentDeadline;
     return entity;
   }
 
@@ -30,7 +30,7 @@ export class TournamentMapper {
       name: entity.name,
       sport: { id: entity.sport.id, name: entity.sport.name },
       startDate: entity.startDate,
-      enrollmentDeadline: entity.registrationDeadline,
+      enrollmentDeadline: entity.enrollmentDeadline,
       active: entity.active,
     };
   }
@@ -39,3 +39,4 @@ export class TournamentMapper {
     return entities.map((entity) => this.toResponseDto(entity));
   }
 }
+

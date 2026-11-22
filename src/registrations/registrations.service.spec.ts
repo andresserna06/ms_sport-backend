@@ -27,7 +27,7 @@ describe('RegistrationsService', () => {
     active: true,
     sportId: 30,
     status: TournamentStatus.SCHEDULED,
-    registrationDeadline: '2099-12-31',
+    enrollmentDeadline: '2099-12-31',
   } as Tournament;
   const registration = {
     id: 1,
@@ -115,3 +115,4 @@ describe('RegistrationsService', () => {
     });
   });
 });
+

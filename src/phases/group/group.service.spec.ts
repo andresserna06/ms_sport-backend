@@ -1,4 +1,4 @@
-import { NotFoundException } from '@nestjs/common';
+import { ApplicationException } from '../../exception/application.exception';
 import { ErrorCase } from '../../exception/error-case.enum';
 import { RegistrationsService } from '../../registrations/registrations.service';
 import { Team } from '../../teams/entities/team.entity';
@@ -97,7 +97,9 @@ describe('GroupService', () => {
     });
 
     it('should throw NOT_FOUND when the tournament does not exist', async () => {
-      tournamentsService.findOne.mockRejectedValue(new NotFoundException());
+      tournamentsService.findOne.mockRejectedValue(
+        new ApplicationException(ErrorCase.NOT_FOUND, 'No existe el torneo con id 7'),
+      );
 
       await expect(service.create(dto)).rejects.toMatchObject({
         errorCase: ErrorCase.NOT_FOUND,

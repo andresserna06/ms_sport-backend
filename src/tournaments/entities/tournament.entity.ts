@@ -1,4 +1,4 @@
-import {
+﻿import {
   Column,
   Entity,
   Index,
@@ -32,7 +32,7 @@ export class Tournament {
   startDate!: string;
 
   @Column({ type: 'date', name: 'enrollment_deadline' })
-  registrationDeadline!: string;
+  enrollmentDeadline!: string;
 
   @Column({ name: 'sport_id', type: 'int' })
   sportId!: number;
@@ -61,6 +61,7 @@ export class Tournament {
   registrations?: Relation<Registration[]>;
 
   canChangeRegistrations(today: string): boolean {
-    return this.status === TournamentStatus.SCHEDULED && today <= this.registrationDeadline;
+    return this.status === TournamentStatus.SCHEDULED && today <= this.enrollmentDeadline;
   }
 }
+
