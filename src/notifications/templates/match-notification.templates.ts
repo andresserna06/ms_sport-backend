@@ -1,3 +1,11 @@
+export interface MatchCreatedNotificationPayload {
+  matchId: number;
+  phaseId: number;
+  homeTeamName?: string;
+  awayTeamName?: string;
+  scheduledAt: string;
+}
+
 export interface ScoringEventNotificationPayload {
   matchId: number;
   playerUserId?: number;
@@ -71,6 +79,25 @@ export function buildScoringEventEmail(data: ScoringEventEmailData): {
     `</ul>`,
   ].join('');
 
+  return { subject, htmlContent };
+}
+
+export function buildMatchCreatedEmail(data: MatchCreatedNotificationPayload): {
+  subject: string;
+  htmlContent: string;
+} {
+  const home = data.homeTeamName ? escapeHtml(data.homeTeamName) : 'Por definir';
+  const away = data.awayTeamName ? escapeHtml(data.awayTeamName) : 'Por definir';
+  const subject = `Nuevo partido programado #${data.matchId}`;
+  const htmlContent = [
+    `<h2>Nuevo partido programado</h2>`,
+    `<p>Se ha creado el <strong>partido #${data.matchId}</strong> en la fase #${data.phaseId}.</p>`,
+    `<ul>`,
+    `<li><strong>Local:</strong> ${home}</li>`,
+    `<li><strong>Visitante:</strong> ${away}</li>`,
+    `<li><strong>Fecha programada:</strong> ${escapeHtml(data.scheduledAt)}</li>`,
+    `</ul>`,
+  ].join('');
   return { subject, htmlContent };
 }
 

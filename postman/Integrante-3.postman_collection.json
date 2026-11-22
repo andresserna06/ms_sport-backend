@@ -1037,6 +1037,137 @@
         }
       ],
       "description": "HU-GC-06. Contrato actual: POST/GET por fase, GET/PUT/DELETE por match. Update generico no acepta status/homeScore/awayScore (GC-07). Variantes GET mismo metodo: {{baseUrl}}/phases/{{phaseId}}/matches, {{baseUrl}}/matches/{{matchId}}."
+    },
+    {
+      "name": "FLOW GC-06 Verificar fase con torneo",
+      "description": "Flujo manual para diagnosticar: \"La fase X no tiene un torneo asociado\". Ejecutar en orden. Precondicion para crear partido: equipos activos, inscritos en el torneo (GC-02) y asignados al grupo (GC-04). Si GC-02 falla por sportId/TeamSport, ajustar por SQL/seed.",
+      "item": [
+        {
+          "name": "Check phase (GET)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/phases/{{phaseId}}",
+            "description": "Paso 1: verificar fase. Si tournamentId es null, la fase es huerfana y matches devolvera 409 INVALID_STATE. Variante: GET {{baseUrl}}/phases/1. Para listar fases por torneo: GET {{baseUrl}}/tournaments/{{tournamentId}}/phases."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200 OK', function () { pm.response.to.have.status(200); });",
+                  "const body = pm.response.json();",
+                  "pm.test('Phase has tournamentId', function () { pm.expect(body).to.have.property('tournamentId'); if(body.tournamentId !== null){ pm.collectionVariables.set('tournamentId', String(body.tournamentId)); } });",
+                  "pm.test('Diagnostico: fase asociada a torneo', function () { pm.expect(body.tournamentId, 'La fase no tiene torneo asociado; crea/usa una fase con tournamentId').to.not.eql(null); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Create tournament (POST)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/tournaments",
+            "description": "Paso 2 (si falta torneo): crea torneo y guarda tournamentId. Nota: DTO actual no acepta sportId; para GC-02 puede requerir SQL UPDATE tournaments SET sport_id=... WHERE id=... y TeamSport existente.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Tournament-Flow-{{runId}}\",\n  \"startDate\": \"2030-06-01\",\n  \"enrollmentDeadline\": \"2030-05-01\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 201 Created', function () { pm.response.to.have.status(201); });",
+                  "const body = pm.response.json();",
+                  "pm.collectionVariables.set('tournamentId', String(body.id));",
+                  "pm.test('Tournament id saved', function () { pm.expect(body.id).to.be.a('number'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Create group phase (POST)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/groups",
+            "description": "Paso 3: crea grupo/fase asociado al torneo. Guarda phaseId/groupId. Verifica luego con GET /phases/{{phaseId}} que tournamentId no sea null.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Group-Flow-{{runId}}\",\n  \"order\": 1,\n  \"tournamentId\": {{tournamentId}}\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 201 Created', function () { pm.response.to.have.status(201); });",
+                  "const body = pm.response.json();",
+                  "pm.collectionVariables.set('phaseId', String(body.id));",
+                  "pm.collectionVariables.set('groupId', String(body.id));",
+                  "pm.test('Group has tournamentId', function () { pm.expect(body.tournamentId).to.eql(Number(pm.collectionVariables.get('tournamentId'))); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Create match (POST)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/phases/{{phaseId}}/matches",
+            "description": "Paso 4: crea partido en fase valida. Precondiciones: home/away activos, inscritos en torneo, asignados al grupo. Si falla por precondiciones, usar carpetas Equipos/Torneos/GC-02/GC-04. Variante GET mismo flujo: {{baseUrl}}/phases/{{phaseId}}/matches.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"scheduledAt\": \"2030-01-15T10:00:00.000Z\",\n  \"homeTeamId\": {{homeTeamId}},\n  \"awayTeamId\": {{awayTeamId}}\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 201 Created', function () { pm.response.to.have.status(201); });",
+                  "const body = pm.response.json();",
+                  "pm.collectionVariables.set('matchId', String(body.id));",
+                  "pm.test('Match created in phase', function () { pm.expect(body.phaseId).to.eql(Number(pm.collectionVariables.get('phaseId'))); });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
     }
   ],
   "event": [

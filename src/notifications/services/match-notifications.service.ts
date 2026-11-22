@@ -13,8 +13,10 @@ import {
   type SecurityUserClient,
 } from '../ports/security-user-client.port';
 import {
+  buildMatchCreatedEmail,
   buildMatchFinishedEmail,
   buildScoringEventEmail,
+  type MatchCreatedNotificationPayload,
   type MatchFinishedNotificationPayload,
   type ScoringEventNotificationPayload,
 } from '../templates/match-notification.templates';
@@ -31,6 +33,20 @@ export class MatchNotificationsService implements MatchNotifier {
     @Inject(SECURITY_USER_CLIENT)
     private readonly securityUserClient: SecurityUserClient,
   ) {}
+
+  async notifyMatchCreated(payload: MatchCreatedNotificationPayload): Promise<void> {
+    const enabled =
+      String(process.env.NOTIFICATIONS_MATCH_CREATED_ENABLED ?? 'false').toLowerCase() ===
+      'true';
+    if (!enabled) {
+      this.logger.log(
+        `Notificación de creación de partido #${payload.matchId} omitida: NOTIFICATIONS_MATCH_CREATED_ENABLED=false`,
+      );
+      return;
+    }
+    const { subject, htmlContent } = buildMatchCreatedEmail(payload);
+    await this.dispatchToMatchRecipients(payload.matchId, subject, htmlContent);
+  }
 
   async notifyScoringEventCreated(
     payload: ScoringEventNotificationPayload,

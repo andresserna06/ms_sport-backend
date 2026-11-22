@@ -1,5 +1,6 @@
 import { forwardRef, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { NotificationsModule } from '../notifications/notifications.module';
 import { PhasesModule } from '../phases/base/phases.module';
 import { GroupModule } from '../phases/group/group.module';
 import { RegistrationsModule } from '../registrations/registrations.module';
@@ -21,6 +22,7 @@ import { MatchTypeOrmRepository } from './repositories/matches.typeorm.repositor
     RegistrationsModule,
     TeamsModule,
     ScoringEventDependenciesModule,
+    NotificationsModule,
   ],
   controllers: [MatchesController, PhaseMatchesController],
   providers: [

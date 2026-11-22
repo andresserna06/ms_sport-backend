@@ -1,4 +1,5 @@
 import {
+  type MatchCreatedNotificationPayload,
   type MatchFinishedNotificationPayload,
   type ScoringEventNotificationPayload,
 } from '../templates/match-notification.templates';
@@ -6,6 +7,7 @@ import {
 export const MATCH_NOTIFIER = Symbol('MATCH_NOTIFIER');
 
 export interface MatchNotifier {
+  notifyMatchCreated(payload: MatchCreatedNotificationPayload): Promise<void>;
   notifyScoringEventCreated(
     payload: ScoringEventNotificationPayload,
   ): Promise<void>;

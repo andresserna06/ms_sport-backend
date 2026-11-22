@@ -36,4 +36,8 @@ export class ScoringEventMatchDependenciesAdapter
   async hasScoringEvents(matchId: number): Promise<boolean> {
     return this.scoringEventRepository.existsByMatchId(matchId);
   }
+
+  async hasBlockingDependencies(matchId: number): Promise<boolean> {
+    return this.hasScoringEvents(matchId);
+  }
 }

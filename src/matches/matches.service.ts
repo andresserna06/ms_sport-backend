@@ -1,6 +1,7 @@
-﻿import { Inject, Injectable } from '@nestjs/common';
+﻿import { Inject, Injectable, Logger } from '@nestjs/common';
 import { ApplicationException } from '../exception/application.exception';
 import { ErrorCase } from '../exception/error-case.enum';
+import { MATCH_NOTIFIER, type MatchNotifier } from '../notifications/ports/match-notifier.port';
 import { Phase } from '../phases/base/entities/phase.entity';
 import { PhasesService } from '../phases/base/phases.service';
 import { GroupService } from '../phases/group/group.service';
@@ -19,6 +20,8 @@ import { MATCH_REPOSITORY, type MatchRepository } from './repositories/matches.r
 
 @Injectable()
 export class MatchesService {
+  private readonly logger = new Logger(MatchesService.name);
+
   constructor(
     @Inject(MATCH_REPOSITORY)
     private readonly matchesRepository: MatchRepository,
@@ -29,13 +32,17 @@ export class MatchesService {
     private readonly matchMapper: MatchMapper,
     @Inject(MATCH_DEPENDENCIES_CHECKER)
     private readonly dependenciesChecker: MatchDependenciesChecker,
+    @Inject(MATCH_NOTIFIER)
+    private readonly matchNotifier: MatchNotifier,
   ) {}
 
   async create(phaseId: number, dto: CreateMatchDto): Promise<MatchResponseDto> {
     const phase = await this.getPhaseOrFail(phaseId);
     await this.validateTeamsForPhase(phase, dto.homeTeamId, dto.awayTeamId);
     const saved = await this.matchesRepository.save(this.matchMapper.toEntity(dto, phase));
-    return this.findOne(saved.id);
+    const created = await this.findOne(saved.id);
+    await this.notifyMatchCreated(created, phase.id);
+    return created;
   }
 
   async findAll(): Promise<MatchResponseDto[]> {
@@ -60,9 +67,25 @@ export class MatchesService {
       );
     }
 
-    const targetPhase = dto.phaseId !== undefined ? await this.getPhaseOrFail(dto.phaseId) : match.phase;
-    const homeTeamId = dto.homeTeamId !== undefined ? dto.homeTeamId : (match.homeTeamId ?? undefined);
-    const awayTeamId = dto.awayTeamId !== undefined ? dto.awayTeamId : (match.awayTeamId ?? undefined);
+    const targetPhase =
+      dto.phaseId !== undefined ? await this.getPhaseOrFail(dto.phaseId) : match.phase;
+    const currentTournamentId = match.phase?.tournament?.id;
+    const targetTournamentId = targetPhase.tournament?.id;
+    if (
+      currentTournamentId !== undefined &&
+      targetTournamentId !== undefined &&
+      currentTournamentId !== targetTournamentId
+    ) {
+      throw new ApplicationException(
+        ErrorCase.INVALID_STATE,
+        `No se puede mover el partido ${id} a una fase de otro torneo`,
+      );
+    }
+
+    const homeTeamId =
+      dto.homeTeamId !== undefined ? dto.homeTeamId : (match.homeTeamId ?? undefined);
+    const awayTeamId =
+      dto.awayTeamId !== undefined ? dto.awayTeamId : (match.awayTeamId ?? undefined);
     await this.validateTeamsForPhase(targetPhase, homeTeamId, awayTeamId);
 
     if (dto.phaseId !== undefined) match.phase = targetPhase;
@@ -78,10 +101,13 @@ export class MatchesService {
         `No se puede eliminar el partido ${id} porque su estado es ${match.status}`,
       );
     }
-    if (await this.dependenciesChecker.hasScoringEvents(id)) {
+    const hasBlockingDependencies =
+      (await this.dependenciesChecker.hasBlockingDependencies?.(id)) ??
+      (await this.dependenciesChecker.hasScoringEvents(id));
+    if (hasBlockingDependencies) {
       throw new ApplicationException(
         ErrorCase.INVALID_STATE,
-        `No se puede eliminar el partido ${id} porque tiene anotaciones registradas`,
+        `No se puede eliminar el partido ${id} porque tiene información asociada que lo impide`,
       );
     }
     await this.matchesRepository.remove(match);
@@ -165,7 +191,26 @@ export class MatchesService {
 
   private assertTeamsAssigned(match: Match): void {
     if (match.homeTeamId === null || match.awayTeamId === null) {
-      throw new ApplicationException(ErrorCase.INVALID_STATE, `El partido ${match.id} no tiene equipos participantes asignados`);
+      throw new ApplicationException(
+        ErrorCase.INVALID_STATE,
+        `El partido ${match.id} no tiene equipos participantes asignados`,
+      );
+    }
+  }
+
+  private async notifyMatchCreated(match: MatchResponseDto, phaseId: number): Promise<void> {
+    try {
+      await this.matchNotifier.notifyMatchCreated({
+        matchId: match.id,
+        phaseId,
+        homeTeamName: match.homeTeamId ? `Equipo ${match.homeTeamId}` : undefined,
+        awayTeamName: match.awayTeamId ? `Equipo ${match.awayTeamId}` : undefined,
+        scheduledAt: new Date(match.scheduledAt).toISOString(),
+      });
+    } catch (error) {
+      this.logger.warn(
+        `No se pudo enviar la notificación de creación del partido #${match.id}: ${String(error)}`,
+      );
     }
   }
 }
