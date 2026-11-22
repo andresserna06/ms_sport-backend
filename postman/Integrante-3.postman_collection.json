@@ -1,7 +1,7 @@
 {
   "info": {
     "name": "Integrante 3 - Gestión de competencias",
-    "description": "Coleccion Postman para HU-GC-02/03/04/05/06 (Integrante 3). Una peticion por metodo por carpeta; editar URL/body para variantes del mismo metodo. Precondiciones: baseUrl/token en environment, torneo/equipos/fase existentes. GC-02: el torneo debe tener sportId y debe existir asociacion TeamSport(teamId,sportId); si GD-03 no esta implementada en API, crearla por seed/SQL antes de probar. runId se genera automaticamente.",
+    "description": "Coleccion Postman para HU-GC-02/03/04/05/06 (Integrante 3). Una peticion por metodo por carpeta; editar URL/body para variantes del mismo metodo. Precondiciones: baseUrl/token en environment, deporte/equipos/TeamSport y torneo existentes. GC-01 soporta sportId; GC-02 valida TeamSport(teamId,tournament.sportId). runId se genera automaticamente.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "auth": {
@@ -352,8 +352,61 @@
       ]
     },
     {
+      "name": "GD-03 Team-Sports",
+      "description": "Asociacion equipo-deporte (GD-03). Precondicion para GC-02: crear TeamSport antes de inscribir equipo en torneo del mismo deporte.",
+      "item": [
+        {
+          "name": "Associate team sport (POST)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/teams/{{teamId}}/sports/{{sportId}}",
+            "description": "Asocia equipo con deporte. 201/200 segun implementacion; 409 si ya existe o estado invalido."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200/201', function(){ pm.expect([200,201]).to.include(pm.response.code); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "List team sports (GET)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/teams/{{teamId}}/sports",
+            "description": "Lista deportes asociados al equipo. Variante: {{baseUrl}}/sports/{{sportId}}/teams?active=true."
+          }
+        },
+        {
+          "name": "List sport teams (GET)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/sports/{{sportId}}/teams",
+            "description": "Lista equipos asociados al deporte. Variante con ?active=true."
+          }
+        },
+        {
+          "name": "Dissociate team sport (DELETE)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/teams/{{teamId}}/sports/{{sportId}}",
+            "description": "Elimina asociacion. 204 si existe; 404 si no existe."
+          }
+        }
+      ]
+    },
+    {
       "name": "Torneos",
-      "description": "GC-01 soporte. Una peticion por metodo; editar URL/body para variantes. IMPORTANTE: DTO actual no acepta sportId; si GC-02 falla con torneo sin deporte definido, asignar sport_id por SQL y asegurar TeamSport. Variantes GET: {{baseUrl}}/tournaments/{{tournamentId}}, {{baseUrl}}/tournaments/reports/open-enrollment, {{baseUrl}}/tournaments/{{tournamentId}}/phases.",
+      "description": "GC-01 soporte. Una peticion por metodo; editar URL/body para variantes. DTO actual: name, sportId, startDate, enrollmentDeadline. Variantes GET: {{baseUrl}}/tournaments/{{tournamentId}}, {{baseUrl}}/tournaments/reports/open-enrollment, {{baseUrl}}/tournaments/{{tournamentId}}/overview, {{baseUrl}}/tournaments/{{tournamentId}}/phases.",
       "item": [
         {
           "name": "Create tournament (POST)",
@@ -366,10 +419,10 @@
               }
             ],
             "url": "{{baseUrl}}/tournaments",
-            "description": "Crea torneo. DTO actual: name, startDate, enrollmentDeadline (sin sportId). Guarda tournamentId.",
+            "description": "Crea torneo GC-01. Requiere sportId activo. Guarda tournamentId.",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"Tournament-{{runId}}\",\n  \"startDate\": \"2030-06-01\",\n  \"enrollmentDeadline\": \"2030-05-01\"\n}"
+              "raw": "{\n  \"name\": \"Tournament-{{runId}}\",\n  \"sportId\": {{sportId}},\n  \"startDate\": \"2030-06-01\",\n  \"enrollmentDeadline\": \"2030-05-01\"\n}"
             }
           },
           "event": [
@@ -397,7 +450,7 @@
               }
             ],
             "url": "{{baseUrl}}/tournaments",
-            "description": "Lista torneos. Variantes GET: /tournaments/{{tournamentId}}, /tournaments/reports/open-enrollment, /tournaments/{{tournamentId}}/phases."
+            "description": "Lista torneos. Variantes GET: /tournaments/{{tournamentId}}, /tournaments/reports/open-enrollment, /tournaments/{{tournamentId}}/overview, /tournaments/{{tournamentId}}/phases."
           },
           "event": [
             {
@@ -413,9 +466,9 @@
           ]
         },
         {
-          "name": "Update tournament (PATCH)",
+          "name": "Update tournament (PUT)",
           "request": {
-            "method": "PATCH",
+            "method": "PUT",
             "header": [
               {
                 "key": "Content-Type",
@@ -423,10 +476,15 @@
               }
             ],
             "url": "{{baseUrl}}/tournaments/{{tournamentId}}",
-            "description": "Actualiza torneo (PATCH parcial). DTO actual: name?, startDate?, enrollmentDeadline?.",
+            "description": "Actualiza torneo (PUT reemplazo completo). DTO: name, sportId, startDate, enrollmentDeadline.",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"Tournament-Updated-{{runId}}\"\n}"
+              "raw": "{\n  \"name\": \"Tournament-Updated-{{runId}}\",\n  \"sportId\": {{sportId}},\n  \"startDate\": \"2030-06-01\",\n  \"enrollmentDeadline\": \"2030-05-01\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             }
           },
           "event": [
@@ -563,9 +621,18 @@
             }
           ],
           "response": []
+        },
+        {
+          "name": "List team tournaments (GET)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/teams/{{teamId}}/tournaments",
+            "description": "Lista torneos donde el equipo est? inscrito. Variante ?til para validar GC-02."
+          }
         }
       ],
-      "description": "HU-GC-02. Endpoints cubiertos por metodo: POST/GET/DELETE en /tournaments/:tournamentId/registrations. Variante GET mismo metodo (editar URL): /teams/{{teamId}}/tournaments. Punto 2: create valida TeamSport(teamId,tournament.sportId); si falta asociacion o torneo sin sportId retorna 409 INVALID_STATE."
+      "description": "HU-GC-02. Endpoints por metodo: POST/GET/DELETE en /tournaments/:tournamentId/registrations. Variante GET: /teams/{{teamId}}/tournaments. Precondicion: torneo con sportId y TeamSport(teamId,sportId) existente (GD-03)."
     },
     {
       "name": "GC-03 Fases",
@@ -595,6 +662,24 @@
             }
           ],
           "response": []
+        },
+        {
+          "name": "Get phase by id (GET)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/phases/{{phaseId}}",
+            "description": "Obtiene detalle de fase por id."
+          }
+        },
+        {
+          "name": "List tournament phases alias (GET)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/tournaments/{{tournamentId}}/phases",
+            "description": "Alias por torneo. Equivalente a /phases?tournamentId=."
+          }
         }
       ],
       "description": "HU-GC-03. Base de fases es read/report; creacion/edicion se hace en GC-04 (/groups) y GC-05 (/finals). Variante GET: {{baseUrl}}/phases/{{phaseId}}, {{baseUrl}}/phases/reports/count-by-type o {{baseUrl}}/tournaments/{{tournamentId}}/phases."
@@ -681,6 +766,15 @@
           "response": []
         },
         {
+          "name": "Get group by id (GET)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/groups/{{groupId}}",
+            "description": "Obtiene detalle de grupo por id."
+          }
+        },
+        {
           "name": "Update group (PATCH)",
           "request": {
             "method": "PATCH",
@@ -744,6 +838,15 @@
             }
           ],
           "response": []
+        },
+        {
+          "name": "Get group teams (GET)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/groups/{{groupId}}/teams",
+            "description": "Lista equipos asignados al grupo."
+          }
         }
       ],
       "description": "HU-GC-04. CRUD basico de grupos. R11: asignar equipo requiere inscripcion activa en el torneo del grupo (409 INVALID_STATE si no). Variantes mismo metodo: GET {{baseUrl}}/groups/{{groupId}} o {{baseUrl}}/groups/{{groupId}}/teams; POST {{baseUrl}}/groups/{{groupId}}/teams/{{teamId}} (asignar equipo); DELETE {{baseUrl}}/groups/{{groupId}}/teams/{{teamId}} (quitar equipo, 204)."
@@ -828,6 +931,15 @@
             }
           ],
           "response": []
+        },
+        {
+          "name": "Get final by id (GET)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/finals/{{finalId}}",
+            "description": "Obtiene detalle de fase final por id."
+          }
         },
         {
           "name": "Update final phase (PATCH)",
@@ -971,9 +1083,27 @@
           "response": []
         },
         {
-          "name": "Update match (PUT)",
+          "name": "List matches by phase (GET)",
           "request": {
-            "method": "PUT",
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/phases/{{phaseId}}/matches",
+            "description": "Lista partidos por fase."
+          }
+        },
+        {
+          "name": "Get match by id (GET)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/matches/{{matchId}}",
+            "description": "Obtiene detalle de partido por id."
+          }
+        },
+        {
+          "name": "Update match (PATCH)",
+          "request": {
+            "method": "PATCH",
             "header": [
               {
                 "key": "Content-Type",
@@ -990,7 +1120,7 @@
               }
             },
             "url": "{{baseUrl}}/matches/{{matchId}}",
-            "description": "Actualiza partido SCHEDULED. No enviar status/homeScore/awayScore; usar GC-07 para resultado/finalizacion."
+            "description": "Actualiza partido SCHEDULED. No acepta status/homeScore/awayScore; resultado/finalizaci?n por GC-07."
           },
           "event": [
             {
@@ -1040,7 +1170,7 @@
     },
     {
       "name": "FLOW GC-06 Verificar fase con torneo",
-      "description": "Flujo manual para diagnosticar: \"La fase X no tiene un torneo asociado\". Ejecutar en orden. Precondicion para crear partido: equipos activos, inscritos en el torneo (GC-02) y asignados al grupo (GC-04). Si GC-02 falla por sportId/TeamSport, ajustar por SQL/seed.",
+      "description": "Flujo manual para diagnosticar \"La fase X no tiene un torneo asociado\". Precondicion: equipos activos, TeamSport creado (GD-03), inscritos en torneo (GC-02) y asignados al grupo (GC-04).",
       "item": [
         {
           "name": "Check phase (GET)",
@@ -1081,10 +1211,10 @@
               }
             ],
             "url": "{{baseUrl}}/tournaments",
-            "description": "Paso 2 (si falta torneo): crea torneo y guarda tournamentId. Nota: DTO actual no acepta sportId; para GC-02 puede requerir SQL UPDATE tournaments SET sport_id=... WHERE id=... y TeamSport existente.",
+            "description": "Crea torneo GC-01. Requiere sportId activo. Guarda tournamentId.",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"Tournament-Flow-{{runId}}\",\n  \"startDate\": \"2030-06-01\",\n  \"enrollmentDeadline\": \"2030-05-01\"\n}"
+              "raw": "{\n  \"name\": \"Tournament-{{runId}}\",\n  \"sportId\": {{sportId}},\n  \"startDate\": \"2030-06-01\",\n  \"enrollmentDeadline\": \"2030-05-01\"\n}"
             }
           },
           "event": [
