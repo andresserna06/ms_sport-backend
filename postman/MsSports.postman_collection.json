@@ -10,7 +10,14 @@
       "script": {
         "type": "text/javascript",
         "exec": [
-          "if (!pm.collectionVariables.get('runId')) { pm.collectionVariables.set('runId', String(Date.now())); }"
+          "if (!pm.collectionVariables.get('runId')) { pm.collectionVariables.set('runId', String(Date.now())); }",
+          "// Unique user ids for the player tests (GD-04..GD-08, GC-07).",
+          "if (!pm.collectionVariables.get('testUserId1')) {",
+          "  const baseUserId = 100000 + (Date.now() % 800000);",
+          "  pm.collectionVariables.set('testUserId1', String(baseUserId));",
+          "  pm.collectionVariables.set('testUserId2', String(baseUserId + 1));",
+          "  pm.collectionVariables.set('testUserId3', String(baseUserId + 2));",
+          "}"
         ]
       }
     }
@@ -896,7 +903,7 @@
                   "  try {",
                   "    X = yield cr(() => ({}));",
                   "    pm.variables.set('path', (() => '/sports')(X));",
-                  "    const __b = (() => `{\"name\":\"  QA${runId} C04 F├║tbol de sal├│n ├▒and├║  \"}`)(X); pm.variables.set('body', typeof __b === 'string' ? __b : JSON.stringify(__b));",
+                  "    const __b = (() => `{\"name\":\"  QA${runId} C04 Fútbol de salón ñandú  \"}`)(X); pm.variables.set('body', typeof __b === 'string' ? __b : JSON.stringify(__b));",
                   "    pm.variables.set('ctx', JSON.stringify(X || {}));",
                   "  } catch (e) {",
                   "    pm.variables.set('setupError', String(e && e.message || e));",
@@ -1014,7 +1021,7 @@
                   "    const X = JSON.parse(pm.variables.get('ctx') || '{}');",
                   "    yield cr(function* () {",
                   "    code(201); const j = resp();",
-                  "    pm.test('name trimmed and accents intact', () => pm.expect(j.name).to.eql(`QA${runId} C04 F├║tbol de sal├│n ├▒and├║`));",
+                  "    pm.test('name trimmed and accents intact', () => pm.expect(j.name).to.eql(`QA${runId} C04 Fútbol de salón ñandú`));",
                   "    const g = yield get(j.id); pm.test('GET returns the same text', () => pm.expect(g.json.name).to.eql(j.name));",
                   "  }, X);",
                   "    if (pm.request.method === 'POST' && pm.response.code === 201) track(resp());",
@@ -2657,7 +2664,7 @@
                   "  try {",
                   "    X = yield cr(() => ({}));",
                   "    pm.variables.set('path', (() => '/sports')(X));",
-                  "    const __b = (() => `{\"name\":\"QA${runId} C11 ÔÜ¢ F├║tbol\"}`)(X); pm.variables.set('body', typeof __b === 'string' ? __b : JSON.stringify(__b));",
+                  "    const __b = (() => `{\"name\":\"QA${runId} C11 ⚽ Fútbol\"}`)(X); pm.variables.set('body', typeof __b === 'string' ? __b : JSON.stringify(__b));",
                   "    pm.variables.set('ctx', JSON.stringify(X || {}));",
                   "  } catch (e) {",
                   "    pm.variables.set('setupError', String(e && e.message || e));",
@@ -2773,7 +2780,7 @@
                   "  try {",
                   "    pm.test('setup completed', () => pm.expect(pm.variables.get('setupError') || '').to.eql(''));",
                   "    const X = JSON.parse(pm.variables.get('ctx') || '{}');",
-                  "    yield cr(function* () { code(201); const j = resp(); pm.test('name identical', () => pm.expect(j.name).to.eql(`QA${runId} C11 ÔÜ¢ F├║tbol`)); const g = yield get(j.id); same(g.json.name, j.name, 'GET returns the same emoji name'); }, X);",
+                  "    yield cr(function* () { code(201); const j = resp(); pm.test('name identical', () => pm.expect(j.name).to.eql(`QA${runId} C11 ⚽ Fútbol`)); const g = yield get(j.id); same(g.json.name, j.name, 'GET returns the same emoji name'); }, X);",
                   "    if (pm.request.method === 'POST' && pm.response.code === 201) track(resp());",
                   "  } catch (e) {",
                   "    pm.test('script error: ' + (e && e.message), () => { throw e; });",
@@ -7926,7 +7933,7 @@
                   "let X = {};",
                   "runIt((function* () {",
                   "  try {",
-                  "    X = yield cr(function* () { return ({ R: yield mk(`QA${runId} C32 F├║tbol`) }); });",
+                  "    X = yield cr(function* () { return ({ R: yield mk(`QA${runId} C32 Fútbol`) }); });",
                   "    pm.variables.set('path', (() => '/sports')(X));",
                   "    const __b = (() => `{\"name\":\"qa${runId} C32 FUTBOL\"}`)(X); pm.variables.set('body', typeof __b === 'string' ? __b : JSON.stringify(__b));",
                   "    pm.variables.set('ctx', JSON.stringify(X || {}));",
@@ -15999,7 +16006,7 @@
                   "  try {",
                   "    pm.test('setup completed', () => pm.expect(pm.variables.get('setupError') || '').to.eql(''));",
                   "    const X = JSON.parse(pm.variables.get('ctx') || '{}');",
-                  "    yield cr(() => { bizErr(400, \"INVALID_OPERATION\"); pm.test('exact message', () => pm.expect(resp().message).to.eql(\"El id debe ser un n├║mero entero\")); }, X);",
+                  "    yield cr(() => { bizErr(400, \"INVALID_OPERATION\"); pm.test('exact message', () => pm.expect(resp().message).to.eql(\"El id debe ser un número entero\")); }, X);",
                   "    if (pm.request.method === 'POST' && pm.response.code === 201) track(resp());",
                   "  } catch (e) {",
                   "    pm.test('script error: ' + (e && e.message), () => { throw e; });",
@@ -20601,7 +20608,7 @@
                   "  try {",
                   "    X = yield cr(function* () { return ({ R: yield mk(`QA${runId} U03 Futbol`) }); });",
                   "    pm.variables.set('path', ((X) => '/sports/' + X.R.id)(X));",
-                  "    const __b = (() => `{\"name\":\"QA${runId} U03 F├ÜTBOL\"}`)(X); pm.variables.set('body', typeof __b === 'string' ? __b : JSON.stringify(__b));",
+                  "    const __b = (() => `{\"name\":\"QA${runId} U03 FÚTBOL\"}`)(X); pm.variables.set('body', typeof __b === 'string' ? __b : JSON.stringify(__b));",
                   "    pm.variables.set('ctx', JSON.stringify(X || {}));",
                   "  } catch (e) {",
                   "    pm.variables.set('setupError', String(e && e.message || e));",
@@ -20717,7 +20724,7 @@
                   "  try {",
                   "    pm.test('setup completed', () => pm.expect(pm.variables.get('setupError') || '').to.eql(''));",
                   "    const X = JSON.parse(pm.variables.get('ctx') || '{}');",
-                  "    yield cr(function* () { code(200); const j = resp(); pm.test('new text', () => pm.expect(j.name).to.eql(`QA${runId} U03 F├ÜTBOL`)); yield rereadEquals(j); }, X);",
+                  "    yield cr(function* () { code(200); const j = resp(); pm.test('new text', () => pm.expect(j.name).to.eql(`QA${runId} U03 FÚTBOL`)); yield rereadEquals(j); }, X);",
                   "    if (pm.request.method === 'POST' && pm.response.code === 201) track(resp());",
                   "  } catch (e) {",
                   "    pm.test('script error: ' + (e && e.message), () => { throw e; });",
@@ -25870,7 +25877,7 @@
                   "let X = {};",
                   "runIt((function* () {",
                   "  try {",
-                  "    X = yield cr(function* () { return ({ R1: yield mk(`QA${runId} U24 F├║tbol`), R: yield mk(N('U24 R2')) }); });",
+                  "    X = yield cr(function* () { return ({ R1: yield mk(`QA${runId} U24 Fútbol`), R: yield mk(N('U24 R2')) }); });",
                   "    pm.variables.set('path', ((X) => '/sports/' + X.R.id)(X));",
                   "    const __b = (() => `{\"name\":\"qa${runId} u24 FUTBOL\"}`)(X); pm.variables.set('body', typeof __b === 'string' ? __b : JSON.stringify(__b));",
                   "    pm.variables.set('ctx', JSON.stringify(X || {}));",
@@ -40355,7 +40362,7 @@
           "name": "Pruebas automatizadas (22 casos)",
           "item": [
             {
-              "name": "TC-GD06-01 Crear habilidad (├®xito con trim)",
+              "name": "TC-GD06-01 Crear habilidad (éxito con trim)",
               "request": {
                 "method": "POST",
                 "header": [
@@ -40366,7 +40373,7 @@
                 ],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"name\": \"  Velocidad-{{runId}}  \",\n  \"description\": \"  Capacidad de desplazamiento r├ípido en cancha  \"\n}"
+                  "raw": "{\n  \"name\": \"  Velocidad-{{runId}}  \",\n  \"description\": \"  Capacidad de desplazamiento rápido en cancha  \"\n}"
                 },
                 "url": "{{baseUrl}}/skills"
               },
@@ -40384,7 +40391,7 @@
                       "pm.test('Devuelve DTO con id y campos recortados', function () {",
                       "  pm.expect(body.id).to.be.a('number');",
                       "  pm.expect(body.name).to.eql(expectedName);",
-                      "  pm.expect(body.description).to.eql('Capacidad de desplazamiento r├ípido en cancha');",
+                      "  pm.expect(body.description).to.eql('Capacidad de desplazamiento rápido en cancha');",
                       "});",
                       "pm.collectionVariables.set('skillId', body.id);",
                       "pm.collectionVariables.set('skillName', body.name);"
@@ -40405,7 +40412,7 @@
                 ],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"name\": \"Resistencia-{{runId}}\",\n  \"description\": \"Capacidad f├¡sica sostenida durante el partido\"\n}"
+                  "raw": "{\n  \"name\": \"Resistencia-{{runId}}\",\n  \"description\": \"Capacidad física sostenida durante el partido\"\n}"
                 },
                 "url": "{{baseUrl}}/skills"
               },
@@ -40443,7 +40450,7 @@
                 ],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"name\": \"   \",\n  \"description\": \"Descripci├│n v├ílida\"\n}"
+                  "raw": "{\n  \"name\": \"   \",\n  \"description\": \"Descripción válida\"\n}"
                 },
                 "url": "{{baseUrl}}/skills"
               },
@@ -40457,7 +40464,7 @@
                       "  pm.response.to.have.status(400);",
                       "});",
                       "const body = pm.response.json();",
-                      "pm.test('Error de validaci├│n', function () {",
+                      "pm.test('Error de validación', function () {",
                       "  pm.expect(body).to.not.have.property('errorCase'); pm.expect(Object.keys(body)).to.not.be.empty; /* flat {campo: mensaje} */",
                       "});"
                     ]
@@ -40466,7 +40473,7 @@
               ]
             },
             {
-              "name": "TC-GD06-04 Crear habilidad con descripci├│n solo espacios (400)",
+              "name": "TC-GD06-04 Crear habilidad con descripción solo espacios (400)",
               "request": {
                 "method": "POST",
                 "header": [
@@ -40491,7 +40498,7 @@
                       "  pm.response.to.have.status(400);",
                       "});",
                       "const body = pm.response.json();",
-                      "pm.test('Error de validaci├│n', function () {",
+                      "pm.test('Error de validación', function () {",
                       "  pm.expect(body).to.not.have.property('errorCase'); pm.expect(Object.keys(body)).to.not.be.empty; /* flat {campo: mensaje} */",
                       "});"
                     ]
@@ -40511,7 +40518,7 @@
                 ],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"name\": \"Agilidad-{{runId}}\",\n  \"description\": \"Capacidad de cambio de direcci├│n\",\n  \"campoExtra\": true\n}"
+                  "raw": "{\n  \"name\": \"Agilidad-{{runId}}\",\n  \"description\": \"Capacidad de cambio de dirección\",\n  \"campoExtra\": true\n}"
                 },
                 "url": "{{baseUrl}}/skills"
               },
@@ -40534,7 +40541,7 @@
               ]
             },
             {
-              "name": "TC-GD06-06 Crear habilidad duplicada con distinta may├║scula y espacios (409)",
+              "name": "TC-GD06-06 Crear habilidad duplicada con distinta mayúscula y espacios (409)",
               "request": {
                 "method": "POST",
                 "header": [
@@ -40545,7 +40552,7 @@
                 ],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"name\": \"  VELOCIDAD-{{runId}}  \",\n  \"description\": \"Otra descripci├│n distinta\"\n}"
+                  "raw": "{\n  \"name\": \"  VELOCIDAD-{{runId}}  \",\n  \"description\": \"Otra descripción distinta\"\n}"
                 },
                 "url": "{{baseUrl}}/skills"
               },
@@ -40695,7 +40702,7 @@
               ]
             },
             {
-              "name": "TC-GD06-12 Consultar detalle con id no num├®rico (400)",
+              "name": "TC-GD06-12 Consultar detalle con id no numérico (400)",
               "request": {
                 "method": "GET",
                 "header": [],
@@ -40752,7 +40759,7 @@
                 ],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"name\": \"{{skillName}}\",\n  \"description\": \"Descripci├│n actualizada de velocidad\"\n}"
+                  "raw": "{\n  \"name\": \"{{skillName}}\",\n  \"description\": \"Descripción actualizada de velocidad\"\n}"
                 },
                 "url": "{{baseUrl}}/skills/{{skillId}}"
               },
@@ -40766,9 +40773,9 @@
                       "  pm.response.to.have.status(200);",
                       "});",
                       "const body = pm.response.json();",
-                      "pm.test('Descripci├│n actualizada correctamente', function () {",
+                      "pm.test('Descripción actualizada correctamente', function () {",
                       "  pm.expect(body.id).to.eql(Number(pm.collectionVariables.get('skillId')));",
-                      "  pm.expect(body.description).to.eql('Descripci├│n actualizada de velocidad');",
+                      "  pm.expect(body.description).to.eql('Descripción actualizada de velocidad');",
                       "});"
                     ]
                   }
@@ -40787,7 +40794,7 @@
                 ],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"name\": \"{{skillName2Upper}}\",\n  \"description\": \"Intento de duplicado en actualizaci├│n\"\n}"
+                  "raw": "{\n  \"name\": \"{{skillName2Upper}}\",\n  \"description\": \"Intento de duplicado en actualización\"\n}"
                 },
                 "url": "{{baseUrl}}/skills/{{skillId}}"
               },
@@ -40810,7 +40817,7 @@
               ]
             },
             {
-              "name": "TC-GD06-16 Actualizar habilidad con descripci├│n solo espacios (400)",
+              "name": "TC-GD06-16 Actualizar habilidad con descripción solo espacios (400)",
               "request": {
                 "method": "PUT",
                 "header": [
@@ -40851,7 +40858,7 @@
                 ],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"name\": \"Inexistente-{{runId}}\",\n  \"description\": \"Descripci├│n de prueba\"\n}"
+                  "raw": "{\n  \"name\": \"Inexistente-{{runId}}\",\n  \"description\": \"Descripción de prueba\"\n}"
                 },
                 "url": "{{baseUrl}}/skills/999999"
               },
@@ -40945,7 +40952,7 @@
               ]
             },
             {
-              "name": "TC-GD06-21 Eliminar habilidad con id no num├®rico (400)",
+              "name": "TC-GD06-21 Eliminar habilidad con id no numérico (400)",
               "request": {
                 "method": "DELETE",
                 "header": [],
@@ -40998,7 +41005,7 @@
           "name": "Pruebas automatizadas (24 casos)",
           "item": [
             {
-              "name": "TC-GD04-01 Crear jugador completo (├®xito con trim)",
+              "name": "TC-GD04-01 Crear jugador completo (éxito con trim)",
               "request": {
                 "method": "POST",
                 "header": [
@@ -41082,7 +41089,7 @@
               ]
             },
             {
-              "name": "TC-GD04-03 Crear jugador con userId inv├ílido (400)",
+              "name": "TC-GD04-03 Crear jugador con userId inválido (400)",
               "request": {
                 "method": "POST",
                 "header": [
@@ -41106,7 +41113,7 @@
                       "pm.test('Status 400 Bad Request', function () {",
                       "  pm.response.to.have.status(400);",
                       "});",
-                      "pm.test('Error de validaci├│n', function () {",
+                      "pm.test('Error de validación', function () {",
                       "  pm.expect(pm.response.json()).to.not.have.property('errorCase'); /* flat {campo: mensaje} */",
                       "});"
                     ]
@@ -41139,7 +41146,7 @@
                       "pm.test('Status 400 Bad Request', function () {",
                       "  pm.response.to.have.status(400);",
                       "});",
-                      "pm.test('Error de validaci├│n', function () {",
+                      "pm.test('Error de validación', function () {",
                       "  pm.expect(pm.response.json()).to.not.have.property('errorCase'); /* flat {campo: mensaje} */",
                       "});"
                     ]
@@ -41178,7 +41185,7 @@
               ]
             },
             {
-              "name": "TC-GD04-06 Crear jugador con documento duplicado en min├║sculas (409)",
+              "name": "TC-GD04-06 Crear jugador con documento duplicado en minúsculas (409)",
               "request": {
                 "method": "POST",
                 "header": [
@@ -41301,7 +41308,7 @@
               ]
             },
             {
-              "name": "TC-GD04-10 Listar con query param inv├ílido (400)",
+              "name": "TC-GD04-10 Listar con query param inválido (400)",
               "request": {
                 "method": "GET",
                 "header": [],
@@ -41348,7 +41355,7 @@
               ]
             },
             {
-              "name": "TC-GD04-12 Consultar detalle con id no num├®rico (400)",
+              "name": "TC-GD04-12 Consultar detalle con id no numérico (400)",
               "request": {
                 "method": "GET",
                 "header": [],
@@ -41393,7 +41400,7 @@
               ]
             },
             {
-              "name": "TC-GD04-14 Actualizar posici├│n y camiseta conservando documento y userId (200)",
+              "name": "TC-GD04-14 Actualizar posición y camiseta conservando documento y userId (200)",
               "request": {
                 "method": "PUT",
                 "header": [
@@ -41734,7 +41741,7 @@
                 "url": "{{baseUrl}}/skills",
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"name\": \"Regate-{{psRunId}}-1\",\n  \"description\": \"Capacidad de superar rivales con el bal├│n\"\n}"
+                  "raw": "{\n  \"name\": \"Regate-{{psRunId}}-1\",\n  \"description\": \"Capacidad de superar rivales con el balón\"\n}"
                 }
               },
               "event": [
@@ -41764,7 +41771,7 @@
                 "url": "{{baseUrl}}/skills",
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"name\": \"Definici├│n-{{psRunId}}-2\",\n  \"description\": \"Efectividad frente al arco\"\n}"
+                  "raw": "{\n  \"name\": \"Definición-{{psRunId}}-2\",\n  \"description\": \"Efectividad frente al arco\"\n}"
                 }
               },
               "event": [
@@ -41865,7 +41872,7 @@
                     "exec": [
                       "pm.test('Status 201 Created', () => pm.response.to.have.status(201));",
                       "const b = pm.response.json();",
-                      "pm.test('Devuelve DTO de asociaci├│n con level=4 y assignedAt', () => {",
+                      "pm.test('Devuelve DTO de asociación con level=4 y assignedAt', () => {",
                       "  pm.expect(b.id).to.be.a('number');",
                       "  pm.expect(b.playerId).to.eql(Number(pm.collectionVariables.get('psPlayerId1')));",
                       "  pm.expect(b.skillId).to.eql(Number(pm.collectionVariables.get('psSkillId1')));",
@@ -41892,7 +41899,7 @@
                     "exec": [
                       "pm.test('Status 201 Created', () => pm.response.to.have.status(201));",
                       "const b = pm.response.json();",
-                      "pm.test('Permite m├║ltiples habilidades y level=null por defecto', () => {",
+                      "pm.test('Permite múltiples habilidades y level=null por defecto', () => {",
                       "  pm.expect(b.level).to.eql(null);",
                       "});"
                     ]
@@ -41933,7 +41940,7 @@
               ]
             },
             {
-              "name": "TC-GD07-08 Asignaci├│n duplicada misma habilidad y jugador (409)",
+              "name": "TC-GD07-08 Asignación duplicada misma habilidad y jugador (409)",
               "request": {
                 "method": "POST",
                 "header": [
@@ -42110,7 +42117,7 @@
                     "exec": [
                       "pm.test('Status 200 OK', () => pm.response.to.have.status(200));",
                       "const b = pm.response.json();",
-                      "pm.test('Devuelve ambos jugadores (incluido hist├│rico inactivo)', () => {",
+                      "pm.test('Devuelve ambos jugadores (incluido histórico inactivo)', () => {",
                       "  const ids = b.map((x) => x.playerId);",
                       "  pm.expect(ids).to.include(Number(pm.collectionVariables.get('psPlayerId1')));",
                       "  pm.expect(ids).to.include(Number(pm.collectionVariables.get('psPlayerId2')));",
@@ -42201,7 +42208,7 @@
               ]
             },
             {
-              "name": "TC-GD07-19 Retirar asociaci├│n inexistente (404)",
+              "name": "TC-GD07-19 Retirar asociación inexistente (404)",
               "request": {
                 "method": "DELETE",
                 "header": [],
@@ -42539,7 +42546,7 @@
                     "type": "text/javascript",
                     "exec": [
                       "pm.test('Status 201 Created', () => pm.response.to.have.status(201));",
-                      "pm.test('M├║ltiples jugadores en equipo', () => pm.expect(pm.response.json().current).to.eql(true));",
+                      "pm.test('Múltiples jugadores en equipo', () => pm.expect(pm.response.json().current).to.eql(true));",
                       "pm.collectionVariables.set('pcContractId2', pm.response.json().id);"
                     ]
                   }
@@ -42858,7 +42865,7 @@
                     "exec": [
                       "pm.test('Status 200 OK', () => pm.response.to.have.status(200));",
                       "const b = pm.response.json();",
-                      "pm.test('Tiene contrato hist├│rico (false) y vigente (true)', () => {",
+                      "pm.test('Tiene contrato histórico (false) y vigente (true)', () => {",
                       "  pm.expect(b).to.have.lengthOf(2);",
                       "  pm.expect(b[0].current).to.eql(false);",
                       "  pm.expect(b[1].current).to.eql(true);",
@@ -42892,7 +42899,7 @@
                     "exec": [
                       "pm.test('Status 201 Created', () => pm.response.to.have.status(201));",
                       "const b = pm.response.json();",
-                      "pm.test('Contrato futuro no vigente todav├¡a', () => pm.expect(b.current).to.eql(false));",
+                      "pm.test('Contrato futuro no vigente todavía', () => pm.expect(b.current).to.eql(false));",
                       "pm.collectionVariables.set('pcContractIdFuture', b.id);"
                     ]
                   }
@@ -42920,7 +42927,7 @@
               ]
             },
             {
-              "name": "TC-GD05-21 Query param current inv├ílido (400) y limpiar variables",
+              "name": "TC-GD05-21 Query param current inválido (400) y limpiar variables",
               "request": {
                 "method": "GET",
                 "header": [],
@@ -45081,7 +45088,7 @@
                 "url": "{{baseUrl}}/skills",
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"name\": \"Pase-{{ppRunId}}\",\n  \"description\": \"Precisi├│n en pases filtrados\"\n}"
+                  "raw": "{\n  \"name\": \"Pase-{{ppRunId}}\",\n  \"description\": \"Precisión en pases filtrados\"\n}"
                 }
               },
               "event": [
@@ -45141,7 +45148,7 @@
                     "exec": [
                       "pm.test('Status 200 OK', () => pm.response.to.have.status(200));",
                       "const b = pm.response.json();",
-                      "pm.test('Muestra listas vac├¡as y mensajes expl├¡citos', () => {",
+                      "pm.test('Muestra listas vacías y mensajes explícitos', () => {",
                       "  pm.expect(b.player.id).to.eql(Number(pm.collectionVariables.get('ppPlayerId')));",
                       "  pm.expect(b.teams).to.eql([]);",
                       "  pm.expect(b.teamsMessage).to.eql('El jugador no tiene equipos asociados');",
@@ -45302,7 +45309,7 @@
               ]
             },
             {
-              "name": "TC-GD08-07c Perfil hist├│rico de jugador inactivo con contrato finalizado (200)",
+              "name": "TC-GD08-07c Perfil histórico de jugador inactivo con contrato finalizado (200)",
               "request": {
                 "method": "GET",
                 "header": [],
@@ -45316,7 +45323,7 @@
                     "exec": [
                       "pm.test('Status 200 OK', () => pm.response.to.have.status(200));",
                       "const b = pm.response.json();",
-                      "pm.test('Consulta hist├│rica permitida para jugador inactivo', () => {",
+                      "pm.test('Consulta histórica permitida para jugador inactivo', () => {",
                       "  pm.expect(b.player.active).to.eql(false);",
                       "  pm.expect(b.teams[0].current).to.eql(false);",
                       "});"
@@ -45349,7 +45356,7 @@
               ]
             },
             {
-              "name": "TC-GD08-09 Perfil con id no num├®rico (400)",
+              "name": "TC-GD08-09 Perfil con id no numérico (400)",
               "request": {
                 "method": "GET",
                 "header": [],
@@ -45417,7 +45424,7 @@
               }
             },
             {
-              "name": "Registrar anotaci├│n en el partido",
+              "name": "Registrar anotación en el partido",
               "request": {
                 "method": "POST",
                 "header": [
@@ -45442,7 +45449,7 @@
               }
             },
             {
-              "name": "Modificar anotaci├│n",
+              "name": "Modificar anotación",
               "request": {
                 "method": "PUT",
                 "header": [
@@ -45459,7 +45466,7 @@
               }
             },
             {
-              "name": "Eliminar anotaci├│n",
+              "name": "Eliminar anotación",
               "request": {
                 "method": "DELETE",
                 "header": [],
@@ -45853,7 +45860,7 @@
               ]
             },
             {
-              "name": "TC-GC07-10 Registrar anotaci├│n 1 - jugador local (201)",
+              "name": "TC-GC07-10 Registrar anotación 1 - jugador local (201)",
               "request": {
                 "method": "POST",
                 "header": [
@@ -45876,7 +45883,7 @@
                     "exec": [
                       "pm.test('Status 201 Created', () => pm.response.to.have.status(201));",
                       "const b = pm.response.json();",
-                      "pm.test('Anotaci├│n registrada con jugador y equipo', () => { pm.expect(b.minute).to.eql(15); pm.expect(b.type).to.eql('GOL'); });",
+                      "pm.test('Anotación registrada con jugador y equipo', () => { pm.expect(b.minute).to.eql(15); pm.expect(b.type).to.eql('GOL'); });",
                       "pm.collectionVariables.set('gcEventId1', b.id);"
                     ]
                   }
@@ -45884,7 +45891,7 @@
               ]
             },
             {
-              "name": "TC-GC07-11 Registrar anotaci├│n 2 - jugador visitante (201)",
+              "name": "TC-GC07-11 Registrar anotación 2 - jugador visitante (201)",
               "request": {
                 "method": "POST",
                 "header": [
@@ -45913,7 +45920,7 @@
               ]
             },
             {
-              "name": "TC-GC07-12 Anotaci├│n por equipo que no juega el partido (409 INVALID_STATE)",
+              "name": "TC-GC07-12 Anotación por equipo que no juega el partido (409 INVALID_STATE)",
               "request": {
                 "method": "POST",
                 "header": [
@@ -45996,7 +46003,7 @@
               ]
             },
             {
-              "name": "TC-GC07-15 Modificar anotaci├│n 1 (200)",
+              "name": "TC-GC07-15 Modificar anotación 1 (200)",
               "request": {
                 "method": "PUT",
                 "header": [
@@ -46066,7 +46073,7 @@
               ]
             },
             {
-              "name": "TC-GC07-17 Eliminar anotaci├│n 2 (204)",
+              "name": "TC-GC07-17 Eliminar anotación 2 (204)",
               "request": {
                 "method": "DELETE",
                 "header": [],
@@ -46085,7 +46092,7 @@
               ]
             },
             {
-              "name": "TC-GC07-18 Verificar que jugador 2 sigue existiendo tras eliminar anotaci├│n (200)",
+              "name": "TC-GC07-18 Verificar que jugador 2 sigue existiendo tras eliminar anotación (200)",
               "request": {
                 "method": "GET",
                 "header": [],

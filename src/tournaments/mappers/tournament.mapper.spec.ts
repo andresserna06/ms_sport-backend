@@ -39,14 +39,14 @@ describe('TournamentMapper', () => {
       active: true,
       sport: Object.assign(new Sport(), {
         id: 5,
-        name: 'FÃºtbol',
+        name: 'Fútbol',
         active: true,
       }),
     });
     const expected = {
       id: 1,
       name: 'Copa',
-      sport: { id: 5, name: 'FÃºtbol' },
+      sport: { id: 5, name: 'Fútbol' },
       startDate: '2027-03-01',
       enrollmentDeadline: '2027-02-01',
       active: true,

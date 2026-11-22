@@ -1,7 +1,7 @@
 ﻿import { MigrationInterface, QueryRunner, TableColumn, TableForeignKey } from 'typeorm';
 
-export class AddGroupToTeams20261121150002 implements MigrationInterface {
-  name = 'AddGroupToTeams20261121150002';
+export class AddGroupToTeams1795305600002 implements MigrationInterface {
+  name = 'AddGroupToTeams1795305600002';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     const table = await queryRunner.getTable('teams');
@@ -15,7 +15,7 @@ export class AddGroupToTeams20261121150002 implements MigrationInterface {
     const hasFk = refreshed?.foreignKeys.some((fk) => fk.columnNames.includes('group_id') && fk.referencedTableName === 'phases');
     if (!hasFk) {
       await queryRunner.createForeignKey('teams', new TableForeignKey({
-        name: 'FK_teams_group_id',
+        name: 'FK_dac3c13839536151455938e66b7',
         columnNames: ['group_id'],
         referencedTableName: 'phases',
         referencedColumnNames: ['id'],

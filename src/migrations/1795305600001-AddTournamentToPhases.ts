@@ -1,7 +1,7 @@
 ﻿import { MigrationInterface, QueryRunner, TableColumn, TableForeignKey } from 'typeorm';
 
-export class AddTournamentToPhases20261121150001 implements MigrationInterface {
-  name = 'AddTournamentToPhases20261121150001';
+export class AddTournamentToPhases1795305600001 implements MigrationInterface {
+  name = 'AddTournamentToPhases1795305600001';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     const table = await queryRunner.getTable('phases');

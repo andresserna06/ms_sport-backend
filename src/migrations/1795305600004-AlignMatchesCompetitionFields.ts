@@ -1,7 +1,7 @@
 ﻿import { MigrationInterface, QueryRunner, TableColumn, TableForeignKey, TableIndex } from 'typeorm';
 
-export class AlignMatchesCompetitionFields20261121150004 implements MigrationInterface {
-  name = 'AlignMatchesCompetitionFields20261121150004';
+export class AlignMatchesCompetitionFields1795305600004 implements MigrationInterface {
+  name = 'AlignMatchesCompetitionFields1795305600004';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     const table = await queryRunner.getTable('matches');
