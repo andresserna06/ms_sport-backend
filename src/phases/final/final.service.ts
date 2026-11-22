@@ -1,7 +1,7 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+﻿import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { TournamentsService } from '../../tournaments/tournaments.service';
+import { TournamentsService } from '../../tournaments/services/tournaments.service';
 import { CreateFinalDto } from './dto/create-final.dto';
 import { FinalResponseDto } from './dto/final-response.dto';
 import { UpdateFinalDto } from './dto/update-final.dto';
@@ -121,3 +121,4 @@ export class FinalService {
     }
   }
 }
+

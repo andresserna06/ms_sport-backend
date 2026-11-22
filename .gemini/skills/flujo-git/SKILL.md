@@ -24,6 +24,11 @@ Tipos: `feat`, `fix`, `test`, `refactor`, `docs`, `chore`. El scope es el módul
 Ejemplos: `feat(contracts): validate overlapping contracts`,
 `test(registrations): add closed registration cases`.
 
+**Mensaje corto:** solo la línea de título, en inglés, en modo imperativo,
+sin punto final y de unos 72 caracteres como máximo. No agregues cuerpo,
+viñetas ni explicaciones debajo: el detalle va en la historia o en el PR.
+Esto aplica también a los commits de merge (`merge: <origen> into <destino>`).
+
 Commits pequeños; no mezclar dos historias en un commit.
 
 **Autoría:** los commits son del integrante que los hace.

@@ -8,6 +8,7 @@ import { PhasesModule } from './phases/base/phases.module';
 import { TournamentsModule } from './tournaments/tournaments.module';
 import { TeamsModule } from './teams/teams.module';
 import { SportsModule } from './sports/sports.module';
+import { TeamSportsModule } from './team-sports/team-sports.module';
 import { SkillsModule } from './skills/skills.module';
 import { PlayersModule } from './players/players.module';
 import { PlayerSkillsModule } from './player-skills/player-skills.module';
@@ -42,6 +43,7 @@ import { RegistrationsModule } from './registrations/registrations.module';
     TournamentsModule,
     TeamsModule,
     SportsModule,
+    TeamSportsModule,
     SkillsModule,
     PlayersModule,
     PlayerSkillsModule,

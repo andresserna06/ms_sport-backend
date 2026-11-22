@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import { CreateTournamentDto } from '../dto/create-tournament.dto';
-import { TournamentResponseDto } from '../dto/tournament-response.dto';
-import { UpdateTournamentDto } from '../dto/update-tournament.dto';
+import { CreateTournamentDto } from '../dtos/create-tournament.dto';
+import { TournamentResponseDto } from '../dtos/tournament-response.dto';
+import { UpdateTournamentDto } from '../dtos/update-tournament.dto';
 import { Tournament } from '../entities/tournament.entity';
 
 @Injectable()
@@ -9,17 +9,18 @@ export class TournamentMapper {
   toEntity(dto: CreateTournamentDto): Tournament {
     const entity = new Tournament();
     entity.name = dto.name;
+    entity.sportId = dto.sportId;
     entity.startDate = dto.startDate;
     entity.registrationDeadline = dto.enrollmentDeadline;
+    entity.active = true;
     return entity;
   }
 
-  mergeEntity(entity: Tournament, dto: UpdateTournamentDto): Tournament {
-    if (dto.name !== undefined) entity.name = dto.name;
-    if (dto.startDate !== undefined) entity.startDate = dto.startDate;
-    if (dto.enrollmentDeadline !== undefined) {
-      entity.registrationDeadline = dto.enrollmentDeadline;
-    }
+  replaceEntity(entity: Tournament, dto: UpdateTournamentDto): Tournament {
+    entity.name = dto.name;
+    entity.sportId = dto.sportId;
+    entity.startDate = dto.startDate;
+    entity.registrationDeadline = dto.enrollmentDeadline;
     return entity;
   }
 
@@ -27,8 +28,10 @@ export class TournamentMapper {
     return {
       id: entity.id,
       name: entity.name,
+      sport: { id: entity.sport.id, name: entity.sport.name },
       startDate: entity.startDate,
       enrollmentDeadline: entity.registrationDeadline,
+      active: entity.active,
     };
   }
 

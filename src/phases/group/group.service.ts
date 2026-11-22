@@ -1,7 +1,7 @@
-import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+﻿import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { PhasesService } from '../base/phases.service';
 import { RegistrationsService } from '../../registrations/registrations.service';
-import { TournamentsService } from '../../tournaments/tournaments.service';
+import { TournamentsService } from '../../tournaments/services/tournaments.service';
 import { CreateGroupDto } from './dto/create-group.dto';
 import { GroupResponseDto } from './dto/group-response.dto';
 import { GroupTeamResponseDto } from './dto/group-team-response.dto';
@@ -108,7 +108,7 @@ export class GroupService {
     if (!team.active) {
       throw new ApplicationException(
         ErrorCase.INVALID_STATE,
-        `El equipo #${teamId} está inactivo y no se puede asignar a un grupo`,
+        `El equipo #${teamId} estÃ¡ inactivo y no se puede asignar a un grupo`,
       );
     }
 
@@ -122,7 +122,7 @@ export class GroupService {
     if (team.group) {
       throw new ApplicationException(
         ErrorCase.INVALID_STATE,
-        `El equipo #${teamId} ya pertenece al grupo #${team.group.id}; ret��relo antes de asignarlo a otro grupo`,
+        `El equipo #${teamId} ya pertenece al grupo #${team.group.id}; retï¿½ï¿½relo antes de asignarlo a otro grupo`,
       );
     }
 
@@ -217,3 +217,4 @@ export class GroupService {
     }
   }
 }
+
