@@ -80,9 +80,395 @@
       "value": "1",
       "type": "string",
       "description": "Se actualiza al crear partido."
+    },
+    {
+      "key": "sportId",
+      "value": "1",
+      "type": "string",
+      "description": "ID de deporte existente. Usar GET /sports?all=true para obtener uno."
     }
   ],
   "item": [
+    {
+      "name": "Deportes",
+      "description": "GD-01 soporte. Una peticion por metodo; editar URL/body para variantes. Variantes GET: {{baseUrl}}/sports/{{sportId}}, {{baseUrl}}/sports/{{sportId}}/subsports. Variante PATCH: {{baseUrl}}/sports/{{sportId}}/activate. Filtros GET: ?active=true&all=true&name=&parentSportId=.",
+      "item": [
+        {
+          "name": "Create sport (POST)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/sports",
+            "description": "Crea deporte. Body: name, description?, parentSportId?. Guarda sportId.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Sport-{{runId}}\",\n  \"description\": \"Sport description\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 201 Created', function () { pm.response.to.have.status(201); });",
+                  "const body = pm.response.json();",
+                  "pm.test('Returns created sport', function () { pm.expect(body.id).to.be.a('number'); pm.collectionVariables.set('sportId', String(body.id)); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "List sports (GET)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/sports?all=true",
+            "description": "Lista deportes. Variantes: GET {{baseUrl}}/sports/{{sportId}}, GET {{baseUrl}}/sports/{{sportId}}/subsports?all=true."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200 OK', function () { pm.response.to.have.status(200); });",
+                  "pm.test('Returns array', function () { pm.expect(pm.response.json()).to.be.an('array'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Update sport (PUT)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/sports/{{sportId}}",
+            "description": "Actualiza deporte (PUT reemplazo completo). Enviar name, description, parentSportId.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Sport-Updated-{{runId}}\",\n  \"description\": \"Updated description\",\n  \"parentSportId\": null\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200 OK', function () { pm.response.to.have.status(200); });",
+                  "pm.test('Returns updated sport', function () { pm.expect(pm.response.json().id).to.eql(Number(pm.collectionVariables.get('sportId'))); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Deactivate sport (PATCH)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/sports/{{sportId}}/deactivate",
+            "description": "Desactiva deporte. Variante mismo metodo: PATCH {{baseUrl}}/sports/{{sportId}}/activate."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200 OK', function () { pm.response.to.have.status(200); });",
+                  "pm.test('Sport is inactive', function () { pm.expect(pm.response.json().active).to.eql(false); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Delete sport (DELETE)",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/sports/{{sportId}}",
+            "description": "Elimina deporte. 204 si no tiene dependencias; 409 INVALID_STATE si tiene subdeportes/equipos/torneos asociados."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 204 No Content', function () { pm.response.to.have.status(204); });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Equipos",
+      "description": "GD-02 soporte. Una peticion por metodo; editar URL/body para variantes. Variantes GET: {{baseUrl}}/teams/{{teamId}}, {{baseUrl}}/teams/reports/active-by-city, {{baseUrl}}/teams?active=false. Variantes PATCH: {{baseUrl}}/teams/{{teamId}}/activate, {{baseUrl}}/teams/{{teamId}}/deactivate.",
+      "item": [
+        {
+          "name": "Create team (POST)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/teams",
+            "description": "Crea equipo. Body: name, city, contactEmail, foundedYear?. Guarda teamId.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Team-{{runId}}\",\n  \"city\": \"Cali\",\n  \"contactEmail\": \"team-{{runId}}@example.com\",\n  \"foundedYear\": 2000\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 201 Created', function () { pm.response.to.have.status(201); });",
+                  "const body = pm.response.json();",
+                  "pm.test('Returns created team', function () { pm.expect(body.id).to.be.a('number'); pm.collectionVariables.set('teamId', String(body.id)); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "List teams (GET)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/teams",
+            "description": "Lista equipos. Variantes: GET {{baseUrl}}/teams/{{teamId}}, GET {{baseUrl}}/teams?active=false, GET {{baseUrl}}/teams/reports/active-by-city."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200 OK', function () { pm.response.to.have.status(200); });",
+                  "pm.test('Returns array', function () { pm.expect(pm.response.json()).to.be.an('array'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Update team (PATCH)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/teams/{{teamId}}",
+            "description": "Actualiza equipo (PATCH parcial). Campos permitidos: name, city, contactEmail, foundedYear. Variantes PATCH: /teams/{{teamId}}/activate, /teams/{{teamId}}/deactivate.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"city\": \"Updated City\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200 OK', function () { pm.response.to.have.status(200); });",
+                  "pm.test('Returns updated team', function () { pm.expect(pm.response.json().id).to.eql(Number(pm.collectionVariables.get('teamId'))); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Delete team (DELETE)",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/teams/{{teamId}}",
+            "description": "Elimina equipo. 200 con mensaje o 204 segun implementacion; 409 si tiene asociaciones."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200 or 204', function () { pm.expect([200,204]).to.include(pm.response.code); });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Torneos",
+      "description": "GC-01 soporte. Una peticion por metodo; editar URL/body para variantes. IMPORTANTE: DTO actual no acepta sportId; si GC-02 falla con torneo sin deporte definido, asignar sport_id por SQL y asegurar TeamSport. Variantes GET: {{baseUrl}}/tournaments/{{tournamentId}}, {{baseUrl}}/tournaments/reports/open-enrollment, {{baseUrl}}/tournaments/{{tournamentId}}/phases.",
+      "item": [
+        {
+          "name": "Create tournament (POST)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/tournaments",
+            "description": "Crea torneo. DTO actual: name, startDate, enrollmentDeadline (sin sportId). Guarda tournamentId.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Tournament-{{runId}}\",\n  \"startDate\": \"2030-06-01\",\n  \"enrollmentDeadline\": \"2030-05-01\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 201 Created', function () { pm.response.to.have.status(201); });",
+                  "const body = pm.response.json();",
+                  "pm.test('Returns created tournament', function () { pm.expect(body.id).to.be.a('number'); pm.collectionVariables.set('tournamentId', String(body.id)); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "List tournaments (GET)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/tournaments",
+            "description": "Lista torneos. Variantes GET: /tournaments/{{tournamentId}}, /tournaments/reports/open-enrollment, /tournaments/{{tournamentId}}/phases."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200 OK', function () { pm.response.to.have.status(200); });",
+                  "pm.test('Returns array', function () { pm.expect(pm.response.json()).to.be.an('array'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Update tournament (PATCH)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/tournaments/{{tournamentId}}",
+            "description": "Actualiza torneo (PATCH parcial). DTO actual: name?, startDate?, enrollmentDeadline?.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Tournament-Updated-{{runId}}\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200 OK', function () { pm.response.to.have.status(200); });",
+                  "pm.test('Returns updated tournament', function () { pm.expect(pm.response.json().id).to.eql(Number(pm.collectionVariables.get('tournamentId'))); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Delete tournament (DELETE)",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/tournaments/{{tournamentId}}",
+            "description": "Elimina torneo. Comportamiento actual GC-01: 200 con mensaje si elimina; puede fallar por dependencias/FK."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200 or 204', function () { pm.expect([200,204]).to.include(pm.response.code); });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
     {
       "name": "GC-02 Inscripciones",
       "item": [
@@ -190,7 +576,7 @@
             "method": "GET",
             "header": [],
             "url": "{{baseUrl}}/phases?tournamentId={{tournamentId}}",
-            "description": "Lista fases por tournamentId. Editar query para filtrar o usar /phases/{{phaseId}}."
+            "description": "Lista fases por tournamentId. Variantes GET: /phases/{{phaseId}}, /phases/reports/count-by-type, /tournaments/{{tournamentId}}/phases."
           },
           "event": [
             {
@@ -211,7 +597,7 @@
           "response": []
         }
       ],
-      "description": "HU-GC-03. Base de fases es read/report; creacion/edicion se hace en GC-04 (/groups) y GC-05 (/finals). Variante GET: {{baseUrl}}/phases/{{phaseId}} o {{baseUrl}}/phases/reports/count-by-type."
+      "description": "HU-GC-03. Base de fases es read/report; creacion/edicion se hace en GC-04 (/groups) y GC-05 (/finals). Variante GET: {{baseUrl}}/phases/{{phaseId}}, {{baseUrl}}/phases/reports/count-by-type o {{baseUrl}}/tournaments/{{tournamentId}}/phases."
     },
     {
       "name": "GC-04 Grupos",
@@ -342,7 +728,7 @@
             "method": "DELETE",
             "header": [],
             "url": "{{baseUrl}}/groups/{{groupId}}",
-            "description": "Elimina grupo. 200 con mensaje si no tiene partidos; 409 INVALID_STATE si tiene partidos. Variante DELETE: /groups/{{groupId}}/teams/{{teamId}} devuelve 204."
+            "description": "Elimina grupo. 204 No Content si no tiene partidos; 409 INVALID_STATE si tiene partidos. Variante DELETE: /groups/{{groupId}}/teams/{{teamId}} devuelve 204."
           },
           "event": [
             {
@@ -350,11 +736,8 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test('Status 200 OK', function () {",
-                  "  pm.response.to.have.status(200);",
-                  "});",
-                  "pm.test('Returns a deletion message', function () {",
-                  "  pm.expect(pm.response.json().message).to.be.a('string');",
+                  "pm.test('Status 204 No Content', function () {",
+                  "  pm.response.to.have.status(204);",
                   "});"
                 ]
               }
@@ -494,7 +877,7 @@
             "method": "DELETE",
             "header": [],
             "url": "{{baseUrl}}/finals/{{finalId}}",
-            "description": "Elimina fase final. 200 con mensaje si no tiene partidos; 409 si tiene partidos."
+            "description": "Elimina fase final. 204 No Content si no tiene partidos; 409 si tiene partidos."
           },
           "event": [
             {
@@ -502,11 +885,8 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test('Status 200 OK', function () {",
-                  "  pm.response.to.have.status(200);",
-                  "});",
-                  "pm.test('Returns a deletion message', function () {",
-                  "  pm.expect(pm.response.json().message).to.be.a('string');",
+                  "pm.test('Status 204 No Content', function () {",
+                  "  pm.response.to.have.status(204);",
                   "});"
                 ]
               }

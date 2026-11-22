@@ -78,7 +78,7 @@ export class GroupService {
     return this.groupMapper.toResponseDto(saved);
   }
 
-  async remove(id: number): Promise<{ message: string }> {
+  async remove(id: number): Promise<void> {
     const group = await this.getGroupOrFail(id);
 
     if (await this.phasesService.hasMatches(id)) {
@@ -89,7 +89,6 @@ export class GroupService {
     }
 
     await this.groupRepository.remove(group);
-    return { message: `Grupo #${id} eliminado correctamente` };
   }
 
   async assignTeam(

@@ -80,7 +80,7 @@ export class FinalService {
     return this.finalMapper.toResponseDto(saved);
   }
 
-  async remove(id: number): Promise<{ message: string }> {
+  async remove(id: number): Promise<void> {
     const final = await this.getFinalOrFail(id);
 
     if (await this.phasesService.hasMatches(id)) {
@@ -91,7 +91,6 @@ export class FinalService {
     }
 
     await this.finalsRepository.remove(final);
-    return { message: `Fase final #${id} eliminada correctamente` };
   }
 
   private async getFinalOrFail(id: number): Promise<Final> {

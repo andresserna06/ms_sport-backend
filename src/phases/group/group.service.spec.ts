@@ -143,10 +143,9 @@ describe('GroupService', () => {
       repository.findById.mockResolvedValue(makeGroup());
       phasesService.hasMatches.mockResolvedValue(false);
 
-      const result = await service.remove(3);
+      await expect(service.remove(3)).resolves.toBeUndefined();
 
       expect(repository.remove).toHaveBeenCalled();
-      expect(result.message).toContain('3');
     });
   });
 

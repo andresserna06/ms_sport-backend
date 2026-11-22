@@ -1,5 +1,6 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { PhasesModule } from '../phases/base/phases.module';
 import { Tournament } from './entities/tournament.entity';
 import { TournamentMapper } from './mappers/tournament.mapper';
 import { TournamentsController } from './tournaments.controller';
@@ -7,7 +8,10 @@ import { TournamentsRepository } from './repositories/tournaments.repository';
 import { TournamentsService } from './tournaments.service';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Tournament])],
+  imports: [
+    TypeOrmModule.forFeature([Tournament]),
+    forwardRef(() => PhasesModule),
+  ],
   controllers: [TournamentsController],
   providers: [TournamentsService, TournamentMapper, TournamentsRepository],
   exports: [TournamentsService, TournamentMapper],

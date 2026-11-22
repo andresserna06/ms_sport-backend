@@ -63,6 +63,7 @@ export class GroupController {
   }
 
   @Delete(':id')
+  @HttpCode(HttpStatus.NO_CONTENT)
   remove(@Param('id', ParseIntPipe) id: number) {
     return this.groupService.remove(id);
   }
