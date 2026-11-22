@@ -1,6 +1,6 @@
 # HU-GD-01 – Gestionar deportes: matriz de pruebas
 
-Estado: **APROBADA y EJECUTADA** (ver sección 8). Colección: `postman/MsSports.postman_collection.json`; environment: `postman/Local.postman_environment.json`. Las decisiones del usuario están en la sección 7.
+Estado: **APROBADA y EJECUTADA** (ver sección 8). Colección: `postman/Pruebas.postman_collection.json`; environment: `postman/Local.postman_environment.json`. Las decisiones del usuario están en la sección 7.
 
 Fuentes: `docs/specs/HU-GD-01.md` (reglas R1..R13 y "Decisiones del grupo"), `docs/historias-usuario.md`, skills `pruebas-api`, `api-rest` y `reglas-dominio`. Entorno: API en `http://localhost:3001`, MySQL 8.0.46, base `sports_db`, sin autenticación (P14).
 
@@ -342,9 +342,9 @@ Comandos exactos (desde la carpeta `ms_sports`, con la API en `http://localhost:
 ```bash
 node postman/fixtures/teardown.mjs     # deja la base sin datos QA
 node postman/fixtures/seed.mjs         # crea los fixtures QA-FIX-*
-npx newman run postman/MsSports.postman_collection.json -e postman/Local.postman_environment.json --reporters cli,json --reporter-json-export postman/results/HU-GD-01-newman.json
+npx newman run postman/Pruebas.postman_collection.json -e postman/Local.postman_environment.json --reporters cli,json --reporter-json-export postman/results/HU-GD-01-newman.json
 node postman/fixtures/manual-checks.mjs   # M-01..M-03
 node postman/fixtures/teardown.mjs     # limpieza final
 ```
 
-La colección se regenera con `node postman/tools/generate-collection.mjs postman/MsSports.postman_collection.json`.
+La colección se mantiene a mano (ya no hay generador).

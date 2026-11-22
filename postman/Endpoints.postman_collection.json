@@ -1,0 +1,2579 @@
+{
+  "info": {
+    "name": "ms_sports - Endpoints",
+    "description": "Todos los endpoints de ms_sports con un cuerpo de ejemplo, para usar la API a mano (sin pruebas automáticas). Orden sugerido: crear un deporte, un equipo y un torneo; las peticiones que crean algo guardan su id en una variable de la colección para que las siguientes lo usen. Para las pruebas automatizadas, ver la colección Pruebas.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Deportes (GD-01)",
+      "description": "Deportes y subdeportes. Un deporte con subdeportes, equipos o torneos no se puede eliminar (409); se desactiva.",
+      "item": [
+        {
+          "name": "Crear deporte",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Saves the id of the created record so the next requests can use it.",
+                  "if (pm.response.code >= 200 && pm.response.code < 300) { pm.collectionVariables.set('sportId', pm.response.json().id); }"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Natación sincronizada {{$timestamp}}\",\n  \"description\": \"Deporte acuático artístico\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/sports",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "sports"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Crear subdeporte",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Saves the id of the created record so the next requests can use it.",
+                  "if (pm.response.code >= 200 && pm.response.code < 300) { pm.collectionVariables.set('subSportId', pm.response.json().id); }"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Dúo libre {{$timestamp}}\",\n  \"description\": \"Modalidad de dos deportistas\",\n  \"parentSportId\": {{sportId}}\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/sports",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "sports"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Listar deportes (solo activos)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/sports",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "sports"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Listar todos (activos e inactivos)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/sports?all=true",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "sports"
+              ],
+              "query": [
+                {
+                  "key": "all",
+                  "value": "true"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Filtrar por nombre",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/sports?name=fut",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "sports"
+              ],
+              "query": [
+                {
+                  "key": "name",
+                  "value": "fut"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Filtrar por deporte padre",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/sports?parentSportId={{sportId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "sports"
+              ],
+              "query": [
+                {
+                  "key": "parentSportId",
+                  "value": "{{sportId}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Detalle de un deporte",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/sports/{{sportId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "sports",
+                "{{sportId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Subdeportes de un deporte",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/sports/{{sportId}}/subsports",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "sports",
+                "{{sportId}}",
+                "subsports"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Equipos de un deporte",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/sports/{{sportId}}/teams",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "sports",
+                "{{sportId}}",
+                "teams"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Actualizar deporte (reemplazo total)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Natación sincronizada {{$timestamp}}\",\n  \"description\": \"Descripción actualizada\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/sports/{{sportId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "sports",
+                "{{sportId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Desactivar un subdeporte",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/sports/{{subSportId}}/deactivate",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "sports",
+                "{{subSportId}}",
+                "deactivate"
+              ]
+            },
+            "description": "Un deporte con subdeportes activos no se puede desactivar (409): desactiva primero sus subdeportes."
+          }
+        },
+        {
+          "name": "Activar un subdeporte",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/sports/{{subSportId}}/activate",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "sports",
+                "{{subSportId}}",
+                "activate"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Equipos (GD-02)",
+      "description": "Equipos. Con deportes, contratos, partidos o anotaciones asociados no se pueden eliminar (409); se desactivan.",
+      "item": [
+        {
+          "name": "Crear equipo",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Saves the id of the created record so the next requests can use it.",
+                  "if (pm.response.code >= 200 && pm.response.code < 300) { pm.collectionVariables.set('teamId', pm.response.json().id); }"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Halcones de Cali {{$timestamp}}\",\n  \"city\": \"Cali\",\n  \"contactEmail\": \"contacto@halcones.co\",\n  \"foundedYear\": 2015\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/teams",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "teams"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Crear un segundo equipo",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Saves the id of the created record so the next requests can use it.",
+                  "if (pm.response.code >= 200 && pm.response.code < 300) { pm.collectionVariables.set('teamId2', pm.response.json().id); }"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Tiburones de Barranquilla {{$timestamp}}\",\n  \"city\": \"Barranquilla\",\n  \"contactEmail\": \"contacto@tiburones.co\",\n  \"foundedYear\": 2018\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/teams",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "teams"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Listar equipos",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/teams",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "teams"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Listar solo activos",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/teams?active=true",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "teams"
+              ],
+              "query": [
+                {
+                  "key": "active",
+                  "value": "true"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Detalle de un equipo",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/teams/{{teamId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "teams",
+                "{{teamId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Actualizar equipo (reemplazo total)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Halcones de Cali actualizado {{$timestamp}}\",\n  \"city\": \"Cali\",\n  \"contactEmail\": \"nuevo@halcones.co\",\n  \"foundedYear\": 2015\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/teams/{{teamId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "teams",
+                "{{teamId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Desactivar equipo",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/teams/{{teamId}}/deactivate",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "teams",
+                "{{teamId}}",
+                "deactivate"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Activar equipo",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/teams/{{teamId}}/activate",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "teams",
+                "{{teamId}}",
+                "activate"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Reporte: equipos activos por ciudad",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/teams/reports/active-by-city",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "teams",
+                "reports",
+                "active-by-city"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Equipos y deportes (GD-03)",
+      "description": "Asociación de un equipo con los deportes en que participa. No lleva cuerpo.",
+      "item": [
+        {
+          "name": "Asociar equipo con deporte",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/teams/{{teamId}}/sports/{{sportId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "teams",
+                "{{teamId}}",
+                "sports",
+                "{{sportId}}"
+              ]
+            },
+            "description": "Requiere un equipo y un deporte creados (variables teamId y sportId). El equipo y el deporte deben estar activos."
+          }
+        },
+        {
+          "name": "Asociar el segundo equipo con el deporte",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/teams/{{teamId2}}/sports/{{sportId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "teams",
+                "{{teamId2}}",
+                "sports",
+                "{{sportId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Deportes de un equipo",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/teams/{{teamId}}/sports",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "teams",
+                "{{teamId}}",
+                "sports"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Deportes activos de un equipo",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/teams/{{teamId}}/sports?active=true",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "teams",
+                "{{teamId}}",
+                "sports"
+              ],
+              "query": [
+                {
+                  "key": "active",
+                  "value": "true"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Habilidades (GD-06)",
+      "description": "Catálogo de habilidades.",
+      "item": [
+        {
+          "name": "Crear habilidad",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Saves the id of the created record so the next requests can use it.",
+                  "if (pm.response.code >= 200 && pm.response.code < 300) { pm.collectionVariables.set('skillId', pm.response.json().id); }"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Remate de cabeza {{$timestamp}}\",\n  \"description\": \"Capacidad de rematar con la cabeza\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/skills",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "skills"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Listar habilidades",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/skills",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "skills"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Detalle de una habilidad",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/skills/{{skillId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "skills",
+                "{{skillId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Actualizar habilidad",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Remate de cabeza {{$timestamp}}\",\n  \"description\": \"Descripción actualizada\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/skills/{{skillId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "skills",
+                "{{skillId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Jugadores con una habilidad",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/skills/{{skillId}}/players",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "skills",
+                "{{skillId}}",
+                "players"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Jugadores (GD-04, GD-07 y GD-08)",
+      "description": "Jugadores, sus habilidades y su perfil deportivo.",
+      "item": [
+        {
+          "name": "Crear jugador",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Saves the id of the created record so the next requests can use it.",
+                  "if (pm.response.code >= 200 && pm.response.code < 300) { pm.collectionVariables.set('playerId', pm.response.json().id); }"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": {{$timestamp}},\n  \"document\": \"CC-{{$timestamp}}\",\n  \"position\": \"Delantero\",\n  \"jerseyNumber\": 9\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/players",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "players"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Listar jugadores",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/players",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "players"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Detalle de un jugador",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/players/{{playerId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "players",
+                "{{playerId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Actualizar jugador",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": {{$timestamp}},\n  \"document\": \"CC-{{$timestamp}}\",\n  \"position\": \"Mediocampista\",\n  \"jerseyNumber\": 10\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/players/{{playerId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "players",
+                "{{playerId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Desactivar jugador",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/players/{{playerId}}/deactivate",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "players",
+                "{{playerId}}",
+                "deactivate"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Activar jugador",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/players/{{playerId}}/activate",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "players",
+                "{{playerId}}",
+                "activate"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Asignar una habilidad al jugador",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"level\": 3\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/players/{{playerId}}/skills/{{skillId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "players",
+                "{{playerId}}",
+                "skills",
+                "{{skillId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Habilidades de un jugador",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/players/{{playerId}}/skills",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "players",
+                "{{playerId}}",
+                "skills"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Perfil deportivo del jugador",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/players/{{playerId}}/profile",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "players",
+                "{{playerId}}",
+                "profile"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Contratos (GD-05)",
+      "description": "Contratos de jugadores con equipos. Retirar a un jugador es finalizar su contrato.",
+      "item": [
+        {
+          "name": "Crear contrato",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Saves the id of the created record so the next requests can use it.",
+                  "if (pm.response.code >= 200 && pm.response.code < 300) { pm.collectionVariables.set('contractId', pm.response.json().id); }"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"playerId\": {{playerId}},\n  \"startDate\": \"2025-01-01\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/teams/{{teamId}}/contracts",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "teams",
+                "{{teamId}}",
+                "contracts"
+              ]
+            },
+            "description": "Requiere un jugador y un equipo creados (playerId y teamId)."
+          }
+        },
+        {
+          "name": "Jugadores de un equipo",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/teams/{{teamId}}/players",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "teams",
+                "{{teamId}}",
+                "players"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Jugadores con contrato vigente",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/teams/{{teamId}}/players?current=true",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "teams",
+                "{{teamId}}",
+                "players"
+              ],
+              "query": [
+                {
+                  "key": "current",
+                  "value": "true"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Equipos de un jugador (historial)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/players/{{playerId}}/teams",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "players",
+                "{{playerId}}",
+                "teams"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Torneos (GC-01 y GC-08)",
+      "description": "Torneos. El deporte es obligatorio. La consulta overview muestra el desarrollo completo del torneo.",
+      "item": [
+        {
+          "name": "Crear torneo",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Saves the id of the created record so the next requests can use it.",
+                  "if (pm.response.code >= 200 && pm.response.code < 300) { pm.collectionVariables.set('tournamentId', pm.response.json().id); }"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Copa Verano 2027 {{$timestamp}}\",\n  \"sportId\": {{sportId}},\n  \"startDate\": \"2027-07-01\",\n  \"enrollmentDeadline\": \"2027-06-15\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/tournaments",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tournaments"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Listar torneos",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/tournaments",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tournaments"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Filtrar por deporte",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/tournaments?sportId={{sportId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tournaments"
+              ],
+              "query": [
+                {
+                  "key": "sportId",
+                  "value": "{{sportId}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Filtrar por nombre",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/tournaments?name=copa",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tournaments"
+              ],
+              "query": [
+                {
+                  "key": "name",
+                  "value": "copa"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Reporte: inscripciones abiertas",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/tournaments/reports/open-enrollment",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tournaments",
+                "reports",
+                "open-enrollment"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Detalle de un torneo",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/tournaments/{{tournamentId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tournaments",
+                "{{tournamentId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Desarrollo del torneo (fases, partidos y anotaciones)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/tournaments/{{tournamentId}}/overview",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tournaments",
+                "{{tournamentId}}",
+                "overview"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Fases de un torneo",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/tournaments/{{tournamentId}}/phases",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tournaments",
+                "{{tournamentId}}",
+                "phases"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Actualizar torneo (reemplazo total)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Copa Verano 2027 actualizada {{$timestamp}}\",\n  \"sportId\": {{sportId}},\n  \"startDate\": \"2027-07-05\",\n  \"enrollmentDeadline\": \"2027-06-20\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/tournaments/{{tournamentId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tournaments",
+                "{{tournamentId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Desactivar torneo",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/tournaments/{{tournamentId}}/deactivate",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tournaments",
+                "{{tournamentId}}",
+                "deactivate"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Activar torneo",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/tournaments/{{tournamentId}}/activate",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tournaments",
+                "{{tournamentId}}",
+                "activate"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Inscripciones (GC-02)",
+      "description": "Inscripción de equipos en torneos. El equipo debe jugar el deporte del torneo.",
+      "item": [
+        {
+          "name": "Inscribir equipo en un torneo",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"teamId\": {{teamId}}\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/tournaments/{{tournamentId}}/registrations",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tournaments",
+                "{{tournamentId}}",
+                "registrations"
+              ]
+            },
+            "description": "Requiere que el equipo ya esté asociado al deporte del torneo (carpeta Equipos y deportes) y que el torneo siga con la inscripción abierta."
+          }
+        },
+        {
+          "name": "Inscribir el segundo equipo en el torneo",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"teamId\": {{teamId2}}\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/tournaments/{{tournamentId}}/registrations",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tournaments",
+                "{{tournamentId}}",
+                "registrations"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Equipos inscritos en un torneo",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/tournaments/{{tournamentId}}/registrations",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tournaments",
+                "{{tournamentId}}",
+                "registrations"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Torneos en los que está inscrito un equipo",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/teams/{{teamId}}/tournaments",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "teams",
+                "{{teamId}}",
+                "tournaments"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Fases (GC-03)",
+      "description": "Consulta de las fases de un torneo (grupos y fases finales).",
+      "item": [
+        {
+          "name": "Listar fases",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/phases",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "phases"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Fases de un torneo (filtro)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/phases?tournamentId={{tournamentId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "phases"
+              ],
+              "query": [
+                {
+                  "key": "tournamentId",
+                  "value": "{{tournamentId}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Detalle de una fase",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/phases/{{groupId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "phases",
+                "{{groupId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Reporte: fases por tipo",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/phases/reports/count-by-type",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "phases",
+                "reports",
+                "count-by-type"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Grupos (GC-04)",
+      "description": "Fases de grupos y los equipos que las conforman.",
+      "item": [
+        {
+          "name": "Crear grupo",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Saves the id of the created record so the next requests can use it.",
+                  "if (pm.response.code >= 200 && pm.response.code < 300) { pm.collectionVariables.set('groupId', pm.response.json().id); }"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Grupo A {{$timestamp}}\",\n  \"order\": 1,\n  \"tournamentId\": {{tournamentId}}\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/groups",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "groups"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Listar grupos",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/groups",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "groups"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Grupos de un torneo",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/groups?tournamentId={{tournamentId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "groups"
+              ],
+              "query": [
+                {
+                  "key": "tournamentId",
+                  "value": "{{tournamentId}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Detalle de un grupo",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/groups/{{groupId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "groups",
+                "{{groupId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Actualizar grupo",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Grupo A (actualizado)\",\n  \"order\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/groups/{{groupId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "groups",
+                "{{groupId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Asignar equipo al grupo",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/groups/{{groupId}}/teams/{{teamId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "groups",
+                "{{groupId}}",
+                "teams",
+                "{{teamId}}"
+              ]
+            },
+            "description": "Requiere que el equipo esté inscrito en el torneo del grupo."
+          }
+        },
+        {
+          "name": "Asignar el segundo equipo al grupo",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/groups/{{groupId}}/teams/{{teamId2}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "groups",
+                "{{groupId}}",
+                "teams",
+                "{{teamId2}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Equipos de un grupo",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/groups/{{groupId}}/teams",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "groups",
+                "{{groupId}}",
+                "teams"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Fases finales (GC-05)",
+      "description": "Fases finales (eliminación) de un torneo.",
+      "item": [
+        {
+          "name": "Crear fase final",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Saves the id of the created record so the next requests can use it.",
+                  "if (pm.response.code >= 200 && pm.response.code < 300) { pm.collectionVariables.set('finalId', pm.response.json().id); }"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Final {{$timestamp}}\",\n  \"order\": 2,\n  \"tournamentId\": {{tournamentId}}\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/finals",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "finals"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Listar fases finales",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/finals",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "finals"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Fases finales de un torneo",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/finals?tournamentId={{tournamentId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "finals"
+              ],
+              "query": [
+                {
+                  "key": "tournamentId",
+                  "value": "{{tournamentId}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Detalle de una fase final",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/finals/{{finalId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "finals",
+                "{{finalId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Actualizar fase final",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Final (actualizada)\",\n  \"order\": 2\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/finals/{{finalId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "finals",
+                "{{finalId}}"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Partidos (GC-06)",
+      "description": "Partidos de una fase. Solo se pueden eliminar los partidos programados.",
+      "item": [
+        {
+          "name": "Crear partido en una fase de grupos",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Saves the id of the created record so the next requests can use it.",
+                  "if (pm.response.code >= 200 && pm.response.code < 300) { pm.collectionVariables.set('matchId', pm.response.json().id); }"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"scheduledAt\": \"2027-07-10T16:00:00.000Z\",\n  \"homeTeamId\": {{teamId}},\n  \"awayTeamId\": {{teamId2}}\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/phases/{{groupId}}/matches",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "phases",
+                "{{groupId}}",
+                "matches"
+              ]
+            },
+            "description": "Requiere dos equipos (teamId y teamId2) inscritos en el torneo y asignados al grupo. El equipo local y el visitante deben ser distintos."
+          }
+        },
+        {
+          "name": "Crear partido en una fase final",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Saves the id of the created record so the next requests can use it.",
+                  "if (pm.response.code >= 200 && pm.response.code < 300) { pm.collectionVariables.set('finalMatchId', pm.response.json().id); }"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"scheduledAt\": \"2027-07-20T16:00:00.000Z\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/phases/{{finalId}}/matches",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "phases",
+                "{{finalId}}",
+                "matches"
+              ]
+            },
+            "description": "No necesita equipos: se pueden asignar después."
+          }
+        },
+        {
+          "name": "Listar partidos",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/matches",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "matches"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Partidos de una fase",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/phases/{{groupId}}/matches",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "phases",
+                "{{groupId}}",
+                "matches"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Detalle de un partido",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/matches/{{matchId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "matches",
+                "{{matchId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Actualizar partido",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"scheduledAt\": \"2027-07-11T17:00:00.000Z\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/matches/{{matchId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "matches",
+                "{{matchId}}"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Resultados y anotaciones (GC-07)",
+      "description": "Anotaciones, marcador y finalización de partidos. Finalizar es un paso sin vuelta: el partido ya no se puede editar ni eliminar.",
+      "item": [
+        {
+          "name": "Registrar una anotación",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Saves the id of the created record so the next requests can use it.",
+                  "if (pm.response.code >= 200 && pm.response.code < 300) { pm.collectionVariables.set('eventId', pm.response.json().id); }"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"playerId\": {{playerId}},\n  \"teamId\": {{teamId}},\n  \"minute\": 23,\n  \"type\": \"GOAL\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/matches/{{matchId}}/scoring-events",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "matches",
+                "{{matchId}}",
+                "scoring-events"
+              ]
+            },
+            "description": "Requiere un partido con los dos equipos y un jugador con contrato vigente en el equipo que anota."
+          }
+        },
+        {
+          "name": "Anotaciones de un partido",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/matches/{{matchId}}/scoring-events",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "matches",
+                "{{matchId}}",
+                "scoring-events"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Modificar una anotación",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"playerId\": {{playerId}},\n  \"teamId\": {{teamId}},\n  \"minute\": 25,\n  \"type\": \"GOAL\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/scoring-events/{{eventId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "scoring-events",
+                "{{eventId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Registrar el resultado",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"homeScore\": 2,\n  \"awayScore\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/matches/{{matchId}}/result",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "matches",
+                "{{matchId}}",
+                "result"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Finalizar el partido (envía el resumen por correo)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"homeScore\": 2,\n  \"awayScore\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/matches/{{matchId}}/finish",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "matches",
+                "{{matchId}}",
+                "finish"
+              ]
+            },
+            "description": "Un partido finalizado ya no se puede editar ni eliminar. Requiere marcador de ambos equipos."
+          }
+        },
+        {
+          "name": "Finalizar contrato (retirar jugador)",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/contracts/{{contractId}}/end",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "contracts",
+                "{{contractId}}",
+                "end"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Eliminar (hacerlo al final)",
+      "description": "Todas las eliminaciones, en el orden en que cada una está permitida. Tras finalizar el partido (carpeta Resultados), el partido pasa a ser histórico: no se puede eliminar y por eso el grupo, la inscripción, el torneo, el equipo y el deporte dan 409. Es lo esperado; en ese caso se desactivan.",
+      "item": [
+        {
+          "name": "Eliminar una anotación",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/scoring-events/{{eventId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "scoring-events",
+                "{{eventId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Eliminar partido",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/matches/{{matchId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "matches",
+                "{{matchId}}"
+              ]
+            },
+            "description": "Solo se pueden eliminar partidos programados. El partido de grupos se finaliza en la carpeta Resultados, así que aquí da 409; por eso el grupo, el torneo y el deporte también dan 409. Es lo esperado: un partido finalizado es histórico."
+          }
+        },
+        {
+          "name": "Eliminar partido de la fase final",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/matches/{{finalMatchId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "matches",
+                "{{finalMatchId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Retirar equipo del grupo",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/groups/{{groupId}}/teams/{{teamId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "groups",
+                "{{groupId}}",
+                "teams",
+                "{{teamId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Retirar el segundo equipo del grupo",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/groups/{{groupId}}/teams/{{teamId2}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "groups",
+                "{{groupId}}",
+                "teams",
+                "{{teamId2}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Eliminar grupo",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/groups/{{groupId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "groups",
+                "{{groupId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Eliminar fase final",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/finals/{{finalId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "finals",
+                "{{finalId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Retirar la inscripción",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/tournaments/{{tournamentId}}/registrations/{{teamId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tournaments",
+                "{{tournamentId}}",
+                "registrations",
+                "{{teamId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Retirar la inscripción del segundo equipo",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/tournaments/{{tournamentId}}/registrations/{{teamId2}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tournaments",
+                "{{tournamentId}}",
+                "registrations",
+                "{{teamId2}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Quitar una habilidad al jugador",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/players/{{playerId}}/skills/{{skillId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "players",
+                "{{playerId}}",
+                "skills",
+                "{{skillId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Retirar la asociación",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/teams/{{teamId}}/sports/{{sportId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "teams",
+                "{{teamId}}",
+                "sports",
+                "{{sportId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Retirar la asociación del segundo equipo",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/teams/{{teamId2}}/sports/{{sportId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "teams",
+                "{{teamId2}}",
+                "sports",
+                "{{sportId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Eliminar habilidad",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/skills/{{skillId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "skills",
+                "{{skillId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Eliminar torneo",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/tournaments/{{tournamentId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tournaments",
+                "{{tournamentId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Eliminar jugador",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/players/{{playerId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "players",
+                "{{playerId}}"
+              ]
+            },
+            "description": "Con contratos o anotaciones da 409: se desactiva en lugar de eliminar."
+          }
+        },
+        {
+          "name": "Eliminar equipo",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/teams/{{teamId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "teams",
+                "{{teamId}}"
+              ]
+            },
+            "description": "Con contratos, partidos, deportes o inscripciones asociados da 409: se desactiva en lugar de eliminar."
+          }
+        },
+        {
+          "name": "Eliminar un subdeporte",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/sports/{{subSportId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "sports",
+                "{{subSportId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Eliminar deporte",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/sports/{{sportId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "sports",
+                "{{sportId}}"
+              ]
+            },
+            "description": "Con subdeportes, equipos o torneos asociados da 409."
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "sportId",
+      "value": "1"
+    },
+    {
+      "key": "subSportId",
+      "value": "2"
+    },
+    {
+      "key": "teamId",
+      "value": "1"
+    },
+    {
+      "key": "teamId2",
+      "value": "2"
+    },
+    {
+      "key": "tournamentId",
+      "value": "1"
+    },
+    {
+      "key": "groupId",
+      "value": "1"
+    },
+    {
+      "key": "finalId",
+      "value": "2"
+    },
+    {
+      "key": "matchId",
+      "value": "1"
+    },
+    {
+      "key": "finalMatchId",
+      "value": "4"
+    },
+    {
+      "key": "eventId",
+      "value": "1"
+    },
+    {
+      "key": "skillId",
+      "value": "1"
+    },
+    {
+      "key": "playerId",
+      "value": "1"
+    },
+    {
+      "key": "contractId",
+      "value": "1"
+    }
+  ]
+}

@@ -37,8 +37,12 @@ Casos límite que no deben faltar en este proyecto:
 
 ## Colección Postman
 
-- Archivos: `postman/MsSports.postman_collection.json` (v2.1) y
-  `postman/Local.postman_environment.json` (solo `baseUrl` y variables; sin secretos).
+- Archivos (un solo juego para todo el proyecto):
+  - `postman/Pruebas.postman_collection.json` (v2.1): **todas** las pruebas automatizadas, con aserciones.
+    Las historias nuevas agregan su carpeta aquí; no se crean colecciones aparte.
+  - `postman/Endpoints.postman_collection.json`: todos los endpoints con un cuerpo de ejemplo, sin pruebas,
+    para usar la API a mano. Una historia nueva agrega aquí sus endpoints.
+  - `postman/Local.postman_environment.json` (solo `baseUrl` y variables; sin secretos).
 - Carpetas por historia (`GD-01 Deportes`, `GC-02 Inscripciones`…), en orden de dependencias.
 - El nombre de cada request empieza con el ID del caso de la matriz.
 - Scripts y nombres de `pm.test` en inglés. Cada request tiene `pm.test` que valida al menos el código HTTP y, cuando
@@ -56,7 +60,9 @@ Casos límite que no deben faltar en este proyecto:
 Ejecución:
 
 ```bash
-newman run postman/MsSports.postman_collection.json -e postman/Local.postman_environment.json
+newman run postman/Pruebas.postman_collection.json -e postman/Local.postman_environment.json
+
+# Datos de prueba: npm run seed (una vez). Si una corrida deja datos QA: node postman/fixtures/teardown.mjs
 ```
 
 ## Reporte
