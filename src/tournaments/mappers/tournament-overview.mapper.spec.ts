@@ -1,5 +1,6 @@
 import { TournamentResponseDto } from '../dtos/tournament-response.dto';
 import {
+  OverviewGroupTeamRow,
   OverviewMatchRow,
   OverviewPhaseRow,
   OverviewScoringEventRow,
@@ -176,5 +177,96 @@ describe('TournamentOverviewMapper', () => {
     const overview = mapper.toOverview(tournament, [groupPhase], [match()], []);
 
     expect(overview.phases[0].matches[0].scoringEvents).toEqual([]);
+  });
+
+  describe('standings of a group phase (proposal)', () => {
+    const teams: OverviewGroupTeamRow[] = [
+      { groupId: 10, id: 1, name: 'Atlético' },
+      { groupId: 10, id: 2, name: 'Millonarios' },
+      { groupId: 10, id: 3, name: 'Nacional' },
+      { groupId: 99, id: 4, name: 'Of another group' },
+    ];
+    const team = (id: number) => {
+      const row = teams.find((t) => t.id === id)!;
+      return { id: row.id, name: row.name };
+    };
+
+    it('lists only the teams of the group', () => {
+      const [phase] = mapper.toOverview(tournament, [groupPhase], [], [], teams).phases;
+
+      expect(phase.teams).toEqual([team(1), team(2), team(3)]);
+      expect(phase.bracket).toBeUndefined();
+    });
+
+    it('counts 3 points per win, 1 per draw and only FINISHED matches', () => {
+      const matches = [
+        match({ id: 1, homeTeam: team(1), awayTeam: team(2), homeScore: 2, awayScore: 0 }),
+        match({ id: 2, homeTeam: team(2), awayTeam: team(3), homeScore: 1, awayScore: 1 }),
+        match({ id: 3, homeTeam: team(3), awayTeam: team(1), homeScore: 5, awayScore: 0, status: 'IN_PROGRESS' }),
+        match({ id: 4, homeTeam: team(3), awayTeam: team(1), homeScore: null, awayScore: null, status: 'SCHEDULED' }),
+      ];
+
+      const [phase] = mapper.toOverview(tournament, [groupPhase], matches, [], teams).phases;
+
+      expect(phase.standings).toEqual([
+        { position: 1, team: team(1), played: 1, won: 1, drawn: 0, lost: 0, goalsFor: 2, goalsAgainst: 0, goalDifference: 2, points: 3 },
+        { position: 2, team: team(3), played: 1, won: 0, drawn: 1, lost: 0, goalsFor: 1, goalsAgainst: 1, goalDifference: 0, points: 1 },
+        { position: 3, team: team(2), played: 2, won: 0, drawn: 1, lost: 1, goalsFor: 1, goalsAgainst: 3, goalDifference: -2, points: 1 },
+      ]);
+    });
+
+    it('breaks ties by goal difference, then goals for, then name', () => {
+      const matches = [
+        // 1 and 2 draw 2-2; 3 beats nobody: everyone ends with 1 point except 3.
+        match({ id: 1, homeTeam: team(2), awayTeam: team(1), homeScore: 2, awayScore: 2 }),
+      ];
+
+      const [phase] = mapper.toOverview(tournament, [groupPhase], matches, [], teams).phases;
+
+      expect(phase.standings!.map((row) => row.team.name)).toEqual([
+        'Atlético',
+        'Millonarios',
+        'Nacional',
+      ]);
+    });
+
+    it('shows every team with zeros when no match is finished', () => {
+      const [phase] = mapper.toOverview(tournament, [groupPhase], [], [], teams).phases;
+
+      expect(phase.standings!.every((row) => row.played === 0 && row.points === 0)).toBe(true);
+      expect(phase.standings!.map((row) => row.position)).toEqual([1, 2, 3]);
+    });
+  });
+
+  describe('bracket of a knockout phase', () => {
+    const final = (overrides: Partial<OverviewMatchRow>) => match({ phaseId: 11, ...overrides });
+
+    it('shows the winner of a finished match', () => {
+      const [phase] = mapper.toOverview(tournament, [finalPhase], [final({ id: 90 })], []).phases;
+
+      expect(phase.standings).toBeUndefined();
+      expect(phase.bracket).toEqual([
+        {
+          matchId: 90,
+          status: 'FINISHED',
+          homeTeam: { id: 1, name: 'Atlético' },
+          awayTeam: { id: 2, name: 'Millonarios' },
+          homeScore: 2,
+          awayScore: 1,
+          winner: { id: 1, name: 'Atlético' },
+        },
+      ]);
+    });
+
+    it('has no winner while the match is not finished or is drawn', () => {
+      const matches = [
+        final({ id: 90, status: 'SCHEDULED', homeScore: null, awayScore: null }),
+        final({ id: 91, homeScore: 1, awayScore: 1 }),
+      ];
+
+      const [phase] = mapper.toOverview(tournament, [finalPhase], matches, []).phases;
+
+      expect(phase.bracket!.map((crossing) => crossing.winner)).toEqual([null, null]);
+    });
   });
 });

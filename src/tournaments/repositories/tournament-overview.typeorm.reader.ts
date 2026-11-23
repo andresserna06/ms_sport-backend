@@ -4,7 +4,9 @@ import { DataSource } from 'typeorm';
 import { Match } from '../../matches/entities/match.entity';
 import { Phase } from '../../phases/base/entities/phase.entity';
 import { ScoringEvent } from '../../scoring-events/entities/scoring-event.entity';
+import { Team } from '../../teams/entities/team.entity';
 import {
+  OverviewGroupTeamRow,
   OverviewMatchRow,
   OverviewPhaseRow,
   OverviewScoringEventRow,
@@ -78,6 +80,24 @@ export class TournamentOverviewTypeOrmReader implements TournamentOverviewReader
       type: event.type,
       player: { id: event.player.id, document: event.player.document },
       team: { id: event.team.id, name: event.team.name },
+    }));
+  }
+
+  async findGroupTeams(groupIds: number[]): Promise<OverviewGroupTeamRow[]> {
+    if (groupIds.length === 0) return [];
+
+    const teams = await this.dataSource.manager
+      .createQueryBuilder(Team, 'team')
+      .innerJoinAndSelect('team.group', 'group')
+      .where('group.id IN (:...groupIds)', { groupIds })
+      .orderBy('team.name', 'ASC')
+      .addOrderBy('team.id', 'ASC')
+      .getMany();
+
+    return teams.map((team) => ({
+      groupId: team.group!.id,
+      id: team.id,
+      name: team.name,
     }));
   }
 }

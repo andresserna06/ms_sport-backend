@@ -81,13 +81,17 @@ export class TournamentsService {
   async remove(id: number): Promise<void> {
     const tournament = await this.getOrFail(id);
 
-    const { phases, matches } = await this.repository.countDependencies(id);
-    const blockers = [
-      phases > 0 ? `${phases} ${phases === 1 ? 'fase' : 'fases'}` : null,
-      matches > 0
-        ? `${matches} ${matches === 1 ? 'partido' : 'partidos'}`
-        : null,
-    ].filter((blocker): blocker is string => blocker !== null);
+    const { phases, matches, registrations, venues } =
+      await this.repository.countDependencies(id);
+    const parts: [number, string, string][] = [
+      [phases, 'fase', 'fases'],
+      [matches, 'partido', 'partidos'],
+      [registrations, 'equipo inscrito', 'equipos inscritos'],
+      [venues, 'escenario asociado', 'escenarios asociados'],
+    ];
+    const blockers = parts
+      .filter(([total]) => total > 0)
+      .map(([total, one, many]) => `${total} ${total === 1 ? one : many}`);
 
     if (blockers.length > 0) {
       throw new ApplicationException(
@@ -110,8 +114,9 @@ export class TournamentsService {
     }
   }
 
-  // HU-GC-08: the tournament with its phases, matches and scoring events.
-  // Read only, in four queries at most; only data of this tournament.
+  // HU-GC-08: the tournament with its phases, matches, scoring events, group
+  // teams with standings and knockout brackets. Read only, five queries at
+  // most; only data of this tournament.
   async getOverview(id: number): Promise<TournamentOverviewDto> {
     const tournament = await this.getDetailOrFail(id);
 
@@ -122,12 +127,16 @@ export class TournamentsService {
     const scoringEvents = await this.overviewReader.findScoringEvents(
       matches.map((match) => match.id),
     );
+    const groupTeams = await this.overviewReader.findGroupTeams(
+      phases.filter((phase) => phase.phaseType === 'GROUP').map((phase) => phase.id),
+    );
 
     return this.overviewMapper.toOverview(
       tournament,
       phases,
       matches,
       scoringEvents,
+      groupTeams,
     );
   }
 

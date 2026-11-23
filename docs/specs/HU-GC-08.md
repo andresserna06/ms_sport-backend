@@ -33,7 +33,10 @@
 ## Estado de la implementación (actualizado)
 
 - **Implementado:** etapas A y B de `GET /tournaments/:id/overview`: torneo, fases en orden (`order`, tipo `GROUP_STAGE`/`KNOCKOUT`), partidos por fase con `hasResult` y anotaciones por partido (jugador `{id, document}`, P8). Respuestas 200, 400, 404. Sin N+1: torneo, fases, partidos `IN`, anotaciones `IN`. Datos de ejemplo en `scripts/seed-data.mjs` (Copa Colombia de Fútbol 2027 con 2 fases, 4 partidos, 3 anotaciones) y carpeta Postman "GC-08 Desarrollo de un torneo".
-- **Pendiente (se retoma cuando avance el integrante 3):** etapa C (grupos con equipos y tabla de posiciones) y etapa D (llaves). Dependen de B1, B2, B3 y de P1, P4 y P5. La historia queda **parcial**.
+- **Implementado (etapa C):** en cada fase `GROUP_STAGE`, `teams` (equipos con `group_id` de esa fase) y `standings` (tabla calculada al consultar con la regla propuesta R6: solo partidos `FINISHED`, 3/1/0, orden PTS, DIF, AF, nombre). En el código actual el grupo **es** la fase (`Group` hereda de `Phase` y `Team.group_id` apunta a ella), así que la respuesta no tiene un nivel `groups`: `teams` y `standings` van en la fase.
+- **Implementado (etapa D, versión sin `finalRound`):** en cada fase `KNOCKOUT`, `bracket` con cada cruce (`matchId`, equipos, marcador, `status`, `winner`). Cada fase final es una ronda y las rondas se ordenan por `order`. `winner` es `null` si el partido no está `FINISHED` o terminó empatado (regla de empate [PENDIENTE], P5).
+- **Pendiente:** cuando se mergee `feature/phases-rules` (integrante 3), añadir `finalRound` a las fases `KNOCKOUT` como etiqueta de la ronda. No existe `bracketPosition` ni la relación entre cruces (qué partido alimenta a cuál), así que las llaves se muestran por ronda, sin conexiones.
+- Los datos de `scripts/seed-data.mjs` no inscriben equipos ni los asignan al grupo, por eso con ese seed `teams` y `standings` salen vacíos; con datos creados por la API sí se llenan.
 - En la respuesta el campo se llama `order` (no `sequence`).
 
 ## Qué se entrega y qué no

@@ -1,4 +1,6 @@
 import { Injectable } from '@nestjs/common';
+import { Registration } from '../../registrations/entities/registration.entity';
+import { TournamentVenue } from '../../tournament-venues/entities/tournament-venue.entity';
 import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
 import { Match } from '../../matches/entities/match.entity';
@@ -93,15 +95,17 @@ export class TournamentTypeOrmRepository implements TournamentRepository {
 
   async countDependencies(id: number): Promise<TournamentDependencies> {
     const manager = this.dataSource.manager;
-    const [phases, matches] = await Promise.all([
+    const [phases, matches, registrations, venues] = await Promise.all([
       manager.count(Phase, { where: { tournamentId: id } }),
       manager
         .createQueryBuilder(Match, 'match')
         .innerJoin('match.phase', 'phase')
         .where('phase.tournamentId = :id', { id })
         .getCount(),
+      manager.count(Registration, { where: { tournament: { id } } }),
+      manager.count(TournamentVenue, { where: { tournamentId: id } }),
     ]);
-    return { phases, matches };
+    return { phases, matches, registrations, venues };
   }
 
   async save(tournament: Tournament): Promise<Tournament> {

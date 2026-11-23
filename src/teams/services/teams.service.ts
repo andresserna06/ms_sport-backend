@@ -149,6 +149,8 @@ export class TeamsService {
       [associations.contracts, 'contrato', 'contratos'],
       [associations.matches, 'partido', 'partidos'],
       [associations.scoringEvents, 'anotación', 'anotaciones'],
+      [associations.registrations, 'inscripción en torneos', 'inscripciones en torneos'],
+      [associations.fans, 'aficionado asociado', 'aficionados asociados'],
     ];
     return parts
       .filter(([total]) => total > 0)

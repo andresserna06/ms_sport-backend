@@ -26,11 +26,42 @@ export class OverviewMatchDto {
   scoringEvents!: OverviewScoringEventDto[];
 }
 
+// One row of the standings table of a group phase (PJ, PG, PE, PP, AF, AC, DIF, PTS).
+export class OverviewStandingDto {
+  position!: number;
+  team!: OverviewTeamDto;
+  played!: number;
+  won!: number;
+  drawn!: number;
+  lost!: number;
+  goalsFor!: number;
+  goalsAgainst!: number;
+  goalDifference!: number;
+  points!: number;
+}
+
+// One crossing of a knockout phase (each final phase is one round of the bracket).
+export class OverviewBracketMatchDto {
+  matchId!: number;
+  status!: string;
+  homeTeam!: OverviewTeamDto | null;
+  awayTeam!: OverviewTeamDto | null;
+  homeScore!: number | null;
+  awayScore!: number | null;
+  // Only when the match is FINISHED and not drawn (the tie rule is pending).
+  winner!: OverviewTeamDto | null;
+}
+
 export class OverviewPhaseDto {
   id!: number;
   name!: string;
   order!: number;
   type!: 'GROUP_STAGE' | 'KNOCKOUT';
+  // Only in GROUP_STAGE phases.
+  teams?: OverviewTeamDto[];
+  standings?: OverviewStandingDto[];
+  // Only in KNOCKOUT phases.
+  bracket?: OverviewBracketMatchDto[];
   matches!: OverviewMatchDto[];
 }
 

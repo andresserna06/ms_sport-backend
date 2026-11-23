@@ -69,7 +69,8 @@ export class TeamTypeOrmRepository implements TeamRepository {
       return Number(rows[0].total);
     };
 
-    const [sports, contracts, matches, scoringEvents] = await Promise.all([
+    const [sports, contracts, matches, scoringEvents, registrations, fans] =
+      await Promise.all([
       count('team_sports', 'team_id = ?', [teamId]),
       count('player_contracts', 'team_id = ?', [teamId]),
       count('matches', 'home_team_id = ? OR away_team_id = ?', [
@@ -77,9 +78,11 @@ export class TeamTypeOrmRepository implements TeamRepository {
         teamId,
       ]),
       count('scoring_events', 'team_id = ?', [teamId]),
+      count('registrations', 'team_id = ?', [teamId]),
+      count('fan_teams', 'team_id = ?', [teamId]),
     ]);
 
-    return { sports, contracts, matches, scoringEvents };
+    return { sports, contracts, matches, scoringEvents, registrations, fans };
   }
 
   async findActiveByCityReport(): Promise<TeamCityReportRow[]> {

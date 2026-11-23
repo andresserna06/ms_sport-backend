@@ -160,6 +160,11 @@ alcance). Están implementadas, pero el grupo debe confirmarlas.
 - Se calcula en el service al consultar; no se guarda en una tabla.
 
 **Llaves de fase final (Propuesta)**
-- Los partidos se agrupan por `round` (ej. 1 = octavos, 2 = cuartos…) y se
-  ordenan por `bracketPosition`. El ganador de cada partido se muestra si está finalizado.
+- Cada fase final (`Final`) es una ronda de la llave; las rondas se ordenan por `order`
+  y los cruces de cada ronda son sus partidos (por fecha). Implementado en el overview de GC-08.
+- El ganador se muestra solo si el partido está `FINISHED` y no terminó empatado.
+- No hay `bracketPosition` ni relación entre cruces: la llave se muestra por rondas, sin conexiones.
+- Cuando se mergee `feature/phases-rules`, `finalRound` (octavos, cuartos, semifinal,
+  tercer puesto, final) se agrega como etiqueta de la ronda.
 - [PENDIENTE] ¿Cómo se resuelve un empate en fase final (penales, partido extra)?
+  Mientras no se decida, un empate queda sin ganador (`winner: null`).

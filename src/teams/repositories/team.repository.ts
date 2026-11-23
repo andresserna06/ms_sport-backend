@@ -21,6 +21,8 @@ export interface TeamAssociations {
   contracts: number;
   matches: number;
   scoringEvents: number;
+  registrations: number;
+  fans: number;
 }
 
 // Raised when the UNIQUE(name) index rejects a team (two concurrent requests

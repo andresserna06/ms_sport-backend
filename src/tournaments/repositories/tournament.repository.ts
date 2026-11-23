@@ -13,6 +13,8 @@ export interface TournamentFilter {
 export interface TournamentDependencies {
   phases: number;
   matches: number;
+  registrations: number;
+  venues: number;
 }
 
 // Raised when the UNIQUE(sport_id, name) index rejects a tournament (two

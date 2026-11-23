@@ -23,6 +23,8 @@ describe('TeamTypeOrmRepository', () => {
         if (sql.includes('`team_sports`')) return [{ total: '1' }];
         if (sql.includes('`player_contracts`')) return [{ total: '2' }];
         if (sql.includes('`matches`')) return [{ total: '3' }];
+        if (sql.includes('`registrations`')) return [{ total: '5' }];
+        if (sql.includes('`fan_teams`')) return [{ total: '6' }];
         return [{ total: '4' }];
       });
 
@@ -31,6 +33,8 @@ describe('TeamTypeOrmRepository', () => {
         contracts: 2,
         matches: 3,
         scoringEvents: 4,
+        registrations: 5,
+        fans: 6,
       });
     });
 

@@ -54,7 +54,9 @@ describe('TournamentsService', () => {
       findAll: jest.fn().mockResolvedValue([]),
       findOpenEnrollment: jest.fn().mockResolvedValue([]),
       existsByName: jest.fn().mockResolvedValue(false),
-      countDependencies: jest.fn().mockResolvedValue({ phases: 0, matches: 0 }),
+      countDependencies: jest
+        .fn()
+        .mockResolvedValue({ phases: 0, matches: 0, registrations: 0, venues: 0 }),
       save: jest.fn(async (tournament: Tournament) =>
         Object.assign(tournament, { id: tournament.id ?? 1 }),
       ),
@@ -69,6 +71,7 @@ describe('TournamentsService', () => {
       findPhases: jest.fn().mockResolvedValue([]),
       findMatches: jest.fn().mockResolvedValue([]),
       findScoringEvents: jest.fn().mockResolvedValue([]),
+      findGroupTeams: jest.fn().mockResolvedValue([]),
     };
     service = new TournamentsService(
       repository,
@@ -237,6 +240,7 @@ describe('TournamentsService', () => {
 
       expect(overviewReader.findMatches).toHaveBeenCalledWith([10]);
       expect(overviewReader.findScoringEvents).toHaveBeenCalledWith([77]);
+      expect(overviewReader.findGroupTeams).toHaveBeenCalledWith([10]);
       expect(overview.message).toBeUndefined();
       expect(overview.phases[0].matches).toHaveLength(1);
     });
@@ -361,18 +365,28 @@ describe('TournamentsService', () => {
     });
 
     it('lists phases and matches in the 409 message', async () => {
-      repository.countDependencies.mockResolvedValue({ phases: 2, matches: 3 });
+      repository.countDependencies.mockResolvedValue({
+        phases: 2,
+        matches: 3,
+        registrations: 4,
+        venues: 1,
+      });
 
       await expect(service.remove(1)).rejects.toMatchObject({
         errorCase: ErrorCase.INVALID_STATE,
         message:
-          'No se puede eliminar el torneo "Copa": tiene 2 fases, 3 partidos. Desactívelo en su lugar.',
+          'No se puede eliminar el torneo "Copa": tiene 2 fases, 3 partidos, 4 equipos inscritos, 1 escenario asociado. Desactívelo en su lugar.',
       });
       expect(repository.remove).not.toHaveBeenCalled();
     });
 
     it('uses the singular and only mentions what exists', async () => {
-      repository.countDependencies.mockResolvedValue({ phases: 1, matches: 0 });
+      repository.countDependencies.mockResolvedValue({
+        phases: 1,
+        matches: 0,
+        registrations: 0,
+        venues: 0,
+      });
 
       await expect(service.remove(1)).rejects.toThrow('tiene 1 fase.');
     });

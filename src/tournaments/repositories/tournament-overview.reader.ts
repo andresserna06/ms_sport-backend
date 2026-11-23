@@ -27,6 +27,12 @@ export interface OverviewScoringEventRow {
   team: { id: number; name: string };
 }
 
+export interface OverviewGroupTeamRow {
+  groupId: number;
+  id: number;
+  name: string;
+}
+
 // Read-only port used by the tournament overview (HU-GC-08). It keeps the
 // tournaments service free of the phases, matches and scoring-events
 // repositories, and every method is one batched query (no N+1).
@@ -37,4 +43,6 @@ export interface TournamentOverviewReader {
   findMatches(phaseIds: number[]): Promise<OverviewMatchRow[]>;
   // Scoring events of those matches, with player and team, by minute.
   findScoringEvents(matchIds: number[]): Promise<OverviewScoringEventRow[]>;
+  // Teams that belong to those group phases, by name.
+  findGroupTeams(groupIds: number[]): Promise<OverviewGroupTeamRow[]>;
 }

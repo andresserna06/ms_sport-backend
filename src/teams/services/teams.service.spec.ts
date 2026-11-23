@@ -15,6 +15,8 @@ const noAssociations: TeamAssociations = {
   contracts: 0,
   matches: 0,
   scoringEvents: 0,
+  registrations: 0,
+  fans: 0,
 };
 
 const errorCase = (error: unknown) => (error as ApplicationException).errorCase;
@@ -136,13 +138,15 @@ describe('TeamsService', () => {
         contracts: 2,
         matches: 1,
         scoringEvents: 3,
+        registrations: 2,
+        fans: 1,
       });
 
       const error = await service.remove(1).catch((e: unknown) => e);
 
       expect(errorCase(error)).toBe(ErrorCase.INVALID_STATE);
       expect((error as Error).message).toBe(
-        'No se puede eliminar el equipo "Atlético": tiene 1 deporte asociado, 2 contratos, 1 partido, 3 anotaciones. Desactívelo en su lugar.',
+        'No se puede eliminar el equipo "Atlético": tiene 1 deporte asociado, 2 contratos, 1 partido, 3 anotaciones, 2 inscripciones en torneos, 1 aficionado asociado. Desactívelo en su lugar.',
       );
       expect(repository.remove).not.toHaveBeenCalled();
     });
