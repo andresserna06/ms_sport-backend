@@ -2,6 +2,7 @@ import { ApplicationException } from '../../exception/application.exception';
 import { ErrorCase } from '../../exception/error-case.enum';
 import { Player } from '../entities/player.entity';
 import { PlayerMapper } from '../mappers/player.mapper';
+import { PlayerRoleAssigner } from '../ports/player-role-assigner.port';
 import { PlayerDependenciesChecker } from '../repositories/player-dependencies.port';
 import { PlayerRepository } from '../repositories/player.repository';
 import { PlayerService } from './player.service';
@@ -10,6 +11,7 @@ describe('PlayerService', () => {
   let service: PlayerService;
   let repository: jest.Mocked<PlayerRepository>;
   let dependenciesChecker: jest.Mocked<PlayerDependenciesChecker>;
+  let playerRoleAssigner: jest.Mocked<PlayerRoleAssigner>;
   let mapper: PlayerMapper;
 
   beforeEach(() => {
@@ -24,11 +26,19 @@ describe('PlayerService', () => {
     dependenciesChecker = {
       hasAssociatedRecords: jest.fn(),
     };
+    playerRoleAssigner = {
+      assignPlayerRole: jest.fn().mockResolvedValue(undefined),
+    };
     mapper = new PlayerMapper();
-    service = new PlayerService(repository, dependenciesChecker, mapper);
+    service = new PlayerService(
+      repository,
+      dependenciesChecker,
+      playerRoleAssigner,
+      mapper,
+    );
   });
 
-  it('should create a player when document and userId are available', async () => {
+  it('should create a player and assign player role when document and userId are available', async () => {
     repository.existsByDocument.mockResolvedValue(false);
     repository.existsByUserId.mockResolvedValue(false);
     repository.save.mockResolvedValue(
@@ -42,18 +52,25 @@ describe('PlayerService', () => {
       }),
     );
 
-    const result = await service.create({
-      userId: 10,
-      document: '  1053812345  ',
-      position: '  Delantero  ',
-      jerseyNumber: 9,
-    });
+    const result = await service.create(
+      {
+        userId: 10,
+        document: '  1053812345  ',
+        position: '  Delantero  ',
+        jerseyNumber: 9,
+      },
+      'Bearer jwt-token',
+    );
 
     expect(repository.existsByDocument).toHaveBeenCalledWith(
       '1053812345',
       undefined,
     );
     expect(repository.existsByUserId).toHaveBeenCalledWith(10, undefined);
+    expect(playerRoleAssigner.assignPlayerRole).toHaveBeenCalledWith(
+      10,
+      'Bearer jwt-token',
+    );
     expect(result).toEqual({
       id: 1,
       userId: 10,

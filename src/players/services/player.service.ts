@@ -8,6 +8,10 @@ import { UpdatePlayerDto } from '../dtos/update-player.dto';
 import { Player } from '../entities/player.entity';
 import { PlayerMapper } from '../mappers/player.mapper';
 import {
+  PLAYER_ROLE_ASSIGNER,
+  type PlayerRoleAssigner,
+} from '../ports/player-role-assigner.port';
+import {
   PLAYER_DEPENDENCIES_CHECKER,
   type PlayerDependenciesChecker,
 } from '../repositories/player-dependencies.port';
@@ -23,16 +27,25 @@ export class PlayerService {
     private readonly playerRepository: PlayerRepository,
     @Inject(PLAYER_DEPENDENCIES_CHECKER)
     private readonly dependenciesChecker: PlayerDependenciesChecker,
+    @Inject(PLAYER_ROLE_ASSIGNER)
+    private readonly playerRoleAssigner: PlayerRoleAssigner,
     private readonly playerMapper: PlayerMapper,
   ) {}
 
-  async create(dto: CreatePlayerDto): Promise<PlayerResponseDto> {
+  async create(
+    dto: CreatePlayerDto,
+    authorizationHeader?: string,
+  ): Promise<PlayerResponseDto> {
     const normalizedDocument = dto.document.trim();
     await this.ensureDocumentIsAvailable(normalizedDocument);
     await this.ensureUserIdIsAvailable(dto.userId);
 
     const entity = this.playerMapper.toEntity(dto);
     const saved = await this.playerRepository.save(entity);
+    await this.playerRoleAssigner.assignPlayerRole(
+      saved.userId,
+      authorizationHeader,
+    );
     return this.playerMapper.toResponseDto(saved);
   }
 
