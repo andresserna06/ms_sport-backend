@@ -1,31 +1,11 @@
-import { Transform } from 'class-transformer';
-import {
-  IsBoolean,
-  IsEmail,
-  IsNotEmpty,
-  IsOptional,
-  IsString,
-  MaxLength,
-} from 'class-validator';
-import { trimString } from '../../common/transformers/query-transformers';
+import { Type } from 'class-transformer';
+import { IsBoolean, IsInt, IsOptional, Min } from 'class-validator';
 
 export class CreateFanDto {
-  @Transform(trimString)
-  @IsString({ message: 'El campo nombre debe ser un texto' })
-  @IsNotEmpty({ message: 'El campo nombre es obligatorio' })
-  @MaxLength(120, {
-    message: 'El campo nombre no puede superar los 120 caracteres',
-  })
-  name!: string;
-
-  @Transform(trimString)
-  @IsString({ message: 'El campo correo debe ser un texto' })
-  @IsNotEmpty({ message: 'El campo correo es obligatorio' })
-  @IsEmail({}, { message: 'El campo correo no es válido' })
-  @MaxLength(150, {
-    message: 'El campo correo no puede superar los 150 caracteres',
-  })
-  email!: string;
+  @Type(() => Number)
+  @IsInt({ message: 'El campo userId debe ser un número entero' })
+  @Min(1, { message: 'El campo userId debe ser mayor o igual a 1' })
+  userId!: number;
 
   @IsOptional()
   @IsBoolean({ message: 'El campo estado activo debe ser true o false' })
