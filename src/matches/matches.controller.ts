@@ -1,5 +1,6 @@
-﻿import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, ParseIntPipe, Patch } from '@nestjs/common';
+﻿import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, ParseIntPipe, Patch, Query } from '@nestjs/common';
 import { UpdateMatchDto } from './dto/update-match.dto';
+import { FindMatchesQueryDto } from './dto/find-matches-query.dto';
 import { MatchesService } from './matches.service';
 
 @Controller('matches')
@@ -7,8 +8,13 @@ export class MatchesController {
   constructor(private readonly matchesService: MatchesService) {}
 
   @Get()
-  findAll() {
-    return this.matchesService.findAll();
+  findAll(@Query() query: FindMatchesQueryDto) {
+    return this.matchesService.findAll(query);
+  }
+
+  @Patch(':id/start')
+  start(@Param('id', ParseIntPipe) id: number) {
+    return this.matchesService.startMatch(id);
   }
 
   @Get(':id')

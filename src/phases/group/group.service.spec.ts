@@ -128,6 +128,11 @@ describe('GroupService', () => {
       ).rejects.toMatchObject({ errorCase: ErrorCase.ALREADY_EXISTS });
       expect(repository.save).not.toHaveBeenCalled();
     });
+
+    it('should reject order lower than 1', async () => {
+      repository.findById.mockResolvedValue(makeGroup());
+      await expect(service.update(3, { order: 0 })).rejects.toMatchObject({ errorCase: ErrorCase.INVALID_STATE });
+    });
   });
 
   describe('remove', () => {

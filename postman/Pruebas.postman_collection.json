@@ -44742,6 +44742,41 @@
               ]
             },
             {
+              "name": "Iniciar partido (prerequisito finish)",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/matches/{{matchId}}/start",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "matches",
+                    "{{matchId}}",
+                    "start"
+                  ]
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                      "pm.test('IN_PROGRESS', () => pm.expect(pm.response.json().status).to.eql('IN_PROGRESS'));"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
               "name": "TC-GC06-15 Reject finishing a match without a score (409)",
               "request": {
                 "method": "PATCH",
@@ -44964,16 +44999,17 @@
                   "script": {
                     "type": "text/javascript",
                     "exec": [
-                      "pm.test('Status 204', () => pm.response.to.have.status(204));"
+                      "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                      "pm.test('Status is WITHDRAWN', () => pm.expect(pm.response.json().status).to.eql('WITHDRAWN'));"
                     ]
                   }
                 }
               ],
               "request": {
-                "method": "DELETE",
+                "method": "PATCH",
                 "header": [],
                 "url": {
-                  "raw": "{{baseUrl}}/tournaments/{{tournamentId}}/registrations/{{teamId1}}",
+                  "raw": "{{baseUrl}}/tournaments/{{tournamentId}}/registrations/{{teamId1}}/withdraw",
                   "host": [
                     "{{baseUrl}}"
                   ],
@@ -44981,7 +45017,8 @@
                     "tournaments",
                     "{{tournamentId}}",
                     "registrations",
-                    "{{teamId1}}"
+                    "{{teamId1}}",
+                    "withdraw"
                   ]
                 }
               }
@@ -44994,16 +45031,17 @@
                   "script": {
                     "type": "text/javascript",
                     "exec": [
-                      "pm.test('Status 204', () => pm.response.to.have.status(204));"
+                      "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                      "pm.test('Status is WITHDRAWN', () => pm.expect(pm.response.json().status).to.eql('WITHDRAWN'));"
                     ]
                   }
                 }
               ],
               "request": {
-                "method": "DELETE",
+                "method": "PATCH",
                 "header": [],
                 "url": {
-                  "raw": "{{baseUrl}}/tournaments/{{tournamentId}}/registrations/{{teamId2}}",
+                  "raw": "{{baseUrl}}/tournaments/{{tournamentId}}/registrations/{{teamId2}}/withdraw",
                   "host": [
                     "{{baseUrl}}"
                   ],
@@ -45011,7 +45049,8 @@
                     "tournaments",
                     "{{tournamentId}}",
                     "registrations",
-                    "{{teamId2}}"
+                    "{{teamId2}}",
+                    "withdraw"
                   ]
                 }
               }

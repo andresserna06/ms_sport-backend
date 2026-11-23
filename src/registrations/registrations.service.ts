@@ -9,8 +9,8 @@ import { TeamSport } from '../team-sports/entities/team-sport.entity';
 import { Team } from '../teams/entities/team.entity';
 import { Tournament, TournamentStatus } from '../tournaments/entities/tournament.entity';
 import { CreateRegistrationDto } from './dto/create-registration.dto';
-import { RegistrationResponseDto, RegistrationSummaryDto } from './dto/registration-response.dto';
-import { Registration } from './entities/registration.entity';
+import { RegistrationResponseDto } from './dto/registration-response.dto';
+import { Registration, RegistrationStatus } from './entities/registration.entity';
 import { RegistrationMapper } from './mappers/registration.mapper';
 import {
   REGISTRATION_REPOSITORY,
@@ -46,7 +46,25 @@ export class RegistrationsService {
     this.assertTeamActive(team);
     this.assertRegistrationOpen(tournament);
     await this.assertTeamSportAssociation(tournament, team.id);
-    await this.assertNotDuplicated(tournament.id, team.id);
+
+    const existing = await this.registrationsRepository.findByTournamentAndTeam(
+      tournament.id,
+      team.id,
+    );
+    if (existing) {
+      if (existing.status === RegistrationStatus.CONFIRMED) {
+        throw new ApplicationException(
+          ErrorCase.ALREADY_EXISTS,
+          `El equipo ${team.id} ya est? inscrito en el torneo ${tournament.id}`,
+        );
+      }
+      existing.status = RegistrationStatus.CONFIRMED;
+      existing.withdrawnAt = null;
+      existing.registeredAt = new Date();
+      const saved = await this.registrationsRepository.save(existing);
+      const created = await this.registrationsRepository.findById(saved.id);
+      return this.registrationMapper.toResponseDto(created ?? saved);
+    }
 
     const saved = await this.registrationsRepository.save(
       this.registrationMapper.toEntity(team, tournament),
@@ -55,22 +73,16 @@ export class RegistrationsService {
     return this.registrationMapper.toResponseDto(created ?? saved);
   }
 
-  async findByTournament(tournamentId: number): Promise<RegistrationSummaryDto[]> {
+  async findByTournament(tournamentId: number): Promise<RegistrationResponseDto[]> {
     await this.getTournamentOrFail(tournamentId);
     const registrations = await this.registrationsRepository.findByTournament(tournamentId);
-    return registrations.map((registration) => ({
-      id: registration.team.id,
-      name: registration.team.name,
-    }));
+    return this.registrationMapper.toResponseDtoList(registrations);
   }
 
-  async findTournamentsByTeam(teamId: number): Promise<RegistrationSummaryDto[]> {
+  async findTournamentsByTeam(teamId: number): Promise<RegistrationResponseDto[]> {
     await this.getTeamOrFail(teamId);
     const registrations = await this.registrationsRepository.findByTeam(teamId);
-    return registrations.map((registration) => ({
-      id: registration.tournament.id,
-      name: registration.tournament.name,
-    }));
+    return this.registrationMapper.toResponseDtoList(registrations);
   }
 
   async assertTeamRegisteredInTournament(teamId: number, tournamentId: number): Promise<void> {
@@ -78,7 +90,7 @@ export class RegistrationsService {
       tournamentId,
       teamId,
     );
-    if (!registration) {
+    if (!registration || registration.status !== RegistrationStatus.CONFIRMED) {
       throw new ApplicationException(
         ErrorCase.INVALID_STATE,
         `El equipo ${teamId} no est? inscrito activamente en el torneo ${tournamentId}`,
@@ -86,10 +98,37 @@ export class RegistrationsService {
     }
   }
 
-  async remove(tournamentId: number, teamId: number): Promise<void> {
+  async confirm(registrationId: number): Promise<RegistrationResponseDto> {
+    const registration = await this.getRegistrationOrFail(registrationId);
+    if (registration.status === RegistrationStatus.CONFIRMED) {
+      return this.registrationMapper.toResponseDto(registration);
+    }
+    this.assertTournamentActive(registration.tournament);
+    this.assertTeamActive(registration.team);
+    this.assertRegistrationOpen(registration.tournament);
+    registration.status = RegistrationStatus.CONFIRMED;
+    registration.withdrawnAt = null;
+    const saved = await this.registrationsRepository.save(registration);
+    return this.registrationMapper.toResponseDto(saved);
+  }
+
+  async withdraw(registrationId: number): Promise<RegistrationResponseDto> {
+    const registration = await this.getRegistrationOrFail(registrationId);
+    if (registration.status === RegistrationStatus.WITHDRAWN) {
+      return this.registrationMapper.toResponseDto(registration);
+    }
+    this.assertCanWithdraw(registration.tournament);
+    await this.assertTeamNotAssignedToTournamentGroup(registration.tournament.id, registration.team.id);
+    await this.assertTeamHasNoMatchesInTournament(registration.tournament.id, registration.team.id);
+    registration.status = RegistrationStatus.WITHDRAWN;
+    registration.withdrawnAt = new Date();
+    const saved = await this.registrationsRepository.save(registration);
+    return this.registrationMapper.toResponseDto(saved);
+  }
+
+  async withdrawByTournamentAndTeam(tournamentId: number, teamId: number): Promise<RegistrationResponseDto> {
     const tournament = await this.getTournamentOrFail(tournamentId);
     await this.getTeamOrFail(teamId);
-
     const registration = await this.registrationsRepository.findByTournamentAndTeam(
       tournamentId,
       teamId,
@@ -100,12 +139,7 @@ export class RegistrationsService {
         `No existe una inscripci?n del equipo ${teamId} en el torneo ${tournamentId}`,
       );
     }
-
-    this.assertCanWithdraw(tournament);
-    await this.assertTeamNotAssignedToTournamentGroup(tournamentId, teamId);
-    await this.assertTeamHasNoMatchesInTournament(tournamentId, teamId);
-
-    await this.registrationsRepository.remove(registration);
+    return this.withdraw(registration.id);
   }
 
   private async getTeamOrFail(id: number): Promise<Team> {
@@ -196,17 +230,15 @@ export class RegistrationsService {
     }
   }
 
-  private async assertNotDuplicated(tournamentId: number, teamId: number): Promise<void> {
-    const existing = await this.registrationsRepository.findByTournamentAndTeam(
-      tournamentId,
-      teamId,
-    );
-    if (existing) {
+  private async getRegistrationOrFail(id: number): Promise<Registration> {
+    const registration = await this.registrationsRepository.findById(id);
+    if (!registration) {
       throw new ApplicationException(
-        ErrorCase.ALREADY_EXISTS,
-        `El equipo ${teamId} ya est? inscrito en el torneo ${tournamentId}`,
+        ErrorCase.NOT_FOUND,
+        `No existe una inscripci?n con el id ${id}`,
       );
     }
+    return registration;
   }
 
   private async assertTeamNotAssignedToTournamentGroup(

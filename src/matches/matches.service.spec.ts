@@ -146,4 +146,56 @@ describe('MatchesService', () => {
       expect(venuesService.findOne).not.toHaveBeenCalled();
     });
   });
+
+  it('starts a scheduled match with assigned teams', async () => {
+    matchesRepository.findById.mockResolvedValue({ ...matchEntity, status: MatchStatus.SCHEDULED });
+    matchesRepository.save.mockImplementation(async (m) => m);
+
+    const result = await service.startMatch(5);
+
+    expect(result).toMatchObject({ id: 5 });
+    expect(matchesRepository.save).toHaveBeenCalledWith(expect.objectContaining({ status: MatchStatus.IN_PROGRESS }));
+  });
+
+  it('rejects start when match is not scheduled', async () => {
+    matchesRepository.findById.mockResolvedValue({ ...matchEntity, status: MatchStatus.IN_PROGRESS });
+
+    await expect(service.startMatch(5)).rejects.toMatchObject({ errorCase: ErrorCase.INVALID_STATE });
+  });
+
+  it('allows updateResult for scheduled and in_progress matches', async () => {
+    matchesRepository.findById.mockResolvedValue({ ...matchEntity, status: MatchStatus.SCHEDULED });
+    matchesRepository.save.mockImplementation(async (m) => m);
+    await expect(service.updateResult(5, 2, 1)).resolves.toBeDefined();
+
+    matchesRepository.findById.mockResolvedValue({ ...matchEntity, status: MatchStatus.IN_PROGRESS });
+    await expect(service.updateResult(5, 3, 3)).resolves.toBeDefined();
+  });
+
+  it('rejects updateResult for finished or cancelled matches', async () => {
+    matchesRepository.findById.mockResolvedValue({ ...matchEntity, status: MatchStatus.FINISHED });
+    await expect(service.updateResult(5, 1, 0)).rejects.toMatchObject({ errorCase: ErrorCase.INVALID_STATE });
+
+    matchesRepository.findById.mockResolvedValue({ ...matchEntity, status: MatchStatus.CANCELLED });
+    await expect(service.updateResult(5, 1, 0)).rejects.toMatchObject({ errorCase: ErrorCase.INVALID_STATE });
+  });
+
+  it('finishMatch requires in_progress and uses current score when omitted', async () => {
+    matchesRepository.findById.mockResolvedValue({ ...matchEntity, status: MatchStatus.IN_PROGRESS, homeScore: 2, awayScore: 1 });
+    matchesRepository.save.mockImplementation(async (m) => m);
+
+    await service.finishMatch(5);
+
+    expect(matchesRepository.save).toHaveBeenCalledWith(expect.objectContaining({ status: MatchStatus.FINISHED, homeScore: 2, awayScore: 1 }));
+  });
+
+  it('finishMatch ignores incoming scores and keeps current match score', async () => {
+    matchesRepository.findById.mockResolvedValue({ ...matchEntity, status: MatchStatus.IN_PROGRESS, homeScore: 2, awayScore: 1 });
+    matchesRepository.save.mockImplementation(async (m) => m);
+
+    await service.finishMatch(5, 9, 9);
+
+    expect(matchesRepository.save).toHaveBeenCalledWith(expect.objectContaining({ status: MatchStatus.FINISHED, homeScore: 2, awayScore: 1 }));
+
+  });
 });

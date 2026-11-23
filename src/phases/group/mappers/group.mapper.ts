@@ -13,6 +13,7 @@ export class GroupMapper {
     const entity = new Group();
     entity.name = dto.name;
     entity.order = dto.order;
+    entity.finalRound = null;
     entity.tournament = { id: tournamentId } as Tournament;
     return entity;
   }
@@ -30,6 +31,7 @@ export class GroupMapper {
       order: entity.order,
       tournamentId: entity.tournament?.id ?? null,
       phaseType: 'GROUP',
+      finalRound: entity.finalRound ?? null,
       teams: entity.teams
         ? this.toTeamResponseDtoList(entity.teams)
         : undefined,

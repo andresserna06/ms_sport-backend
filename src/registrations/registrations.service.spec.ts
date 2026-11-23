@@ -33,6 +33,8 @@ describe('RegistrationsService', () => {
     id: 1,
     team,
     tournament,
+    status: 'CONFIRMED',
+    withdrawnAt: null,
     registeredAt: new Date('2026-01-01T00:00:00.000Z'),
   };
 
@@ -113,6 +115,32 @@ describe('RegistrationsService', () => {
       constructor: ApplicationException,
       errorCase: ErrorCase.ALREADY_EXISTS,
     });
+  });
+
+  it('reactivates a withdrawn registration instead of creating a new row', async () => {
+    tournamentsRepository.findOne.mockResolvedValue(tournament);
+    teamsRepository.findOne.mockResolvedValue(team);
+    teamSportsRepository.findOne.mockResolvedValue({ id: 99, teamId: 10, sportId: 30 });
+    registrationsRepository.findByTournamentAndTeam.mockResolvedValue({ ...registration, status: 'WITHDRAWN', withdrawnAt: new Date() });
+    registrationsRepository.save.mockImplementation(async (r) => r);
+    registrationsRepository.findById.mockResolvedValue({ ...registration, status: 'CONFIRMED', withdrawnAt: null });
+
+    const result = await service.create(20, { teamId: 10 });
+
+    expect(registrationsRepository.save).toHaveBeenCalledWith(expect.objectContaining({ status: 'CONFIRMED', withdrawnAt: null }));
+    expect(result.status).toBe('CONFIRMED');
+  });
+
+  it('withdraw marks registration as withdrawn without deleting row', async () => {
+    registrationsRepository.findById.mockResolvedValue({ ...registration, status: 'CONFIRMED', withdrawnAt: null });
+    groupsRepository.createQueryBuilder.mockReturnValue({ innerJoin: jest.fn().mockReturnThis(), select: jest.fn().mockReturnThis(), getOne: jest.fn().mockResolvedValue(null) });
+    matchesRepository.createQueryBuilder.mockReturnValue({ innerJoin: jest.fn().mockReturnThis(), where: jest.fn().mockReturnThis(), select: jest.fn().mockReturnThis(), getOne: jest.fn().mockResolvedValue(null) });
+    registrationsRepository.save.mockImplementation(async (r) => r);
+
+    const result = await service.withdraw(1);
+
+    expect(result.status).toBe('WITHDRAWN');
+    expect(result.withdrawnAt).toBeInstanceOf(Date);
   });
 });
 

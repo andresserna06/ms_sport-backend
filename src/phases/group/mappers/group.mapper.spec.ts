@@ -44,6 +44,7 @@ describe('GroupMapper', () => {
       order: 1,
       tournamentId: 7,
       phaseType: 'GROUP',
+      finalRound: null,
       teams: [
         { id: 1, name: 'Lions' },
         { id: 2, name: 'Tigers' },

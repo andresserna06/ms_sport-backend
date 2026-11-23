@@ -24,9 +24,20 @@ export class PhasesService {
     const phases = await this.phasesRepository.find({
       where: tournamentId === undefined ? {} : { tournament: { id: tournamentId } },
       relations: { tournament: true, matches: true },
-      order: { order: 'ASC' },
+      order: { order: 'ASC', name: 'ASC' },
     });
     return this.phaseMapper.toResponseDtoList(phases);
+  }
+
+  async findMaxGroupOrder(tournamentId: number): Promise<number | null> {
+    const result = await this.phasesRepository
+      .createQueryBuilder('phase')
+      .select('MAX(phase.phase_order)', 'maxOrder')
+      .where('phase.tournament_id = :tournamentId', { tournamentId })
+      .andWhere('phase.phase_type = :phaseType', { phaseType: 'GROUP' })
+      .getRawOne<{ maxOrder: string | number | null }>();
+    if (!result?.maxOrder) return null;
+    return Number(result.maxOrder);
   }
 
   async findOne(id: number): Promise<PhaseResponseDto> {

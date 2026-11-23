@@ -18,11 +18,15 @@ export class MatchTypeOrmRepository implements MatchRepository {
     });
   }
 
-  findAll(): Promise<Match[]> {
-    return this.repository.find({
-      relations: { phase: true },
-      order: { scheduledAt: 'ASC' },
-    });
+  findAll(filters?: { tournamentId?: number; phaseId?: number }): Promise<Match[]> {
+    const qb = this.repository
+      .createQueryBuilder('match')
+      .leftJoinAndSelect('match.phase', 'phase')
+      .leftJoin('phase.tournament', 'tournament')
+      .orderBy('match.scheduledAt', 'ASC');
+    if (filters?.phaseId !== undefined) qb.andWhere('phase.id = :phaseId', { phaseId: filters.phaseId });
+    if (filters?.tournamentId !== undefined) qb.andWhere('tournament.id = :tournamentId', { tournamentId: filters.tournamentId });
+    return qb.getMany();
   }
 
   findByPhase(phaseId: number): Promise<Match[]> {
