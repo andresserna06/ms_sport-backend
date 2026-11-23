@@ -2322,10 +2322,10 @@
         {
           "name": "Retirar la inscripción",
           "request": {
-            "method": "DELETE",
+            "method": "PATCH",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/tournaments/{{tournamentId}}/registrations/{{teamId}}",
+              "raw": "{{baseUrl}}/tournaments/{{tournamentId}}/registrations/{{teamId}}/withdraw",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -2333,7 +2333,8 @@
                 "tournaments",
                 "{{tournamentId}}",
                 "registrations",
-                "{{teamId}}"
+                "{{teamId}}",
+                "withdraw"
               ]
             }
           }
@@ -2341,10 +2342,10 @@
         {
           "name": "Retirar la inscripción del segundo equipo",
           "request": {
-            "method": "DELETE",
+            "method": "PATCH",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/tournaments/{{tournamentId}}/registrations/{{teamId2}}",
+              "raw": "{{baseUrl}}/tournaments/{{tournamentId}}/registrations/{{teamId2}}/withdraw",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -2352,7 +2353,8 @@
                 "tournaments",
                 "{{tournamentId}}",
                 "registrations",
-                "{{teamId2}}"
+                "{{teamId2}}",
+                "withdraw"
               ]
             }
           }
@@ -2520,6 +2522,42 @@
           }
         }
       ]
+    },
+    {
+      "name": "Confirmar inscripci?n por id",
+      "request": {
+        "method": "PATCH",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/registrations/{{registrationId}}/confirm",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "registrations",
+            "{{registrationId}}",
+            "confirm"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Retirar inscripci?n por id",
+      "request": {
+        "method": "PATCH",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/registrations/{{registrationId}}/withdraw",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "registrations",
+            "{{registrationId}}",
+            "withdraw"
+          ]
+        }
+      }
     }
   ],
   "variable": [

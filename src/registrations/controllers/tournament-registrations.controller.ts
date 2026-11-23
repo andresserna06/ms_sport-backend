@@ -1,12 +1,10 @@
 ﻿import {
   Body,
   Controller,
-  Delete,
   Get,
-  HttpCode,
-  HttpStatus,
   Param,
   ParseIntPipe,
+  Patch,
   Post,
 } from '@nestjs/common';
 import { CreateRegistrationDto } from '../dto/create-registration.dto';
@@ -29,12 +27,11 @@ export class TournamentRegistrationsController {
     return this.registrationsService.findByTournament(tournamentId);
   }
 
-  @Delete(':teamId')
-  @HttpCode(HttpStatus.NO_CONTENT)
-  remove(
+  @Patch(':teamId/withdraw')
+  withdraw(
     @Param('tournamentId', ParseIntPipe) tournamentId: number,
     @Param('teamId', ParseIntPipe) teamId: number,
   ) {
-    return this.registrationsService.remove(tournamentId, teamId);
+    return this.registrationsService.withdrawByTournamentAndTeam(tournamentId, teamId);
   }
 }

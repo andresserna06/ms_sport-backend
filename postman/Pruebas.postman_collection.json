@@ -44964,16 +44964,17 @@
                   "script": {
                     "type": "text/javascript",
                     "exec": [
-                      "pm.test('Status 204', () => pm.response.to.have.status(204));"
+                      "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                      "pm.test('Status is WITHDRAWN', () => pm.expect(pm.response.json().status).to.eql('WITHDRAWN'));"
                     ]
                   }
                 }
               ],
               "request": {
-                "method": "DELETE",
+                "method": "PATCH",
                 "header": [],
                 "url": {
-                  "raw": "{{baseUrl}}/tournaments/{{tournamentId}}/registrations/{{teamId1}}",
+                  "raw": "{{baseUrl}}/tournaments/{{tournamentId}}/registrations/{{teamId1}}/withdraw",
                   "host": [
                     "{{baseUrl}}"
                   ],
@@ -44981,7 +44982,8 @@
                     "tournaments",
                     "{{tournamentId}}",
                     "registrations",
-                    "{{teamId1}}"
+                    "{{teamId1}}",
+                    "withdraw"
                   ]
                 }
               }
@@ -44994,16 +44996,17 @@
                   "script": {
                     "type": "text/javascript",
                     "exec": [
-                      "pm.test('Status 204', () => pm.response.to.have.status(204));"
+                      "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                      "pm.test('Status is WITHDRAWN', () => pm.expect(pm.response.json().status).to.eql('WITHDRAWN'));"
                     ]
                   }
                 }
               ],
               "request": {
-                "method": "DELETE",
+                "method": "PATCH",
                 "header": [],
                 "url": {
-                  "raw": "{{baseUrl}}/tournaments/{{tournamentId}}/registrations/{{teamId2}}",
+                  "raw": "{{baseUrl}}/tournaments/{{tournamentId}}/registrations/{{teamId2}}/withdraw",
                   "host": [
                     "{{baseUrl}}"
                   ],
@@ -45011,7 +45014,8 @@
                     "tournaments",
                     "{{tournamentId}}",
                     "registrations",
-                    "{{teamId2}}"
+                    "{{teamId2}}",
+                    "withdraw"
                   ]
                 }
               }

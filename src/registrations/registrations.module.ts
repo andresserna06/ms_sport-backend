@@ -5,6 +5,7 @@ import { Group } from '../phases/group/entities/group.entity';
 import { TeamSport } from '../team-sports/entities/team-sport.entity';
 import { Team } from '../teams/entities/team.entity';
 import { Tournament } from '../tournaments/entities/tournament.entity';
+import { RegistrationsController } from './controllers/registrations.controller';
 import { TournamentRegistrationsController } from './controllers/tournament-registrations.controller';
 import { TeamRegistrationsController } from './controllers/team-registrations.controller';
 import { Registration } from './entities/registration.entity';
@@ -26,7 +27,7 @@ import { RegistrationsService } from './registrations.service';
       TeamSport,
     ]),
   ],
-  controllers: [TournamentRegistrationsController, TeamRegistrationsController],
+  controllers: [RegistrationsController, TournamentRegistrationsController, TeamRegistrationsController],
   providers: [
     RegistrationsService,
     RegistrationMapper,
