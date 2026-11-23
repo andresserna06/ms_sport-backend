@@ -27,6 +27,7 @@ describe('PlayerService', () => {
       hasAssociatedRecords: jest.fn(),
     };
     playerRoleAssigner = {
+      resolvePlayerRoleId: jest.fn().mockResolvedValue(3),
       assignPlayerRole: jest.fn().mockResolvedValue(undefined),
     };
     mapper = new PlayerMapper();
@@ -67,9 +68,13 @@ describe('PlayerService', () => {
       undefined,
     );
     expect(repository.existsByUserId).toHaveBeenCalledWith(10, undefined);
+    expect(playerRoleAssigner.resolvePlayerRoleId).toHaveBeenCalledWith(
+      'Bearer jwt-token',
+    );
     expect(playerRoleAssigner.assignPlayerRole).toHaveBeenCalledWith(
       10,
       'Bearer jwt-token',
+      3,
     );
     expect(result).toEqual({
       id: 1,

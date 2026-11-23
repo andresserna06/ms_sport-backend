@@ -1,6 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import axios from 'axios';
+import { ApplicationException } from '../../exception/application.exception';
+import { ErrorCase } from '../../exception/error-case.enum';
 import { PlayerRoleAssigner } from '../ports/player-role-assigner.port';
 
 interface SecurityRoleResponse {
@@ -26,41 +28,68 @@ export class HttpSecurityRoleAssignerClient implements PlayerRoleAssigner {
     ).replace(/\/+$/, '');
   }
 
+  async resolvePlayerRoleId(
+    authorizationHeader?: string,
+  ): Promise<number | null> {
+    const auth = authorizationHeader?.trim();
+    if (!auth) {
+      return null;
+    }
+
+    let roles: SecurityRoleResponse[];
+    try {
+      const rolesResponse = await axios.get<SecurityRoleResponse[]>(
+        `${this.baseUrl}/api/roles`,
+        {
+          headers: { Authorization: auth },
+          timeout: 3000,
+        },
+      );
+      roles = Array.isArray(rolesResponse.data) ? rolesResponse.data : [];
+    } catch (error) {
+      this.logger.warn(
+        `No se pudieron consultar los roles en ms_seguridad: ${String(error)}`,
+      );
+      return null;
+    }
+
+    const playerRole = roles.find((role) =>
+      PLAYER_ROLE_NAMES.has(role.name?.trim().toUpperCase()),
+    );
+    if (!playerRole) {
+      throw new ApplicationException(
+        ErrorCase.INVALID_STATE,
+        'No existe el rol JUGADOR/PLAYER en ms_seguridad. Debes crearlo antes de registrar un jugador',
+      );
+    }
+
+    return playerRole.id;
+  }
+
   async assignPlayerRole(
     userId: number,
     authorizationHeader?: string,
+    roleId?: number | null,
   ): Promise<void> {
     const auth = authorizationHeader?.trim();
     if (!auth) {
       return;
     }
 
-    const requestConfig = {
-      headers: { Authorization: auth },
-      timeout: 3000,
-    };
+    const resolvedRoleId =
+      roleId ?? (await this.resolvePlayerRoleId(authorizationHeader));
+    if (resolvedRoleId === null) {
+      return;
+    }
 
     try {
-      const rolesResponse = await axios.get<SecurityRoleResponse[]>(
-        `${this.baseUrl}/api/roles`,
-        requestConfig,
-      );
-      const roles = Array.isArray(rolesResponse.data) ? rolesResponse.data : [];
-      const playerRole = roles.find((role) =>
-        PLAYER_ROLE_NAMES.has(role.name?.trim().toUpperCase()),
-      );
-
-      if (!playerRole) {
-        this.logger.warn(
-          `No existe el rol JUGADOR/PLAYER en ms_seguridad; no se asignó rol al usuario #${userId}`,
-        );
-        return;
-      }
-
       await axios.post(
         `${this.baseUrl}/api/user-roles`,
-        { userId, roleId: playerRole.id },
-        requestConfig,
+        { userId, roleId: resolvedRoleId },
+        {
+          headers: { Authorization: auth },
+          timeout: 3000,
+        },
       );
     } catch (error) {
       if (axios.isAxiosError(error) && error.response?.status === 409) {

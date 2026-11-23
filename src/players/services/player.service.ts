@@ -39,12 +39,15 @@ export class PlayerService {
     const normalizedDocument = dto.document.trim();
     await this.ensureDocumentIsAvailable(normalizedDocument);
     await this.ensureUserIdIsAvailable(dto.userId);
+    const roleId =
+      await this.playerRoleAssigner.resolvePlayerRoleId(authorizationHeader);
 
     const entity = this.playerMapper.toEntity(dto);
     const saved = await this.playerRepository.save(entity);
     await this.playerRoleAssigner.assignPlayerRole(
       saved.userId,
       authorizationHeader,
+      roleId,
     );
     return this.playerMapper.toResponseDto(saved);
   }

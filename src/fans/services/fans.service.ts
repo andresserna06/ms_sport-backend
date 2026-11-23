@@ -38,8 +38,14 @@ export class FansService {
     dto: CreateFanDto,
     authorizationHeader?: string,
   ): Promise<FanResponseDto> {
+    const roleId =
+      await this.fanRoleAssigner.resolveFanRoleId(authorizationHeader);
     const saved = await this.save(this.mapper.toEntity(dto));
-    await this.fanRoleAssigner.assignFanRole(saved.userId, authorizationHeader);
+    await this.fanRoleAssigner.assignFanRole(
+      saved.userId,
+      authorizationHeader,
+      roleId,
+    );
     return this.mapper.toResponseDto(saved);
   }
 
