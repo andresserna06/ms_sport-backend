@@ -105,7 +105,12 @@ export class RegistrationsService {
     }
     this.assertTournamentActive(registration.tournament);
     this.assertTeamActive(registration.team);
-    this.assertRegistrationOpen(registration.tournament);
+    if (this.hasTournamentStarted(registration.tournament) || this.isRegistrationDeadlinePassed(registration.tournament)) {
+      throw new ApplicationException(
+        ErrorCase.INVALID_STATE,
+        `No se puede confirmar la inscripci?n porque la fecha l?mite de inscripci?n del torneo ${registration.tournament.id} ya pas? o el torneo ya inici?`,
+      );
+    }
     registration.status = RegistrationStatus.CONFIRMED;
     registration.withdrawnAt = null;
     const saved = await this.registrationsRepository.save(registration);
@@ -118,8 +123,8 @@ export class RegistrationsService {
       return this.registrationMapper.toResponseDto(registration);
     }
     this.assertCanWithdraw(registration.tournament);
-    await this.assertTeamNotAssignedToTournamentGroup(registration.tournament.id, registration.team.id);
     await this.assertTeamHasNoMatchesInTournament(registration.tournament.id, registration.team.id);
+    await this.removeTeamFromTournamentGroup(registration.tournament.id, registration.team.id);
     registration.status = RegistrationStatus.WITHDRAWN;
     registration.withdrawnAt = new Date();
     const saved = await this.registrationsRepository.save(registration);
@@ -241,24 +246,17 @@ export class RegistrationsService {
     return registration;
   }
 
-  private async assertTeamNotAssignedToTournamentGroup(
+  private async removeTeamFromTournamentGroup(
     tournamentId: number,
     teamId: number,
   ): Promise<void> {
-    const group = await this.groupsRepository
-      .createQueryBuilder('group')
-      .innerJoin('group.teams', 'team', 'team.id = :teamId', { teamId })
-      .innerJoin('group.tournament', 'tournament', 'tournament.id = :tournamentId', {
-        tournamentId,
-      })
-      .select(['group.id'])
-      .getOne();
-
-    if (group) {
-      throw new ApplicationException(
-        ErrorCase.INVALID_STATE,
-        `No se puede retirar la inscripci?n del equipo ${teamId} porque est? asignado a un grupo del torneo ${tournamentId}`,
-      );
+    const team = await this.teamsRepository.findOne({
+      where: { id: teamId },
+      relations: { group: { tournament: true } },
+    });
+    if (team?.group?.tournament?.id === tournamentId) {
+      team.group = null;
+      await this.teamsRepository.save(team);
     }
   }
 
