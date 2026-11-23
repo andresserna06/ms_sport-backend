@@ -3,7 +3,7 @@ import { ErrorCase } from '../../exception/error-case.enum';
 import { RegistrationsService } from '../../registrations/registrations.service';
 import { Team } from '../../teams/entities/team.entity';
 import { Tournament } from '../../tournaments/entities/tournament.entity';
-import { TournamentsService } from '../../tournaments/tournaments.service';
+import { TournamentsService } from '../../tournaments/services/tournaments.service';
 import { PhasesService } from '../base/phases.service';
 import { CreateGroupDto } from './dto/create-group.dto';
 import { Group } from './entities/group.entity';
@@ -127,6 +127,11 @@ describe('GroupService', () => {
         service.update(3, { name: 'Group B' }),
       ).rejects.toMatchObject({ errorCase: ErrorCase.ALREADY_EXISTS });
       expect(repository.save).not.toHaveBeenCalled();
+    });
+
+    it('should reject order lower than 1', async () => {
+      repository.findById.mockResolvedValue(makeGroup());
+      await expect(service.update(3, { order: 0 })).rejects.toMatchObject({ errorCase: ErrorCase.INVALID_STATE });
     });
   });
 

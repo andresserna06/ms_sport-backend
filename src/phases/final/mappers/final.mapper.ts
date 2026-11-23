@@ -11,6 +11,7 @@ export class FinalMapper {
     const entity = new Final();
     entity.name = dto.name;
     entity.order = dto.order;
+    entity.finalRound = dto.finalRound;
     entity.tournament = { id: tournamentId } as Tournament;
     return entity;
   }
@@ -18,6 +19,7 @@ export class FinalMapper {
   mergeEntity(entity: Final, dto: UpdateFinalDto): Final {
     if (dto.name !== undefined) entity.name = dto.name;
     if (dto.order !== undefined) entity.order = dto.order;
+    if (dto.finalRound !== undefined) entity.finalRound = dto.finalRound;
     return entity;
   }
 
@@ -28,6 +30,7 @@ export class FinalMapper {
       order: entity.order,
       tournamentId: entity.tournament?.id ?? null,
       phaseType: 'FINAL',
+      finalRound: entity.finalRound ?? null,
     };
   }
 

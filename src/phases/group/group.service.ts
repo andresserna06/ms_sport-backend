@@ -27,6 +27,10 @@ export class GroupService {
   async create(dto: CreateGroupDto): Promise<GroupResponseDto> {
     await this.getTournamentOrFail(dto.tournamentId);
 
+    if (dto.order < 1) {
+      throw new ApplicationException(ErrorCase.INVALID_STATE, 'El orden del grupo debe ser mayor o igual a 1');
+    }
+
     if (
       await this.phasesService.existsByNameInTournament(
         dto.name,
@@ -57,6 +61,9 @@ export class GroupService {
   async update(id: number, dto: UpdateGroupDto): Promise<GroupResponseDto> {
     const group = await this.getGroupOrFail(id);
     const tournamentId = group.tournament?.id;
+    if (dto.order !== undefined && dto.order < 1) {
+      throw new ApplicationException(ErrorCase.INVALID_STATE, 'El orden del grupo debe ser mayor o igual a 1');
+    }
 
     if (
       dto.name !== undefined &&
