@@ -1,8 +1,16 @@
-import { IsEnum, IsOptional } from 'class-validator';
+import { IsEnum, IsInt, IsOptional, IsString, Min } from 'class-validator';
 import { FinalRound } from '../../base/entities/phase.entity';
-import { UpdatePhaseRequestDto } from '../../base/dto/update-phase-request.dto';
 
-export class UpdateFinalDto extends UpdatePhaseRequestDto {
+export class UpdateFinalDto {
+  @IsOptional()
+  @IsString()
+  name?: string;
+
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  order?: number;
+
   @IsOptional()
   @IsEnum(FinalRound)
   finalRound?: FinalRound;

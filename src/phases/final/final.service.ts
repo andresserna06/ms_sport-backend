@@ -27,20 +27,9 @@ export class FinalService {
       throw new ApplicationException(ErrorCase.INVALID_STATE, 'El orden de la fase final debe ser mayor o igual a 1');
     }
 
-    if (
-      await this.phasesService.existsByNameInTournament(
-        dto.name,
-        dto.tournamentId,
-      )
-    ) {
-      throw new ApplicationException(
-        ErrorCase.ALREADY_EXISTS,
-        `Ya existe una fase con el nombre "${dto.name}" en el torneo ${dto.tournamentId}`,
-      );
-    }
-
     await this.assertFinalOrderGreaterThanGroups(dto.tournamentId, dto.order);
     await this.assertFinalRoundNotRepeated(dto.tournamentId, dto.finalRound);
+    await this.assertFinalRoundOrderCoherence(dto.tournamentId, dto.finalRound, dto.order);
 
     const entity = this.finalMapper.toEntity(dto, dto.tournamentId);
     const saved = await this.finalsRepository.save(entity);
@@ -69,26 +58,14 @@ export class FinalService {
       throw new ApplicationException(ErrorCase.INVALID_STATE, 'El orden de la fase final debe ser mayor o igual a 1');
     }
 
-    if (
-      dto.name !== undefined &&
-      tournamentId !== undefined &&
-      (await this.phasesService.existsByNameInTournament(
-        dto.name,
-        tournamentId,
-        id,
-      ))
-    ) {
-      throw new ApplicationException(
-        ErrorCase.ALREADY_EXISTS,
-        `Ya existe una fase con el nombre "${dto.name}" en el torneo ${tournamentId}`,
-      );
-    }
-
     if (tournamentId !== undefined) {
       const nextOrder = dto.order ?? final.order;
       const nextRound = dto.finalRound ?? final.finalRound;
       await this.assertFinalOrderGreaterThanGroups(tournamentId, nextOrder);
-      if (nextRound) await this.assertFinalRoundNotRepeated(tournamentId, nextRound, id);
+      if (nextRound) {
+        await this.assertFinalRoundNotRepeated(tournamentId, nextRound, id);
+        await this.assertFinalRoundOrderCoherence(tournamentId, nextRound, nextOrder, id);
+      }
     }
 
     const merged = this.finalMapper.mergeEntity(final, dto);
@@ -153,6 +130,40 @@ export class FinalService {
         ErrorCase.ALREADY_EXISTS,
         `Ya existe una fase final con la ronda ${finalRound} en el torneo ${tournamentId}`,
       );
+    }
+  }
+
+  private async assertFinalRoundOrderCoherence(
+    tournamentId: number,
+    finalRound: string,
+    order: number,
+    excludeId?: number,
+  ): Promise<void> {
+    const sequence = ['ROUND_OF_16', 'QUARTERFINAL', 'SEMIFINAL', 'FINAL'];
+    const rank = (round: string): number => {
+      if (round === 'THIRD_PLACE') return sequence.indexOf('FINAL');
+      return sequence.indexOf(round);
+    };
+    const currentRank = rank(finalRound);
+    if (currentRank < 0) return;
+    const qb = this.finalsRepository
+      .createQueryBuilder('final')
+      .where('final.tournament_id = :tournamentId', { tournamentId });
+    if (excludeId !== undefined) qb.andWhere('final.id <> :excludeId', { excludeId });
+    const finals = await qb.getMany();
+    for (const other of finals) {
+      if (!other.finalRound) continue;
+      const otherRank = rank(other.finalRound);
+      if (otherRank < 0) continue;
+      if (currentRank < otherRank && order >= other.order) {
+        throw new ApplicationException(ErrorCase.INVALID_STATE, `La ronda ${finalRound} debe tener un orden menor que ${other.finalRound}`);
+      }
+      if (currentRank > otherRank && order <= other.order) {
+        throw new ApplicationException(ErrorCase.INVALID_STATE, `La ronda ${finalRound} debe tener un orden mayor que ${other.finalRound}`);
+      }
+      if (currentRank === otherRank && order !== other.order) {
+        throw new ApplicationException(ErrorCase.INVALID_STATE, `La ronda ${finalRound} debe tener el mismo orden que ${other.finalRound}`);
+      }
     }
   }
 }
