@@ -38,6 +38,7 @@ export class MatchesService {
 
   async create(phaseId: number, dto: CreateMatchDto): Promise<MatchResponseDto> {
     const phase = await this.getPhaseOrFail(phaseId);
+    this.assertScheduledAtAfterTournamentStart(phase, dto.scheduledAt);
     await this.validateTeamsForPhase(phase, dto.homeTeamId, dto.awayTeamId);
     const saved = await this.matchesRepository.save(this.matchMapper.toEntity(dto, phase));
     const created = await this.findOne(saved.id);
@@ -45,8 +46,8 @@ export class MatchesService {
     return created;
   }
 
-  async findAll(): Promise<MatchResponseDto[]> {
-    return this.matchMapper.toResponseDtoList(await this.matchesRepository.findAll());
+  async findAll(filters?: { tournamentId?: number; phaseId?: number }): Promise<MatchResponseDto[]> {
+    return this.matchMapper.toResponseDtoList(await this.matchesRepository.findAll(filters));
   }
 
   async findOne(id: number): Promise<MatchResponseDto> {
@@ -125,10 +126,13 @@ export class MatchesService {
   async finishMatch(id: number, homeScore?: number, awayScore?: number): Promise<MatchResponseDto> {
     const match = await this.getMatchOrFail(id);
     if (match.status === MatchStatus.CANCELLED) {
-      throw new ApplicationException(ErrorCase.INVALID_STATE, `No se puede finalizar el partido ${id} porque está cancelado`);
+      throw new ApplicationException(ErrorCase.INVALID_STATE, `No se puede finalizar el partido ${id} porque est? cancelado`);
     }
     if (match.status === MatchStatus.FINISHED) {
       throw new ApplicationException(ErrorCase.INVALID_STATE, `El partido ${id} ya se encuentra finalizado`);
+    }
+    if (match.status !== MatchStatus.IN_PROGRESS) {
+      throw new ApplicationException(ErrorCase.INVALID_STATE, `Solo se puede finalizar un partido en estado IN_PROGRESS`);
     }
     this.assertTeamsAssigned(match);
     const finalHomeScore = homeScore ?? match.homeScore;
@@ -139,6 +143,25 @@ export class MatchesService {
     match.homeScore = finalHomeScore;
     match.awayScore = finalAwayScore;
     match.status = MatchStatus.FINISHED;
+    return this.matchMapper.toResponseDto(await this.matchesRepository.save(match));
+  }
+
+  async startMatch(id: number): Promise<MatchResponseDto> {
+    const match = await this.getMatchOrFail(id);
+    if (match.status !== MatchStatus.SCHEDULED) {
+      throw new ApplicationException(ErrorCase.INVALID_STATE, 'Solo se puede iniciar un partido en estado SCHEDULED');
+    }
+    this.assertTeamsAssigned(match);
+    match.status = MatchStatus.IN_PROGRESS;
+    return this.matchMapper.toResponseDto(await this.matchesRepository.save(match));
+  }
+
+  async cancelMatch(id: number): Promise<MatchResponseDto> {
+    const match = await this.getMatchOrFail(id);
+    if (![MatchStatus.SCHEDULED, MatchStatus.IN_PROGRESS].includes(match.status)) {
+      throw new ApplicationException(ErrorCase.INVALID_STATE, `No se puede cancelar el partido ${id} desde el estado ${match.status}`);
+    }
+    match.status = MatchStatus.CANCELLED;
     return this.matchMapper.toResponseDto(await this.matchesRepository.save(match));
   }
 
@@ -194,6 +217,18 @@ export class MatchesService {
       throw new ApplicationException(
         ErrorCase.INVALID_STATE,
         `El partido ${match.id} no tiene equipos participantes asignados`,
+      );
+    }
+  }
+
+  private assertScheduledAtAfterTournamentStart(phase: Phase, scheduledAt: string): void {
+    const tournamentStart = phase.tournament?.startDate;
+    if (!tournamentStart) return;
+    const matchDate = String(scheduledAt).slice(0, 10);
+    if (matchDate < tournamentStart) {
+      throw new ApplicationException(
+        ErrorCase.INVALID_STATE,
+        `La fecha del partido no puede ser anterior al inicio del torneo (${tournamentStart})`,
       );
     }
   }
