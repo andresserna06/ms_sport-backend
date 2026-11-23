@@ -3,6 +3,7 @@ import {
   Controller,
   Delete,
   Get,
+  Headers,
   HttpCode,
   HttpStatus,
   Param,
@@ -23,8 +24,11 @@ export class PlayerController {
   constructor(private readonly playerService: PlayerService) {}
 
   @Post()
-  create(@Body() dto: CreatePlayerDto): Promise<PlayerResponseDto> {
-    return this.playerService.create(dto);
+  create(
+    @Body() dto: CreatePlayerDto,
+    @Headers('authorization') authorizationHeader?: string,
+  ): Promise<PlayerResponseDto> {
+    return this.playerService.create(dto, authorizationHeader);
   }
 
   @Get()
