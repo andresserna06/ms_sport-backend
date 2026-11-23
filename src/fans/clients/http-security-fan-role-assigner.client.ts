@@ -1,6 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import axios from 'axios';
+import { ApplicationException } from '../../exception/application.exception';
+import { ErrorCase } from '../../exception/error-case.enum';
 import { FanRoleAssigner } from '../ports/fan-role-assigner.port';
 
 interface SecurityRoleResponse {
@@ -26,41 +28,66 @@ export class HttpSecurityFanRoleAssignerClient implements FanRoleAssigner {
     ).replace(/\/+$/, '');
   }
 
+  async resolveFanRoleId(authorizationHeader?: string): Promise<number | null> {
+    const auth = authorizationHeader?.trim();
+    if (!auth) {
+      return null;
+    }
+
+    let roles: SecurityRoleResponse[];
+    try {
+      const rolesResponse = await axios.get<SecurityRoleResponse[]>(
+        `${this.baseUrl}/api/roles`,
+        {
+          headers: { Authorization: auth },
+          timeout: 3000,
+        },
+      );
+      roles = Array.isArray(rolesResponse.data) ? rolesResponse.data : [];
+    } catch (error) {
+      this.logger.warn(
+        `No se pudieron consultar los roles en ms_seguridad: ${String(error)}`,
+      );
+      return null;
+    }
+
+    const fanRole = roles.find((role) =>
+      FAN_ROLE_NAMES.has(role.name?.trim().toUpperCase()),
+    );
+    if (!fanRole) {
+      throw new ApplicationException(
+        ErrorCase.INVALID_STATE,
+        'No existe el rol AFICIONADO/FAN en ms_seguridad. Debes crearlo antes de registrar un aficionado',
+      );
+    }
+
+    return fanRole.id;
+  }
+
   async assignFanRole(
     userId: number,
     authorizationHeader?: string,
+    roleId?: number | null,
   ): Promise<void> {
     const auth = authorizationHeader?.trim();
     if (!auth) {
       return;
     }
 
-    const requestConfig = {
-      headers: { Authorization: auth },
-      timeout: 3000,
-    };
+    const resolvedRoleId =
+      roleId ?? (await this.resolveFanRoleId(authorizationHeader));
+    if (resolvedRoleId === null) {
+      return;
+    }
 
     try {
-      const rolesResponse = await axios.get<SecurityRoleResponse[]>(
-        `${this.baseUrl}/api/roles`,
-        requestConfig,
-      );
-      const roles = Array.isArray(rolesResponse.data) ? rolesResponse.data : [];
-      const fanRole = roles.find((role) =>
-        FAN_ROLE_NAMES.has(role.name?.trim().toUpperCase()),
-      );
-
-      if (!fanRole) {
-        this.logger.warn(
-          `No existe el rol FAN/AFICIONADO en ms_seguridad; no se asignó rol al usuario #${userId}`,
-        );
-        return;
-      }
-
       await axios.post(
         `${this.baseUrl}/api/user-roles`,
-        { userId, roleId: fanRole.id },
-        requestConfig,
+        { userId, roleId: resolvedRoleId },
+        {
+          headers: { Authorization: auth },
+          timeout: 3000,
+        },
       );
     } catch (error) {
       if (axios.isAxiosError(error) && error.response?.status === 409) {

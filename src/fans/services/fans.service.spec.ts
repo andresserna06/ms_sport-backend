@@ -27,6 +27,7 @@ describe('FansService', () => {
       remove: jest.fn().mockResolvedValue(undefined),
     };
     fanRoleAssigner = {
+      resolveFanRoleId: jest.fn().mockResolvedValue(2),
       assignFanRole: jest.fn().mockResolvedValue(undefined),
     };
     service = new FansService(repository, fanRoleAssigner, new FanMapper());
@@ -39,11 +40,31 @@ describe('FansService', () => {
     await expect(
       service.create(dto, 'Bearer jwt-token'),
     ).resolves.toMatchObject({ id: 1, userId: 10, active: true });
+    expect(fanRoleAssigner.resolveFanRoleId).toHaveBeenCalledWith(
+      'Bearer jwt-token',
+    );
     expect(repository.save).toHaveBeenCalled();
     expect(fanRoleAssigner.assignFanRole).toHaveBeenCalledWith(
       10,
       'Bearer jwt-token',
+      2,
     );
+  });
+
+  it('rejects creation when FAN role does not exist in ms_seguridad', async () => {
+    fanRoleAssigner.resolveFanRoleId.mockRejectedValue(
+      new ApplicationException(
+        ErrorCase.INVALID_STATE,
+        'No existe el rol AFICIONADO/FAN en ms_seguridad',
+      ),
+    );
+
+    await expect(
+      service.create(dto, 'Bearer jwt-token'),
+    ).rejects.toMatchObject({
+      errorCase: ErrorCase.INVALID_STATE,
+    });
+    expect(repository.save).not.toHaveBeenCalled();
   });
 
   it('answers 409 when a unique value is repeated', async () => {
