@@ -15,6 +15,7 @@ export class MatchMapper {
     entity.awayScore = null;
     entity.homeTeamId = dto.homeTeamId ?? null;
     entity.awayTeamId = dto.awayTeamId ?? null;
+    entity.venueId = dto.venueId ?? null;
     entity.phase = phase;
     return entity;
   }
@@ -23,6 +24,7 @@ export class MatchMapper {
     if (dto.scheduledAt !== undefined) entity.scheduledAt = new Date(dto.scheduledAt);
     if (dto.homeTeamId !== undefined) entity.homeTeamId = dto.homeTeamId;
     if (dto.awayTeamId !== undefined) entity.awayTeamId = dto.awayTeamId;
+    if (dto.venueId !== undefined) entity.venueId = dto.venueId;
     return entity;
   }
 
@@ -35,6 +37,7 @@ export class MatchMapper {
       awayScore: entity.awayScore,
       homeTeamId: entity.homeTeamId ?? null,
       awayTeamId: entity.awayTeamId ?? null,
+      venueId: entity.venueId ?? null,
       phaseId: phaseId!,
     };
   }

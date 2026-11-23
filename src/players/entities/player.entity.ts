@@ -1,4 +1,14 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  OneToMany,
+  PrimaryGeneratedColumn,
+  type Relation,
+} from 'typeorm';
+import { PlayerContract } from '../../player-contracts/entities/player-contract.entity';
+import { PlayerSkill } from '../../player-skills/entities/player-skill.entity';
+import { ScoringEvent } from '../../scoring-events/entities/scoring-event.entity';
+import { SpatialPosition } from '../../spatial-positions/entities/spatial-position.entity';
 
 @Entity('players')
 export class Player {
@@ -19,4 +29,16 @@ export class Player {
 
   @Column({ type: 'boolean', default: true })
   active!: boolean;
+
+  @OneToMany(() => PlayerContract, (contract) => contract.player)
+  playerContracts?: Relation<PlayerContract[]>;
+
+  @OneToMany(() => PlayerSkill, (playerSkill) => playerSkill.player)
+  playerSkills?: Relation<PlayerSkill[]>;
+
+  @OneToMany(() => ScoringEvent, (scoringEvent) => scoringEvent.player)
+  scoringEvents?: Relation<ScoringEvent[]>;
+
+  @OneToMany(() => SpatialPosition, (position) => position.player)
+  spatialPositions?: Relation<SpatialPosition[]>;
 }

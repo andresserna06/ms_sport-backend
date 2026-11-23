@@ -79,6 +79,7 @@ del JSON y los `errorCase` van en inglés.
 | GC-06 Partidos | `POST/GET /phases/:phaseId/matches`, `GET /matches`, `GET/PUT/DELETE /matches/:id` |
 | GC-07 Resultados y anotaciones | `PUT /matches/:id/result`, `PATCH /matches/:id/finish`, `POST/GET /matches/:id/scoring-events`, `PUT/DELETE /scoring-events/:id` |
 | GC-08 Desarrollo | `GET /tournaments/:id/overview` |
+| Modelo completo (CRUD básico, sin reglas de negocio) | `POST/GET /<recurso>`, `GET/PUT/DELETE /<recurso>/:id` para: `venues`, `seating-zones`, `tournament-venues`, `fans`, `fan-teams`, `payment-methods`, `fan-payment-methods`, `tickets`, `bets`, `balls`, `spatial-positions`. Errores: 404 si una referencia no existe, 409 si se repite un valor único o se elimina algo con información asociada |
 
 Si una historia necesita una ruta que no está aquí, propónla en la especificación
 antes de implementarla; no la inventes durante la implementación.

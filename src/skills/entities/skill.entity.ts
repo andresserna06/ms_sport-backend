@@ -1,4 +1,11 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  OneToMany,
+  PrimaryGeneratedColumn,
+  type Relation,
+} from 'typeorm';
+import { PlayerSkill } from '../../player-skills/entities/player-skill.entity';
 
 @Entity('skills')
 export class Skill {
@@ -10,4 +17,7 @@ export class Skill {
 
   @Column({ type: 'varchar', length: 255 })
   description!: string;
+
+  @OneToMany(() => PlayerSkill, (playerSkill) => playerSkill.skill)
+  playerSkills?: Relation<PlayerSkill[]>;
 }

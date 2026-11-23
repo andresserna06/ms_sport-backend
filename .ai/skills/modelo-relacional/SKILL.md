@@ -34,6 +34,11 @@ agente inventa otra. Si falta un término, se agrega aquí antes de usarlo.
 | Localidad | `SeatingZone` | `seating_zones` |
 | EscenarioTorneo | `TournamentVenue` | `tournament_venues` |
 | Aficionado / Boleto / Apuesta | `Fan` / `Ticket` / `Bet` | `fans` / `tickets` / `bets` |
+| AficionadoEquipo | `FanTeam` | `fan_teams` |
+| MétodoPago | `PaymentMethod` | `payment_methods` |
+| MétodoPagoAficionado | `FanPaymentMethod` | `fan_payment_methods` |
+| Pelota | `Ball` | `balls` |
+| PosiciónEspacial | `SpatialPosition` | `spatial_positions` |
 
 Estados y tipos (enums en inglés, MAYÚSCULAS):
 - Torneo: `SCHEDULED`, `IN_PROGRESS`, `FINISHED`, `CANCELLED`.
@@ -62,12 +67,30 @@ Propiedades en camelCase en el código y snake_case en la base de datos.
 | ScoringEvent | id, matchId, playerId, teamId, minute, type | FK a Match y Player |
 | Venue / SeatingZone / TournamentVenue | según diagrama | UNIQUE (tournamentId, venueId) en TournamentVenue |
 
-Mínimas, solo para notificaciones: Fan (id, name, email), Ticket
-(fanId, matchId), Bet (fanId, matchId).
+Resto del diagrama, con CRUD básico y sin reglas de negocio todavía (cada integrante las
+completa cuando las necesite). Todas con id autoincremental y FK `RESTRICT`:
+
+| Entidad | Campos | Restricciones |
+|---|---|---|
+| Venue | name, city, address?, capacity?, active, parentVenueId? | autorrelación 1:N (`parentVenue`/`subVenues`); 1:N con Match (`matches.venue_id`) |
+| SeatingZone | venueId, name, capacity?, price | UNIQUE (venueId, name) |
+| TournamentVenue | tournamentId, venueId | UNIQUE (tournamentId, venueId): N:N Torneo–Escenario |
+| Fan | name, email, active | email único |
+| FanTeam | fanId, teamId | UNIQUE (fanId, teamId): N:N Aficionado–Equipo |
+| PaymentMethod | name, active | name único |
+| FanPaymentMethod | fanId, paymentMethodId, alias? | UNIQUE (fanId, paymentMethodId): N:N Aficionado–MétodoPago |
+| Ticket | fanId, matchId, seatingZoneId, price, purchasedAt | Partido–Aficionado por boleto; Localidad 1:N Boleto |
+| Bet | fanId, matchId, fanPaymentMethodId, amount, placedAt | Partido–Aficionado por apuesta; Apuesta n:1 MétodoPagoAficionado |
+| Ball | matchId, serialNumber | matchId único (1:1 con Match); serialNumber único |
+| SpatialPosition | ballId, playerId, x, y, recordedAt | Pelota 1:N y Jugador 1:N |
+
+Todas las relaciones del diagrama están declaradas en las dos entidades (bidireccionales).
+Equipo–Jugador es `PlayerContract` y Partido es la relación Equipo × Equipo (`homeTeamId`/`awayTeamId`).
 
 ## Correcciones respecto al diagrama original
 
-1. **Grupo–Equipo era 1:N** → pasa a **N:N con GroupTeam**. Un equipo juega
+1. **Grupo–Equipo**: el diagrama lo define 1:N y así está implementado hoy (`teams.group_id`). La propuesta de pasarlo a **N:N con GroupTeam** sigue pendiente de decisión del grupo.
+   Motivo de la propuesta: Un equipo juega
    varios torneos, así que no puede pertenecer a un solo grupo de por vida.
    `phaseId` se guarda en GroupTeam para poder imponer "un equipo en un solo
    grupo por fase" con una restricción UNIQUE.

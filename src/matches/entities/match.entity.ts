@@ -5,11 +5,18 @@ import {
   Index,
   JoinColumn,
   ManyToOne,
+  OneToMany,
+  OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import type { Relation } from 'typeorm';
+import { Ball } from '../../balls/entities/ball.entity';
+import { Bet } from '../../bets/entities/bet.entity';
 import { Phase } from '../../phases/base/entities/phase.entity';
+import { ScoringEvent } from '../../scoring-events/entities/scoring-event.entity';
 import { Team } from '../../teams/entities/team.entity';
+import { Ticket } from '../../tickets/entities/ticket.entity';
+import { Venue } from '../../venues/entities/venue.entity';
 
 export enum MatchStatus {
   SCHEDULED = 'SCHEDULED',
@@ -26,6 +33,7 @@ export enum MatchStatus {
 )
 @Index('IDX_matches_home_team_id', ['homeTeamId'])
 @Index('IDX_matches_away_team_id', ['awayTeamId'])
+@Index('IDX_matches_venue_id', ['venueId'])
 export class Match {
   @PrimaryGeneratedColumn()
   id!: number;
@@ -48,11 +56,20 @@ export class Match {
   @Column({ type: 'int', name: 'away_team_id', nullable: true })
   awayTeamId!: number | null;
 
-  @ManyToOne(() => Team, { nullable: true, onDelete: 'RESTRICT' })
+  @Column({ type: 'int', name: 'venue_id', nullable: true })
+  venueId!: number | null;
+
+  @ManyToOne(() => Team, (team) => team.homeMatches, {
+    nullable: true,
+    onDelete: 'RESTRICT',
+  })
   @JoinColumn({ name: 'home_team_id' })
   homeTeam!: Relation<Team | null>;
 
-  @ManyToOne(() => Team, { nullable: true, onDelete: 'RESTRICT' })
+  @ManyToOne(() => Team, (team) => team.awayMatches, {
+    nullable: true,
+    onDelete: 'RESTRICT',
+  })
   @JoinColumn({ name: 'away_team_id' })
   awayTeam!: Relation<Team | null>;
 
@@ -66,4 +83,24 @@ export class Match {
     foreignKeyConstraintName: 'FK_matches_phase',
   })
   phase!: Relation<Phase>;
+
+  @ManyToOne(() => Venue, (venue) => venue.matches, {
+    nullable: true,
+    onDelete: 'RESTRICT',
+    onUpdate: 'RESTRICT',
+  })
+  @JoinColumn({ name: 'venue_id', foreignKeyConstraintName: 'FK_matches_venue' })
+  venue!: Relation<Venue | null>;
+
+  @OneToOne(() => Ball, (ball) => ball.match)
+  ball?: Relation<Ball>;
+
+  @OneToMany(() => ScoringEvent, (scoringEvent) => scoringEvent.match)
+  scoringEvents?: Relation<ScoringEvent[]>;
+
+  @OneToMany(() => Ticket, (ticket) => ticket.match)
+  tickets?: Relation<Ticket[]>;
+
+  @OneToMany(() => Bet, (bet) => bet.match)
+  bets?: Relation<Bet[]>;
 }

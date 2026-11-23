@@ -11,6 +11,7 @@
 import { Sport } from '../../sports/entities/sport.entity';
 import { Phase } from '../../phases/base/entities/phase.entity';
 import { Registration } from '../../registrations/entities/registration.entity';
+import { TournamentVenue } from '../../tournament-venues/entities/tournament-venue.entity';
 
 export enum TournamentStatus {
   SCHEDULED = 'SCHEDULED',
@@ -56,6 +57,9 @@ export class Tournament {
 
   @OneToMany(() => Phase, (phase) => phase.tournament)
   phases?: Relation<Phase[]>;
+
+  @OneToMany(() => TournamentVenue, (tournamentVenue) => tournamentVenue.tournament)
+  tournamentVenues?: Relation<TournamentVenue[]>;
 
   @OneToMany(() => Registration, (registration) => registration.tournament)
   registrations?: Relation<Registration[]>;

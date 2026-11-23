@@ -1,4 +1,15 @@
 import { Module } from '@nestjs/common';
+import { VenuesModule } from './venues/venues.module';
+import { SeatingZonesModule } from './seating-zones/seating-zones.module';
+import { TournamentVenuesModule } from './tournament-venues/tournament-venues.module';
+import { FansModule } from './fans/fans.module';
+import { FanTeamsModule } from './fan-teams/fan-teams.module';
+import { PaymentMethodsModule } from './payment-methods/payment-methods.module';
+import { FanPaymentMethodsModule } from './fan-payment-methods/fan-payment-methods.module';
+import { TicketsModule } from './tickets/tickets.module';
+import { BetsModule } from './bets/bets.module';
+import { BallsModule } from './balls/balls.module';
+import { SpatialPositionsModule } from './spatial-positions/spatial-positions.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { MatchesModule } from './matches/matches.module';
@@ -52,6 +63,17 @@ import { RegistrationsModule } from './registrations/registrations.module';
     NotificationsModule,
     ScoringEventsModule,
     RegistrationsModule,
+    VenuesModule,
+    SeatingZonesModule,
+    TournamentVenuesModule,
+    FansModule,
+    FanTeamsModule,
+    PaymentMethodsModule,
+    FanPaymentMethodsModule,
+    TicketsModule,
+    BetsModule,
+    BallsModule,
+    SpatialPositionsModule,
   ],
 })
 export class AppModule {}

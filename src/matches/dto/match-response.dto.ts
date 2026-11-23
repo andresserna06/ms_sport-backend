@@ -8,5 +8,6 @@ export class MatchResponseDto {
   awayScore!: number | null;
   homeTeamId!: number | null;
   awayTeamId!: number | null;
+  venueId!: number | null;
   phaseId!: number;
 }

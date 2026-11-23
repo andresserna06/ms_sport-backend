@@ -1,0 +1,138 @@
+import { ApplicationException } from '../../exception/application.exception';
+import { ErrorCase } from '../../exception/error-case.enum';
+import {
+  DuplicateRecordError,
+  MissingReferenceError,
+  RecordInUseError,
+} from '../../common/persistence/database-errors';
+import { SpatialPosition } from '../entities/spatial-position.entity';
+import { SpatialPositionMapper } from '../mappers/spatial-position.mapper';
+import type { SpatialPositionRepository } from '../repositories/spatial-position.repository';
+import { BallsService } from '../../balls/services/balls.service';
+import { MatchStatus } from '../../matches/entities/match.entity';
+import { MatchesService } from '../../matches/matches.service';
+import { SpatialPositionsService } from './spatial-positions.service';
+
+const dto = {
+  ballId: 1,
+  playerId: 1,
+  x: 10.5,
+  y: 10.5,
+  recordedAt: '2027-01-01T10:00:00.000Z',
+};
+
+describe('SpatialPositionsService', () => {
+  let repository: jest.Mocked<SpatialPositionRepository>;
+  let service: SpatialPositionsService;
+  let ballsService: { findOne: jest.Mock };
+  let matchesService: { findOne: jest.Mock };
+
+  beforeEach(() => {
+    repository = {
+      findAll: jest.fn().mockResolvedValue([]),
+      findById: jest.fn(),
+      save: jest.fn(async (entity: SpatialPosition) =>
+        Object.assign(entity, { id: entity.id ?? 1 }),
+      ),
+      remove: jest.fn().mockResolvedValue(undefined),
+    };
+    ballsService = { findOne: jest.fn().mockResolvedValue({ id: 1, matchId: 3 }) };
+    matchesService = {
+      findOne: jest
+        .fn()
+        .mockResolvedValue({ id: 3, status: MatchStatus.IN_PROGRESS }),
+    };
+    service = new SpatialPositionsService(
+      repository,
+      new SpatialPositionMapper(),
+      ballsService as unknown as BallsService,
+      matchesService as unknown as MatchesService,
+    );
+  });
+
+  const existing = () =>
+    Object.assign(new SpatialPositionMapper().toEntity(dto), { id: 4 });
+
+  it('creates a record', async () => {
+    await expect(service.create(dto)).resolves.toMatchObject({ id: 1 });
+    expect(repository.save).toHaveBeenCalled();
+  });
+
+  it('answers 409 when a unique value is repeated', async () => {
+    repository.save.mockRejectedValue(new DuplicateRecordError());
+
+    await expect(service.create(dto)).rejects.toMatchObject({
+      errorCase: ErrorCase.ALREADY_EXISTS,
+    });
+  });
+
+  it('answers 404 naming the missing reference', async () => {
+    repository.save.mockRejectedValue(
+      new MissingReferenceError('FK_spatial_positions_ball'),
+    );
+
+    await expect(service.create(dto)).rejects.toMatchObject({
+      errorCase: ErrorCase.NOT_FOUND,
+      message: 'No existe la pelota',
+    });
+  });
+
+  it('lists the records', async () => {
+    repository.findAll.mockResolvedValue([existing()]);
+
+    await expect(service.findAll()).resolves.toHaveLength(1);
+  });
+
+  it('answers 404 for an unknown id', async () => {
+    repository.findById.mockResolvedValue(null);
+
+    await expect(service.findOne(9)).rejects.toBeInstanceOf(
+      ApplicationException,
+    );
+    await expect(service.findOne(9)).rejects.toMatchObject({
+      errorCase: ErrorCase.NOT_FOUND,
+      message: 'No existe la posición espacial con id 9',
+    });
+  });
+
+  it('updates a record', async () => {
+    repository.findById.mockResolvedValue(existing());
+
+    await expect(service.update(4, dto)).resolves.toMatchObject({ id: 4 });
+  });
+
+  it('removes a record', async () => {
+    repository.findById.mockResolvedValue(existing());
+
+    await expect(service.remove(4)).resolves.toBeUndefined();
+    expect(repository.remove).toHaveBeenCalled();
+  });
+
+  it('answers 409 when the record is still referenced', async () => {
+    repository.findById.mockResolvedValue(existing());
+    repository.remove.mockRejectedValue(new RecordInUseError());
+
+    await expect(service.remove(4)).rejects.toMatchObject({
+      errorCase: ErrorCase.INVALID_STATE,
+    });
+  });
+
+  it('rethrows unexpected errors', async () => {
+    repository.findById.mockResolvedValue(existing());
+    repository.remove.mockRejectedValue(new Error('boom'));
+
+    await expect(service.remove(4)).rejects.toThrow('boom');
+  });
+
+  it('answers 409 when the match is not in progress', async () => {
+    matchesService.findOne.mockResolvedValue({
+      id: 3,
+      status: MatchStatus.SCHEDULED,
+    });
+
+    await expect(service.create(dto)).rejects.toMatchObject({
+      errorCase: ErrorCase.INVALID_STATE,
+    });
+    expect(repository.save).not.toHaveBeenCalled();
+  });
+});

@@ -118,6 +118,34 @@ no se inventa: se pregunta.
   evento de resumen. (Propuesta) Un partido finalizado solo puede corregir su
   resultado y sus anotaciones, no sus equipos ni su fase.
 
+**Escenarios, boletos, apuestas y posiciones (derivadas del diagrama de clases)**
+
+Todas son **(Propuesta)**: salen de las relaciones del diagrama, no de las
+historias (aficionados, boletos, apuestas y seguimiento espacial están fuera de
+alcance). Están implementadas, pero el grupo debe confirmarlas.
+- Apuesta (n) – MétodoPago Aficionado (1): el método de pago de la apuesta debe
+  pertenecer al aficionado que apuesta (`fanPaymentMethod.fanId === bet.fanId`) → 409. (`BetsService`)
+- Torneo – Escenario (vía `TournamentVenue`): el `venueId` de un partido debe existir,
+  estar activo y estar asociado al torneo de la fase → 409. Es opcional. (`MatchesService`)
+- Escenario (1) – Localidad (n) – Boleto (n): la localidad del boleto debe pertenecer al
+  escenario del partido (`seatingZone.venueId === match.venueId`); un partido sin
+  escenario no vende boletos → 409. (`TicketsService`)
+- Capacidad: los boletos de un partido en una localidad no pueden superar
+  `SeatingZone.capacity` (null = sin límite) → 409. (`TicketsService`)
+- Partido (1) – Pelota (1) – Posición Espacial (n): solo se registran posiciones
+  mientras el partido de la pelota esté `IN_PROGRESS` → 409. (`SpatialPositionsService`)
+- Borrado de partido: además de anotaciones, lo impiden boletos y apuestas → 409
+  (criterio de GC-06). (`MatchDependenciesAdapter`)
+- Escenario reflexivo (padre/hijo), igual que Deporte: no puede ser su propio padre
+  ni formar ciclos → 400; el padre debe existir (404) y estar activo (409).
+- Inactivos: un aficionado inactivo no compra boletos, no apuesta ni registra métodos de
+  pago; un método de pago inactivo no se asocia a aficionados → 409. Solo se valida
+  cuando la asociación es nueva o cambia el aficionado o el método.
+- `Ticket.price` es el precio pagado y se envía al crear; `SeatingZone.price` es el de
+  referencia. No hay regla que los obligue a coincidir.
+- [PENDIENTE] Notificaciones a aficionados (boleto, apuesta o partidos anteriores):
+  depende de confirmar el alcance con el docente.
+
 **Desarrollo del torneo (GC-08)**
 - Devuelve: datos del torneo; fases en orden; por fase de grupos, cada grupo
   con su **tabla de posiciones**; por fase final, las **llaves**; los partidos de

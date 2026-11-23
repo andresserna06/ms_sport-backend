@@ -7,6 +7,8 @@ import { PhasesService } from '../phases/base/phases.service';
 import { GroupService } from '../phases/group/group.service';
 import { RegistrationsService } from '../registrations/registrations.service';
 import { TeamsService } from '../teams/services/teams.service';
+import { TournamentVenuesService } from '../tournament-venues/services/tournament-venues.service';
+import { VenuesService } from '../venues/services/venues.service';
 import { CreateMatchDto } from './dto/create-match.dto';
 import { MatchResponseDto } from './dto/match-response.dto';
 import { UpdateMatchDto } from './dto/update-match.dto';
@@ -34,11 +36,14 @@ export class MatchesService {
     private readonly dependenciesChecker: MatchDependenciesChecker,
     @Inject(MATCH_NOTIFIER)
     private readonly matchNotifier: MatchNotifier,
+    private readonly venuesService: VenuesService,
+    private readonly tournamentVenuesService: TournamentVenuesService,
   ) {}
 
   async create(phaseId: number, dto: CreateMatchDto): Promise<MatchResponseDto> {
     const phase = await this.getPhaseOrFail(phaseId);
     await this.validateTeamsForPhase(phase, dto.homeTeamId, dto.awayTeamId);
+    await this.assertVenueUsable(dto.venueId, phase.tournament!.id);
     const saved = await this.matchesRepository.save(this.matchMapper.toEntity(dto, phase));
     const created = await this.findOne(saved.id);
     await this.notifyMatchCreated(created, phase.id);
@@ -87,6 +92,10 @@ export class MatchesService {
     const awayTeamId =
       dto.awayTeamId !== undefined ? dto.awayTeamId : (match.awayTeamId ?? undefined);
     await this.validateTeamsForPhase(targetPhase, homeTeamId, awayTeamId);
+    await this.assertVenueUsable(
+      dto.venueId !== undefined ? dto.venueId : (match.venueId ?? undefined),
+      targetPhase.tournament!.id,
+    );
 
     if (dto.phaseId !== undefined) match.phase = targetPhase;
     const saved = await this.matchesRepository.save(this.matchMapper.mergeEntity(match, dto));
@@ -180,6 +189,24 @@ export class MatchesService {
     await this.registrationsService.assertTeamRegisteredInTournament(teamId, tournamentId);
     if (phase.phaseType === 'GROUP') {
       await this.groupService.assertTeamBelongsToGroup(teamId, phase.id);
+    }
+  }
+
+  // (Propuesta) Class diagram: Venue (1) - Match (n) and Tournament - Venue through
+  // TournamentVenue. The venue is optional, but when sent it must exist, be active
+  // and be assigned to the tournament of the match.
+  private async assertVenueUsable(venueId: number | undefined, tournamentId: number): Promise<void> {
+    if (venueId === undefined) return;
+    const venue = await this.venuesService.findOne(venueId);
+    if (!venue.active) {
+      throw new ApplicationException(ErrorCase.INVALID_STATE, `El escenario ${venueId} está inactivo`);
+    }
+    const assigned = await this.tournamentVenuesService.isVenueAssignedToTournament(tournamentId, venueId);
+    if (!assigned) {
+      throw new ApplicationException(
+        ErrorCase.INVALID_STATE,
+        `El escenario ${venueId} no está asociado al torneo ${tournamentId}`,
+      );
     }
   }
 

@@ -33,6 +33,7 @@ describe('MatchResultsService', () => {
     homeTeamId: 1,
     awayTeamId: 2,
     phaseId: 1,
+    venueId: null,
   };
 
   const samplePlayer = {
@@ -80,6 +81,7 @@ describe('MatchResultsService', () => {
     teamsService = { findOne: jest.fn() };
     contractService = { hasActiveContractOnDate: jest.fn() };
     matchNotifier = {
+      notifyMatchCreated: jest.fn().mockResolvedValue(undefined),
       notifyScoringEventCreated: jest.fn().mockResolvedValue(undefined),
       notifyMatchFinished: jest.fn().mockResolvedValue(undefined),
     };

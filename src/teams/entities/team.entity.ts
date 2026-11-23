@@ -8,8 +8,12 @@ import {
   PrimaryGeneratedColumn,
   type Relation,
 } from 'typeorm';
+import { FanTeam } from '../../fan-teams/entities/fan-team.entity';
+import { Match } from '../../matches/entities/match.entity';
+import { PlayerContract } from '../../player-contracts/entities/player-contract.entity';
 import { Group } from '../../phases/group/entities/group.entity';
 import { Registration } from '../../registrations/entities/registration.entity';
+import { ScoringEvent } from '../../scoring-events/entities/scoring-event.entity';
 import { TeamSport } from '../../team-sports/entities/team-sport.entity';
 
 @Entity('teams')
@@ -42,6 +46,21 @@ export class Team {
 
   @OneToMany(() => Registration, (registration) => registration.team)
   registrations?: Relation<Registration[]>;
+
+  @OneToMany(() => Match, (match) => match.homeTeam)
+  homeMatches?: Relation<Match[]>;
+
+  @OneToMany(() => Match, (match) => match.awayTeam)
+  awayMatches?: Relation<Match[]>;
+
+  @OneToMany(() => PlayerContract, (contract) => contract.team)
+  playerContracts?: Relation<PlayerContract[]>;
+
+  @OneToMany(() => ScoringEvent, (scoringEvent) => scoringEvent.team)
+  scoringEvents?: Relation<ScoringEvent[]>;
+
+  @OneToMany(() => FanTeam, (fanTeam) => fanTeam.team)
+  fanTeams?: Relation<FanTeam[]>;
 
   @OneToMany(() => TeamSport, (teamSport) => teamSport.team)
   teamSports!: Relation<TeamSport>[];

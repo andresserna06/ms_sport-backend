@@ -33,11 +33,11 @@ export class PlayerContract {
   @Column({ name: 'end_date', type: 'date', nullable: true })
   endDate!: string | null;
 
-  @ManyToOne(() => Player, { onDelete: 'RESTRICT' })
+  @ManyToOne(() => Player, (player) => player.playerContracts, { onDelete: 'RESTRICT' })
   @JoinColumn({ name: 'player_id' })
   player!: Player;
 
-  @ManyToOne(() => Team, { onDelete: 'RESTRICT' })
+  @ManyToOne(() => Team, (team) => team.playerContracts, { onDelete: 'RESTRICT' })
   @JoinColumn({ name: 'team_id' })
   team!: Team;
 }

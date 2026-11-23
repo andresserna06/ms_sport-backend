@@ -4,8 +4,10 @@ import { NotificationsModule } from '../notifications/notifications.module';
 import { PhasesModule } from '../phases/base/phases.module';
 import { GroupModule } from '../phases/group/group.module';
 import { RegistrationsModule } from '../registrations/registrations.module';
-import { ScoringEventDependenciesModule } from '../scoring-events/scoring-event-dependencies.module';
 import { TeamsModule } from '../teams/teams.module';
+import { TournamentVenuesModule } from '../tournament-venues/tournament-venues.module';
+import { VenuesModule } from '../venues/venues.module';
+import { MatchDependenciesModule } from './match-dependencies.module';
 import { Match } from './entities/match.entity';
 import { MatchMapper } from './mappers/match.mapper';
 import { MatchesController } from './matches.controller';
@@ -21,8 +23,10 @@ import { MatchTypeOrmRepository } from './repositories/matches.typeorm.repositor
     GroupModule,
     RegistrationsModule,
     TeamsModule,
-    ScoringEventDependenciesModule,
+    MatchDependenciesModule,
     NotificationsModule,
+    VenuesModule,
+    TournamentVenuesModule,
   ],
   controllers: [MatchesController, PhaseMatchesController],
   providers: [

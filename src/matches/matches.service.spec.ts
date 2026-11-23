@@ -13,6 +13,8 @@ describe('MatchesService', () => {
   let matchMapper: any;
   let dependenciesChecker: any;
   let matchNotifier: any;
+  let venuesService: any;
+  let tournamentVenuesService: any;
 
   const phase = { id: 10, phaseType: 'GROUP', tournament: { id: 1 } };
   const matchEntity = {
@@ -44,6 +46,9 @@ describe('MatchesService', () => {
     dependenciesChecker = { hasScoringEvents: jest.fn(), hasBlockingDependencies: jest.fn() };
     matchNotifier = { notifyMatchCreated: jest.fn().mockResolvedValue(undefined) };
 
+    venuesService = { findOne: jest.fn().mockResolvedValue({ id: 3, active: true }) };
+    tournamentVenuesService = { isVenueAssignedToTournament: jest.fn().mockResolvedValue(true) };
+
     service = new MatchesService(
       matchesRepository,
       phasesService,
@@ -53,6 +58,8 @@ describe('MatchesService', () => {
       matchMapper,
       dependenciesChecker,
       matchNotifier,
+      venuesService,
+      tournamentVenuesService,
     );
   });
 
@@ -101,5 +108,42 @@ describe('MatchesService', () => {
     matchNotifier.notifyMatchCreated.mockRejectedValue(new Error('smtp down'));
 
     await expect(service.create(10, { scheduledAt: '2030-01-01T10:00:00Z', homeTeamId: 100, awayTeamId: 200 } as any)).resolves.toMatchObject({ id: 5 });
+  });
+
+  describe('venue (proposal)', () => {
+    const dto = { scheduledAt: '2030-01-01T10:00:00Z', homeTeamId: 100, awayTeamId: 200, venueId: 3 } as any;
+
+    beforeEach(() => {
+      phasesService.findOneEntity.mockResolvedValue(phase);
+      teamsService.findOneEntity.mockImplementation(async (id: number) => ({ id, active: true }));
+      registrationsService.assertTeamRegisteredInTournament.mockResolvedValue(undefined);
+      groupService.assertTeamBelongsToGroup.mockResolvedValue(undefined);
+      matchesRepository.save.mockResolvedValue({ id: 5 });
+      matchesRepository.findById.mockResolvedValue({ ...matchEntity });
+    });
+
+    it('creates a match with a venue assigned to the tournament', async () => {
+      await expect(service.create(10, dto)).resolves.toMatchObject({ id: 5 });
+      expect(tournamentVenuesService.isVenueAssignedToTournament).toHaveBeenCalledWith(1, 3);
+    });
+
+    it('answers 409 when the venue is not assigned to the tournament', async () => {
+      tournamentVenuesService.isVenueAssignedToTournament.mockResolvedValue(false);
+
+      await expect(service.create(10, dto)).rejects.toMatchObject({ errorCase: ErrorCase.INVALID_STATE });
+      expect(matchesRepository.save).not.toHaveBeenCalled();
+    });
+
+    it('answers 409 when the venue is inactive', async () => {
+      venuesService.findOne.mockResolvedValue({ id: 3, active: false });
+
+      await expect(service.create(10, dto)).rejects.toMatchObject({ errorCase: ErrorCase.INVALID_STATE });
+    });
+
+    it('does not check the venue when none is sent', async () => {
+      await service.create(10, { ...dto, venueId: undefined });
+
+      expect(venuesService.findOne).not.toHaveBeenCalled();
+    });
   });
 });

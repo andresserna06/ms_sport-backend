@@ -35,15 +35,15 @@ export class ScoringEvent {
   @Column({ type: 'varchar', length: 50 })
   type!: string;
 
-  @ManyToOne(() => Match, { onDelete: 'RESTRICT' })
+  @ManyToOne(() => Match, (match) => match.scoringEvents, { onDelete: 'RESTRICT' })
   @JoinColumn({ name: 'match_id' })
   match!: Match;
 
-  @ManyToOne(() => Player, { onDelete: 'RESTRICT' })
+  @ManyToOne(() => Player, (player) => player.scoringEvents, { onDelete: 'RESTRICT' })
   @JoinColumn({ name: 'player_id' })
   player!: Player;
 
-  @ManyToOne(() => Team, { onDelete: 'RESTRICT' })
+  @ManyToOne(() => Team, (team) => team.scoringEvents, { onDelete: 'RESTRICT' })
   @JoinColumn({ name: 'team_id' })
   team!: Team;
 }

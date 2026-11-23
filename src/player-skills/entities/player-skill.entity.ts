@@ -36,11 +36,11 @@ export class PlayerSkill {
   })
   assignedAt!: Date;
 
-  @ManyToOne(() => Player, { onDelete: 'RESTRICT' })
+  @ManyToOne(() => Player, (player) => player.playerSkills, { onDelete: 'RESTRICT' })
   @JoinColumn({ name: 'player_id' })
   player!: Player;
 
-  @ManyToOne(() => Skill, { onDelete: 'RESTRICT' })
+  @ManyToOne(() => Skill, (skill) => skill.playerSkills, { onDelete: 'RESTRICT' })
   @JoinColumn({ name: 'skill_id' })
   skill!: Skill;
 }
