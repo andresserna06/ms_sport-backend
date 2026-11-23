@@ -131,6 +131,22 @@ export class RegistrationsService {
     return this.registrationMapper.toResponseDto(saved);
   }
 
+  async confirmByTournamentAndTeam(tournamentId: number, teamId: number): Promise<RegistrationResponseDto> {
+    const tournament = await this.getTournamentOrFail(tournamentId);
+    await this.getTeamOrFail(teamId);
+    const registration = await this.registrationsRepository.findByTournamentAndTeam(
+      tournamentId,
+      teamId,
+    );
+    if (!registration) {
+      throw new ApplicationException(
+        ErrorCase.NOT_FOUND,
+        `No existe una inscripci?n del equipo ${teamId} en el torneo ${tournamentId}`,
+      );
+    }
+    return this.confirm(registration.id);
+  }
+
   async withdrawByTournamentAndTeam(tournamentId: number, teamId: number): Promise<RegistrationResponseDto> {
     const tournament = await this.getTournamentOrFail(tournamentId);
     await this.getTeamOrFail(teamId);
