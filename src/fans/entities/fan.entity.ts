@@ -6,22 +6,19 @@ import {
   PrimaryGeneratedColumn,
   type Relation,
 } from 'typeorm';
-import { FanTeam } from '../../fan-teams/entities/fan-team.entity';
-import { FanPaymentMethod } from '../../fan-payment-methods/entities/fan-payment-method.entity';
-import { Ticket } from '../../tickets/entities/ticket.entity';
 import { Bet } from '../../bets/entities/bet.entity';
+import { FanPaymentMethod } from '../../fan-payment-methods/entities/fan-payment-method.entity';
+import { FanTeam } from '../../fan-teams/entities/fan-team.entity';
+import { Ticket } from '../../tickets/entities/ticket.entity';
 
 @Entity('fans')
-@Index('UQ_fans_email', ['email'], { unique: true })
+@Index('UQ_fans_user_id', ['userId'], { unique: true })
 export class Fan {
   @PrimaryGeneratedColumn()
   id!: number;
 
-  @Column({ type: 'varchar', length: 120, name: 'name' })
-  name!: string;
-
-  @Column({ type: 'varchar', length: 150, name: 'email' })
-  email!: string;
+  @Column({ type: 'int', name: 'user_id' })
+  userId!: number;
 
   @Column({ type: 'boolean', default: true })
   active!: boolean;

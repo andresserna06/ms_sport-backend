@@ -5,4 +5,8 @@ export interface SecurityUserClient {
     userId: number,
     authorizationHeader?: string,
   ): Promise<string | null>;
+  findUserEmailById(
+    userId: number,
+    authorizationHeader?: string,
+  ): Promise<string | null>;
 }

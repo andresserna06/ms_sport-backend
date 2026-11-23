@@ -12,7 +12,10 @@ describe('MatchNotificationsService', () => {
   beforeEach(() => {
     client = { sendEmail: jest.fn() };
     recipientsProvider = { getMatchRecipientEmails: jest.fn() };
-    securityUserClient = { findUserNameById: jest.fn() };
+    securityUserClient = {
+      findUserNameById: jest.fn(),
+      findUserEmailById: jest.fn(),
+    };
     service = new MatchNotificationsService(
       client,
       recipientsProvider,

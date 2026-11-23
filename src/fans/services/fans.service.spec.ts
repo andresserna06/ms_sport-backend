@@ -1,19 +1,20 @@
-import { ApplicationException } from '../../exception/application.exception';
-import { ErrorCase } from '../../exception/error-case.enum';
 import {
   DuplicateRecordError,
-  MissingReferenceError,
   RecordInUseError,
 } from '../../common/persistence/database-errors';
+import { ApplicationException } from '../../exception/application.exception';
+import { ErrorCase } from '../../exception/error-case.enum';
 import { Fan } from '../entities/fan.entity';
 import { FanMapper } from '../mappers/fan.mapper';
+import type { FanRoleAssigner } from '../ports/fan-role-assigner.port';
 import type { FanRepository } from '../repositories/fan.repository';
 import { FansService } from './fans.service';
 
-const dto = { name: 'Valor', email: 'a@b.co', active: true };
+const dto = { userId: 10, active: true };
 
 describe('FansService', () => {
   let repository: jest.Mocked<FanRepository>;
+  let fanRoleAssigner: jest.Mocked<FanRoleAssigner>;
   let service: FansService;
 
   beforeEach(() => {
@@ -25,15 +26,24 @@ describe('FansService', () => {
       ),
       remove: jest.fn().mockResolvedValue(undefined),
     };
-    service = new FansService(repository, new FanMapper());
+    fanRoleAssigner = {
+      assignFanRole: jest.fn().mockResolvedValue(undefined),
+    };
+    service = new FansService(repository, fanRoleAssigner, new FanMapper());
   });
 
   const existing = () =>
     Object.assign(new FanMapper().toEntity(dto), { id: 4 });
 
-  it('creates a record', async () => {
-    await expect(service.create(dto)).resolves.toMatchObject({ id: 1 });
+  it('creates a record and assigns fan role in ms_seguridad', async () => {
+    await expect(
+      service.create(dto, 'Bearer jwt-token'),
+    ).resolves.toMatchObject({ id: 1, userId: 10, active: true });
     expect(repository.save).toHaveBeenCalled();
+    expect(fanRoleAssigner.assignFanRole).toHaveBeenCalledWith(
+      10,
+      'Bearer jwt-token',
+    );
   });
 
   it('answers 409 when a unique value is repeated', async () => {
@@ -42,6 +52,7 @@ describe('FansService', () => {
     await expect(service.create(dto)).rejects.toMatchObject({
       errorCase: ErrorCase.ALREADY_EXISTS,
     });
+    expect(fanRoleAssigner.assignFanRole).not.toHaveBeenCalled();
   });
 
   it('lists the records', async () => {

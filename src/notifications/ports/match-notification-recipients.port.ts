@@ -6,7 +6,10 @@ export const MATCH_NOTIFICATION_RECIPIENTS_PROVIDER = Symbol(
 );
 
 export interface MatchNotificationRecipientsProvider {
-  getMatchRecipientEmails(matchId: number): Promise<(string | null)[]>;
+  getMatchRecipientEmails(
+    matchId: number,
+    authorizationHeader?: string,
+  ): Promise<(string | null)[]>;
 }
 
 @Injectable()
@@ -15,7 +18,10 @@ export class EnvMatchNotificationRecipientsProvider
 {
   constructor(private readonly configService: ConfigService) {}
 
-  async getMatchRecipientEmails(_matchId: number): Promise<(string | null)[]> {
+  async getMatchRecipientEmails(
+    _matchId: number,
+    _authorizationHeader?: string,
+  ): Promise<(string | null)[]> {
     const testEmail = this.configService
       .get<string>('NOTIFICATIONS_TEST_EMAIL')
       ?.trim();

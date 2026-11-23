@@ -1,6 +1,5 @@
 export class FanResponseDto {
   id!: number;
-  name!: string;
-  email!: string;
+  userId!: number;
   active!: boolean;
 }

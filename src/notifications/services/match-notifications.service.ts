@@ -64,7 +64,12 @@ export class MatchNotificationsService implements MatchNotifier {
       minute: payload.minute,
       type: payload.type,
     });
-    await this.dispatchToMatchRecipients(payload.matchId, subject, htmlContent);
+    await this.dispatchToMatchRecipients(
+      payload.matchId,
+      subject,
+      htmlContent,
+      payload.authorizationHeader,
+    );
   }
 
   async notifyMatchFinished(
@@ -108,7 +113,12 @@ export class MatchNotificationsService implements MatchNotifier {
         };
       }),
     });
-    await this.dispatchToMatchRecipients(payload.matchId, subject, htmlContent);
+    await this.dispatchToMatchRecipients(
+      payload.matchId,
+      subject,
+      htmlContent,
+      payload.authorizationHeader,
+    );
   }
 
   private async resolvePlayerDisplayName(
@@ -132,11 +142,14 @@ export class MatchNotificationsService implements MatchNotifier {
     matchId: number,
     subject: string,
     htmlContent: string,
+    authorizationHeader?: string,
   ): Promise<void> {
     let rawEmails: (string | null)[];
     try {
-      rawEmails =
-        await this.recipientsProvider.getMatchRecipientEmails(matchId);
+      rawEmails = await this.recipientsProvider.getMatchRecipientEmails(
+        matchId,
+        authorizationHeader,
+      );
     } catch (error) {
       this.logger.warn(
         `No se pudieron resolver destinatarios para partido #${matchId}: ${String(error)}`,
