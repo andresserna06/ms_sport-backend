@@ -5,6 +5,7 @@ import { SecurityUserClient } from '../ports/security-user-client.port';
 
 interface SecurityUserResponse {
   name?: string;
+  email?: string;
 }
 
 @Injectable()
@@ -22,6 +23,24 @@ export class HttpSecurityUserClient implements SecurityUserClient {
     userId: number,
     authorizationHeader?: string,
   ): Promise<string | null> {
+    const user = await this.fetchUser(userId, authorizationHeader);
+    const name = user?.name?.trim();
+    return name || null;
+  }
+
+  async findUserEmailById(
+    userId: number,
+    authorizationHeader?: string,
+  ): Promise<string | null> {
+    const user = await this.fetchUser(userId, authorizationHeader);
+    const email = user?.email?.trim();
+    return email || null;
+  }
+
+  private async fetchUser(
+    userId: number,
+    authorizationHeader?: string,
+  ): Promise<SecurityUserResponse | null> {
     try {
       const response = await axios.get<SecurityUserResponse>(
         `${this.baseUrl}/api/users/${userId}`,
@@ -32,11 +51,10 @@ export class HttpSecurityUserClient implements SecurityUserClient {
           timeout: 3000,
         },
       );
-      const name = response.data?.name?.trim();
-      return name || null;
+      return response.data ?? null;
     } catch (error) {
       this.logger.debug(
-        `No se pudo obtener el nombre del usuario #${userId} desde ms_seguridad: ${String(error)}`,
+        `No se pudo obtener el usuario #${userId} desde ms_seguridad: ${String(error)}`,
       );
       return null;
     }
