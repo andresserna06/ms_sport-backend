@@ -27,6 +27,14 @@ export class TournamentRegistrationsController {
     return this.registrationsService.findByTournament(tournamentId);
   }
 
+  @Patch(':teamId/confirm')
+  confirm(
+    @Param('tournamentId', ParseIntPipe) tournamentId: number,
+    @Param('teamId', ParseIntPipe) teamId: number,
+  ) {
+    return this.registrationsService.confirmByTournamentAndTeam(tournamentId, teamId);
+  }
+
   @Patch(':teamId/withdraw')
   withdraw(
     @Param('tournamentId', ParseIntPipe) tournamentId: number,

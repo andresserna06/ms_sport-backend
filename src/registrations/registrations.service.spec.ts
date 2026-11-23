@@ -13,8 +13,8 @@ import { RegistrationsService } from './registrations.service';
 
 describe('RegistrationsService', () => {
   let service: RegistrationsService;
-  let registrationsRepository: { findById: jest.Mock; findByTournamentAndTeam: jest.Mock; save: jest.Mock };
-  let teamsRepository: { findOne: jest.Mock };
+  let registrationsRepository: { findById: jest.Mock; findByTournamentAndTeam: jest.Mock; save: jest.Mock; findByTournament: jest.Mock; findByTeam: jest.Mock };
+  let teamsRepository: { findOne: jest.Mock; save: jest.Mock };
   let tournamentsRepository: { findOne: jest.Mock };
   let groupsRepository: { createQueryBuilder: jest.Mock };
   let matchesRepository: { createQueryBuilder: jest.Mock };
@@ -43,8 +43,10 @@ describe('RegistrationsService', () => {
       findById: jest.fn(),
       findByTournamentAndTeam: jest.fn(),
       save: jest.fn(),
+      findByTournament: jest.fn(),
+      findByTeam: jest.fn(),
     };
-    teamsRepository = { findOne: jest.fn() };
+    teamsRepository = { findOne: jest.fn(), save: jest.fn() };
     tournamentsRepository = { findOne: jest.fn() };
     groupsRepository = { createQueryBuilder: jest.fn() };
     matchesRepository = { createQueryBuilder: jest.fn() };
@@ -131,16 +133,56 @@ describe('RegistrationsService', () => {
     expect(result.status).toBe('CONFIRMED');
   });
 
-  it('withdraw marks registration as withdrawn without deleting row', async () => {
-    registrationsRepository.findById.mockResolvedValue({ ...registration, status: 'CONFIRMED', withdrawnAt: null });
-    groupsRepository.createQueryBuilder.mockReturnValue({ innerJoin: jest.fn().mockReturnThis(), select: jest.fn().mockReturnThis(), getOne: jest.fn().mockResolvedValue(null) });
+  it('withdraw marks registration as withdrawn and removes team from same tournament group', async () => {
+    const teamWithGroup = { ...team, group: { id: 5, tournament: { id: 20 } } };
+    registrationsRepository.findById.mockResolvedValue({ ...registration, status: 'CONFIRMED', withdrawnAt: null, team: teamWithGroup });
     matchesRepository.createQueryBuilder.mockReturnValue({ innerJoin: jest.fn().mockReturnThis(), where: jest.fn().mockReturnThis(), select: jest.fn().mockReturnThis(), getOne: jest.fn().mockResolvedValue(null) });
+    teamsRepository.findOne.mockResolvedValue(teamWithGroup);
+    teamsRepository.save.mockImplementation(async (t) => t);
     registrationsRepository.save.mockImplementation(async (r) => r);
 
     const result = await service.withdraw(1);
 
     expect(result.status).toBe('WITHDRAWN');
     expect(result.withdrawnAt).toBeInstanceOf(Date);
+    expect(teamsRepository.save).toHaveBeenCalledWith(expect.objectContaining({ id: 10, group: null }));
+  });
+
+  it('withdraw does not remove team from group of another tournament', async () => {
+    const teamWithGroup = { ...team, group: { id: 5, tournament: { id: 999 } } };
+    registrationsRepository.findById.mockResolvedValue({ ...registration, status: 'CONFIRMED', withdrawnAt: null, team: teamWithGroup });
+    matchesRepository.createQueryBuilder.mockReturnValue({ innerJoin: jest.fn().mockReturnThis(), where: jest.fn().mockReturnThis(), select: jest.fn().mockReturnThis(), getOne: jest.fn().mockResolvedValue(null) });
+    teamsRepository.findOne.mockResolvedValue(teamWithGroup);
+    registrationsRepository.save.mockImplementation(async (r) => r);
+
+    await service.withdraw(1);
+
+    expect(teamsRepository.save).not.toHaveBeenCalled();
+  });
+
+  it('confirm reactivates withdrawn registration before deadline', async () => {
+    registrationsRepository.findById.mockResolvedValue({ ...registration, status: 'WITHDRAWN', withdrawnAt: new Date() });
+    registrationsRepository.save.mockImplementation(async (r) => r);
+
+    const result = await service.confirm(1);
+
+    expect(result.status).toBe('CONFIRMED');
+    expect(result.withdrawnAt).toBeNull();
+  });
+
+  it('confirm rejects withdrawn registration after deadline with clear message', async () => {
+    registrationsRepository.findById.mockResolvedValue({
+      ...registration,
+      status: 'WITHDRAWN',
+      withdrawnAt: new Date(),
+      tournament: { ...tournament, enrollmentDeadline: '2000-01-01' },
+    });
+
+    await expect(service.confirm(1)).rejects.toMatchObject({
+      constructor: ApplicationException,
+      errorCase: ErrorCase.INVALID_STATE,
+      message: expect.stringContaining('fecha l?mite de inscripci?n'),
+    });
   });
 });
 
