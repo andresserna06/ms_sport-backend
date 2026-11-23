@@ -17,11 +17,6 @@ export class MatchesController {
     return this.matchesService.startMatch(id);
   }
 
-  @Patch(':id/cancel')
-  cancel(@Param('id', ParseIntPipe) id: number) {
-    return this.matchesService.cancelMatch(id);
-  }
-
   @Get(':id')
   findOne(@Param('id', ParseIntPipe) id: number) {
     return this.matchesService.findOne(id);

@@ -116,14 +116,25 @@ export class MatchesService {
 
   async updateResult(id: number, homeScore: number, awayScore: number): Promise<MatchResponseDto> {
     const match = await this.getMatchOrFail(id);
-    this.assertMatchNotCancelled(match, 'registrar resultado');
+    if ([MatchStatus.FINISHED, MatchStatus.CANCELLED].includes(match.status)) {
+      throw new ApplicationException(
+        ErrorCase.INVALID_STATE,
+        `No se puede registrar resultado en el partido ${id} porque su estado es ${match.status}`,
+      );
+    }
+    if (![MatchStatus.SCHEDULED, MatchStatus.IN_PROGRESS].includes(match.status)) {
+      throw new ApplicationException(
+        ErrorCase.INVALID_STATE,
+        `No se puede registrar resultado en el partido ${id} porque su estado es ${match.status}`,
+      );
+    }
     this.assertTeamsAssigned(match);
     match.homeScore = homeScore;
     match.awayScore = awayScore;
     return this.matchMapper.toResponseDto(await this.matchesRepository.save(match));
   }
 
-  async finishMatch(id: number, homeScore?: number, awayScore?: number): Promise<MatchResponseDto> {
+  async finishMatch(id: number, _homeScore?: number, _awayScore?: number): Promise<MatchResponseDto> {
     const match = await this.getMatchOrFail(id);
     if (match.status === MatchStatus.CANCELLED) {
       throw new ApplicationException(ErrorCase.INVALID_STATE, `No se puede finalizar el partido ${id} porque est? cancelado`);
@@ -135,13 +146,9 @@ export class MatchesService {
       throw new ApplicationException(ErrorCase.INVALID_STATE, `Solo se puede finalizar un partido en estado IN_PROGRESS`);
     }
     this.assertTeamsAssigned(match);
-    const finalHomeScore = homeScore ?? match.homeScore;
-    const finalAwayScore = awayScore ?? match.awayScore;
-    if (finalHomeScore === null || finalAwayScore === null) {
+    if (match.homeScore === null || match.awayScore === null) {
       throw new ApplicationException(ErrorCase.INVALID_STATE, `Para finalizar el partido ${id} se requiere registrar el marcador de ambos equipos`);
     }
-    match.homeScore = finalHomeScore;
-    match.awayScore = finalAwayScore;
     match.status = MatchStatus.FINISHED;
     return this.matchMapper.toResponseDto(await this.matchesRepository.save(match));
   }
@@ -156,14 +163,7 @@ export class MatchesService {
     return this.matchMapper.toResponseDto(await this.matchesRepository.save(match));
   }
 
-  async cancelMatch(id: number): Promise<MatchResponseDto> {
-    const match = await this.getMatchOrFail(id);
-    if (![MatchStatus.SCHEDULED, MatchStatus.IN_PROGRESS].includes(match.status)) {
-      throw new ApplicationException(ErrorCase.INVALID_STATE, `No se puede cancelar el partido ${id} desde el estado ${match.status}`);
-    }
-    match.status = MatchStatus.CANCELLED;
-    return this.matchMapper.toResponseDto(await this.matchesRepository.save(match));
-  }
+
 
   private async getMatchOrFail(id: number): Promise<Match> {
     const match = await this.matchesRepository.findById(id);
@@ -206,11 +206,6 @@ export class MatchesService {
     }
   }
 
-  private assertMatchNotCancelled(match: Match, action: string): void {
-    if (match.status === MatchStatus.CANCELLED) {
-      throw new ApplicationException(ErrorCase.INVALID_STATE, `No se puede ${action} en el partido ${match.id} porque está cancelado`);
-    }
-  }
 
   private assertTeamsAssigned(match: Match): void {
     if (match.homeTeamId === null || match.awayTeamId === null) {

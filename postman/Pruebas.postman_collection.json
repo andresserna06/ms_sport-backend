@@ -44742,6 +44742,41 @@
               ]
             },
             {
+              "name": "Iniciar partido (prerequisito finish)",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/matches/{{matchId}}/start",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "matches",
+                    "{{matchId}}",
+                    "start"
+                  ]
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                      "pm.test('IN_PROGRESS', () => pm.expect(pm.response.json().status).to.eql('IN_PROGRESS'));"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
               "name": "TC-GC06-15 Reject finishing a match without a score (409)",
               "request": {
                 "method": "PATCH",
