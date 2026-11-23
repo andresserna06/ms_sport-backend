@@ -189,13 +189,12 @@ describe('MatchesService', () => {
     expect(matchesRepository.save).toHaveBeenCalledWith(expect.objectContaining({ status: MatchStatus.FINISHED, homeScore: 2, awayScore: 1 }));
   });
 
-  it('finishMatch ignores incoming scores and keeps current match score', async () => {
+  it('finishMatch uses incoming scores when provided', async () => {
     matchesRepository.findById.mockResolvedValue({ ...matchEntity, status: MatchStatus.IN_PROGRESS, homeScore: 2, awayScore: 1 });
     matchesRepository.save.mockImplementation(async (m) => m);
 
     await service.finishMatch(5, 9, 9);
 
-    expect(matchesRepository.save).toHaveBeenCalledWith(expect.objectContaining({ status: MatchStatus.FINISHED, homeScore: 2, awayScore: 1 }));
-
+    expect(matchesRepository.save).toHaveBeenCalledWith(expect.objectContaining({ status: MatchStatus.FINISHED, homeScore: 9, awayScore: 9 }));
   });
 });
