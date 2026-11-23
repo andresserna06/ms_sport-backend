@@ -46749,6 +46749,1832 @@
       ]
     },
     {
+      "name": "Modelo completo (estructura básica)",
+      "item": [
+        {
+          "name": "MV-00 Setup: equipo del seed (Atlético Nacional)",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.collectionVariables.set('mvRun', 'QA' + Date.now() + 'M');"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "const t = pm.response.json().find((x) => x.name === 'Atlético Nacional'); pm.test('seed team exists: run npm run seed', () => pm.expect(t).to.exist); pm.collectionVariables.set('mvTeamId', t ? t.id : 'setup-failed');"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/teams",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "teams"
+              ]
+            }
+          }
+        },
+        {
+          "name": "MV-01 Setup: torneo del seed (Copa Colombia)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "const t = pm.response.json()[0]; pm.test('seed tournament exists', () => pm.expect(t).to.exist); pm.collectionVariables.set('mvTournamentId', t ? t.id : 'setup-failed');"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/tournaments?name=Copa Colombia",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tournaments"
+              ],
+              "query": [
+                {
+                  "key": "name",
+                  "value": "Copa Colombia"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "MV-02 Setup: partido de la fase final del seed",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "const m = pm.response.json().phases.find((p) => p.type === 'KNOCKOUT').matches[0]; pm.test('seed match exists', () => pm.expect(m).to.exist); pm.collectionVariables.set('mvMatchId', m ? m.id : 'setup-failed');"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/tournaments/{{mvTournamentId}}/overview",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tournaments",
+                "{{mvTournamentId}}",
+                "overview"
+              ]
+            }
+          }
+        },
+        {
+          "name": "MV-03 Setup: jugador del seed",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "const p = pm.response.json().find((x) => x.document === 'SEED-1001'); pm.test('seed player exists', () => pm.expect(p).to.exist); pm.collectionVariables.set('mvPlayerId', p ? p.id : 'setup-failed');"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/players",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "players"
+              ]
+            }
+          }
+        },
+        {
+          "name": "MV-10 Crear escenario",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 201', () => pm.response.to.have.status(201));",
+                  "pm.collectionVariables.set('mvVenueId', pm.response.json().id);",
+                  "pm.test('active by default', () => pm.expect(pm.response.json().active).to.eql(true));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"name\": \"{{mvRun}} Estadio\", \"city\": \"Medellín\", \"address\": \"Calle 1\", \"capacity\": 40000 }",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/venues",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "venues"
+              ]
+            }
+          }
+        },
+        {
+          "name": "MV-11 Crear sub-escenario (relación reflexiva)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 201', () => pm.response.to.have.status(201));",
+                  "pm.collectionVariables.set('mvSubVenueId', pm.response.json().id);",
+                  "pm.test('has parent', () => pm.expect(pm.response.json().parentVenueId).to.eql(Number(pm.collectionVariables.get('mvVenueId'))));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"name\": \"{{mvRun}} Cancha anexa\", \"city\": \"Medellín\", \"parentVenueId\": {{mvVenueId}} }",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/venues",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "venues"
+              ]
+            }
+          }
+        },
+        {
+          "name": "MV-12 Escenario sin campos obligatorios (400)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 400', () => pm.response.to.have.status(400));",
+                  "const b = pm.response.json(); pm.test('flat field errors', () => { pm.expect(b).to.not.have.property('errorCase'); pm.expect(b).to.have.property('name'); pm.expect(b).to.have.property('city'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/venues",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "venues"
+              ]
+            }
+          }
+        },
+        {
+          "name": "MV-13 Escenario padre inexistente (404)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 404', () => pm.response.to.have.status(404));",
+                  "pm.test('errorCase NOT_FOUND', () => pm.expect(pm.response.json().errorCase).to.eql('NOT_FOUND'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"name\": \"{{mvRun}} X\", \"city\": \"Y\", \"parentVenueId\": 999999 }",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/venues",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "venues"
+              ]
+            }
+          }
+        },
+        {
+          "name": "MV-14 Detalle de escenario",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/venues/{{mvVenueId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "venues",
+                "{{mvVenueId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "MV-15 Actualizar escenario (PUT)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('replaced', () => pm.expect(pm.response.json().city).to.eql('Cali'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"name\": \"{{mvRun}} Estadio\", \"city\": \"Cali\", \"capacity\": 45000 }",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/venues/{{mvVenueId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "venues",
+                "{{mvVenueId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "MV-16 Escenario inexistente (404)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 404', () => pm.response.to.have.status(404));",
+                  "pm.test('errorCase NOT_FOUND', () => pm.expect(pm.response.json().errorCase).to.eql('NOT_FOUND'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/venues/999999",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "venues",
+                "999999"
+              ]
+            }
+          }
+        },
+        {
+          "name": "MV-20 Crear localidad",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 201', () => pm.response.to.have.status(201));",
+                  "pm.collectionVariables.set('mvZoneId', pm.response.json().id);",
+                  "pm.test('price is a number', () => pm.expect(pm.response.json().price).to.eql(85000.5));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"venueId\": {{mvVenueId}}, \"name\": \"Occidental\", \"capacity\": 5000, \"price\": 85000.5 }",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/seating-zones",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "seating-zones"
+              ]
+            }
+          }
+        },
+        {
+          "name": "MV-21 Localidad repetida en el mismo escenario (409)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 409', () => pm.response.to.have.status(409));",
+                  "pm.test('errorCase ALREADY_EXISTS', () => pm.expect(pm.response.json().errorCase).to.eql('ALREADY_EXISTS'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"venueId\": {{mvVenueId}}, \"name\": \"Occidental\", \"price\": 1 }",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/seating-zones",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "seating-zones"
+              ]
+            }
+          }
+        },
+        {
+          "name": "MV-22 Localidad con escenario inexistente (404)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 404', () => pm.response.to.have.status(404));",
+                  "pm.test('errorCase NOT_FOUND', () => pm.expect(pm.response.json().errorCase).to.eql('NOT_FOUND'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"venueId\": 999999, \"name\": \"X\", \"price\": 1 }",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/seating-zones",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "seating-zones"
+              ]
+            }
+          }
+        },
+        {
+          "name": "MV-23 Precio negativo (400)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 400', () => pm.response.to.have.status(400));",
+                  "const b = pm.response.json(); pm.test('flat field errors', () => { pm.expect(b).to.not.have.property('errorCase'); pm.expect(b).to.have.property('price'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"venueId\": {{mvVenueId}}, \"name\": \"Norte\", \"price\": -5 }",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/seating-zones",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "seating-zones"
+              ]
+            }
+          }
+        },
+        {
+          "name": "MV-24 Eliminar escenario con localidades (409)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 409', () => pm.response.to.have.status(409));",
+                  "pm.test('errorCase INVALID_STATE', () => pm.expect(pm.response.json().errorCase).to.eql('INVALID_STATE'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/venues/{{mvVenueId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "venues",
+                "{{mvVenueId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "MV-30 Asignar escenario a torneo",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 201', () => pm.response.to.have.status(201));",
+                  "pm.collectionVariables.set('mvTournamentVenueId', pm.response.json().id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"tournamentId\": {{mvTournamentId}}, \"venueId\": {{mvVenueId}} }",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/tournament-venues",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tournament-venues"
+              ]
+            }
+          }
+        },
+        {
+          "name": "MV-31 Asignación repetida (409)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 409', () => pm.response.to.have.status(409));",
+                  "pm.test('errorCase ALREADY_EXISTS', () => pm.expect(pm.response.json().errorCase).to.eql('ALREADY_EXISTS'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"tournamentId\": {{mvTournamentId}}, \"venueId\": {{mvVenueId}} }",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/tournament-venues",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tournament-venues"
+              ]
+            }
+          }
+        },
+        {
+          "name": "MV-40 Crear aficionado",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 201', () => pm.response.to.have.status(201));",
+                  "pm.collectionVariables.set('mvFanId', pm.response.json().id);",
+                  "pm.test('email lowercased', () => pm.expect(pm.response.json().email).to.eql(pm.collectionVariables.get('mvRun').toLowerCase() + '@example.com'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"name\": \"Ana\", \"email\": \"{{mvRun}}@Example.com\" }",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/fans",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "fans"
+              ]
+            }
+          }
+        },
+        {
+          "name": "MV-41 Correo repetido (409)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 409', () => pm.response.to.have.status(409));",
+                  "pm.test('errorCase ALREADY_EXISTS', () => pm.expect(pm.response.json().errorCase).to.eql('ALREADY_EXISTS'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"name\": \"Otra\", \"email\": \"{{mvRun}}@example.com\" }",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/fans",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "fans"
+              ]
+            }
+          }
+        },
+        {
+          "name": "MV-42 Correo inválido (400)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 400', () => pm.response.to.have.status(400));",
+                  "const b = pm.response.json(); pm.test('flat field errors', () => { pm.expect(b).to.not.have.property('errorCase'); pm.expect(b).to.have.property('email'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"name\": \"Ana\", \"email\": \"no-es-correo\" }",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/fans",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "fans"
+              ]
+            }
+          }
+        },
+        {
+          "name": "MV-43 Seguir a un equipo",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 201', () => pm.response.to.have.status(201));",
+                  "pm.collectionVariables.set('mvFanTeamId', pm.response.json().id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"fanId\": {{mvFanId}}, \"teamId\": {{mvTeamId}} }",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/fan-teams",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "fan-teams"
+              ]
+            }
+          }
+        },
+        {
+          "name": "MV-44 Seguir al mismo equipo otra vez (409)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 409', () => pm.response.to.have.status(409));",
+                  "pm.test('errorCase ALREADY_EXISTS', () => pm.expect(pm.response.json().errorCase).to.eql('ALREADY_EXISTS'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"fanId\": {{mvFanId}}, \"teamId\": {{mvTeamId}} }",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/fan-teams",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "fan-teams"
+              ]
+            }
+          }
+        },
+        {
+          "name": "MV-50 Crear método de pago",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 201', () => pm.response.to.have.status(201));",
+                  "pm.collectionVariables.set('mvPaymentMethodId', pm.response.json().id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"name\": \"{{mvRun}} Tarjeta\" }",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/payment-methods",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "payment-methods"
+              ]
+            }
+          }
+        },
+        {
+          "name": "MV-51 Método de pago repetido (409)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 409', () => pm.response.to.have.status(409));",
+                  "pm.test('errorCase ALREADY_EXISTS', () => pm.expect(pm.response.json().errorCase).to.eql('ALREADY_EXISTS'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"name\": \"{{mvRun}} Tarjeta\" }",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/payment-methods",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "payment-methods"
+              ]
+            }
+          }
+        },
+        {
+          "name": "MV-52 Asignar método de pago al aficionado",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 201', () => pm.response.to.have.status(201));",
+                  "pm.collectionVariables.set('mvFanPaymentMethodId', pm.response.json().id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"fanId\": {{mvFanId}}, \"paymentMethodId\": {{mvPaymentMethodId}}, \"alias\": \"Principal\" }",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/fan-payment-methods",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "fan-payment-methods"
+              ]
+            }
+          }
+        },
+        {
+          "name": "MV-53 Método de pago del aficionado repetido (409)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 409', () => pm.response.to.have.status(409));",
+                  "pm.test('errorCase ALREADY_EXISTS', () => pm.expect(pm.response.json().errorCase).to.eql('ALREADY_EXISTS'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"fanId\": {{mvFanId}}, \"paymentMethodId\": {{mvPaymentMethodId}} }",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/fan-payment-methods",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "fan-payment-methods"
+              ]
+            }
+          }
+        },
+        {
+          "name": "MV-60 Crear boleto",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 201', () => pm.response.to.have.status(201));",
+                  "pm.collectionVariables.set('mvTicketId', pm.response.json().id);",
+                  "pm.test('purchase date is set', () => pm.expect(pm.response.json().purchasedAt).to.be.a('string'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"fanId\": {{mvFanId}}, \"matchId\": {{mvMatchId}}, \"seatingZoneId\": {{mvZoneId}}, \"price\": 85000 }",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/tickets",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tickets"
+              ]
+            }
+          }
+        },
+        {
+          "name": "MV-61 Boleto con partido inexistente (404)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 404', () => pm.response.to.have.status(404));",
+                  "pm.test('errorCase NOT_FOUND', () => pm.expect(pm.response.json().errorCase).to.eql('NOT_FOUND'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"fanId\": {{mvFanId}}, \"matchId\": 999999, \"seatingZoneId\": {{mvZoneId}}, \"price\": 1 }",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/tickets",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tickets"
+              ]
+            }
+          }
+        },
+        {
+          "name": "MV-62 Crear apuesta",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 201', () => pm.response.to.have.status(201));",
+                  "pm.collectionVariables.set('mvBetId', pm.response.json().id);",
+                  "pm.test('placed date is set', () => pm.expect(pm.response.json().placedAt).to.be.a('string'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"fanId\": {{mvFanId}}, \"matchId\": {{mvMatchId}}, \"fanPaymentMethodId\": {{mvFanPaymentMethodId}}, \"amount\": 20000 }",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/bets",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "bets"
+              ]
+            }
+          }
+        },
+        {
+          "name": "MV-70 Crear pelota del partido (1 a 1)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 201', () => pm.response.to.have.status(201));",
+                  "pm.collectionVariables.set('mvBallId', pm.response.json().id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"matchId\": {{mvMatchId}}, \"serialNumber\": \"{{mvRun}}-BALL\" }",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/balls",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "balls"
+              ]
+            }
+          }
+        },
+        {
+          "name": "MV-71 Segunda pelota para el mismo partido (409)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 409', () => pm.response.to.have.status(409));",
+                  "pm.test('errorCase ALREADY_EXISTS', () => pm.expect(pm.response.json().errorCase).to.eql('ALREADY_EXISTS'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"matchId\": {{mvMatchId}}, \"serialNumber\": \"{{mvRun}}-OTRA\" }",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/balls",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "balls"
+              ]
+            }
+          }
+        },
+        {
+          "name": "MV-72 Registrar posición espacial",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 201', () => pm.response.to.have.status(201));",
+                  "pm.collectionVariables.set('mvPositionId', pm.response.json().id);",
+                  "pm.test('coordinates are numbers', () => { const b = pm.response.json(); pm.expect(b.x).to.eql(12.345); pm.expect(b.y).to.eql(-3.5); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"ballId\": {{mvBallId}}, \"playerId\": {{mvPlayerId}}, \"x\": 12.345, \"y\": -3.5, \"recordedAt\": \"2027-04-03T16:05:00.000Z\" }",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/spatial-positions",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "spatial-positions"
+              ]
+            }
+          }
+        },
+        {
+          "name": "MV-73 Posición con fecha inválida (400)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 400', () => pm.response.to.have.status(400));",
+                  "const b = pm.response.json(); pm.test('flat field errors', () => { pm.expect(b).to.not.have.property('errorCase'); pm.expect(b).to.have.property('recordedAt'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"ballId\": {{mvBallId}}, \"playerId\": {{mvPlayerId}}, \"x\": 1, \"y\": 1, \"recordedAt\": \"ayer\" }",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/spatial-positions",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "spatial-positions"
+              ]
+            }
+          }
+        },
+        {
+          "name": "MV-80 Listar boletos",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('contains the ticket', () => pm.expect(pm.response.json().some((t) => t.id == pm.collectionVariables.get('mvTicketId'))).to.eql(true));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/tickets",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tickets"
+              ]
+            }
+          }
+        },
+        {
+          "name": "MV-81 Actualizar apuesta (PUT)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('replaced', () => pm.expect(pm.response.json().amount).to.eql(30000));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"fanId\": {{mvFanId}}, \"matchId\": {{mvMatchId}}, \"fanPaymentMethodId\": {{mvFanPaymentMethodId}}, \"amount\": 30000 }",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/bets/{{mvBetId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "bets",
+                "{{mvBetId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "MV-82 El partido sigue funcionando con relaciones nuevas",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/matches/{{mvMatchId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "matches",
+                "{{mvMatchId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "MV-90 Limpieza: eliminar posición",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 204', () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/spatial-positions/{{mvPositionId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "spatial-positions",
+                "{{mvPositionId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "MV-91 Limpieza: eliminar pelota",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 204', () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/balls/{{mvBallId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "balls",
+                "{{mvBallId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "MV-92 Limpieza: eliminar apuesta",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 204', () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/bets/{{mvBetId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "bets",
+                "{{mvBetId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "MV-93 Limpieza: eliminar boleto",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 204', () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/tickets/{{mvTicketId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tickets",
+                "{{mvTicketId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "MV-94 Limpieza: eliminar método de pago del aficionado",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 204', () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/fan-payment-methods/{{mvFanPaymentMethodId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "fan-payment-methods",
+                "{{mvFanPaymentMethodId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "MV-95 Limpieza: eliminar método de pago",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 204', () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/payment-methods/{{mvPaymentMethodId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "payment-methods",
+                "{{mvPaymentMethodId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "MV-96 Limpieza: eliminar relación aficionado-equipo",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 204', () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/fan-teams/{{mvFanTeamId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "fan-teams",
+                "{{mvFanTeamId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "MV-97 Limpieza: eliminar aficionado",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 204', () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/fans/{{mvFanId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "fans",
+                "{{mvFanId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "MV-98 Limpieza: eliminar asignación de escenario",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 204', () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/tournament-venues/{{mvTournamentVenueId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tournament-venues",
+                "{{mvTournamentVenueId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "MV-99 Limpieza: eliminar localidad",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 204', () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/seating-zones/{{mvZoneId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "seating-zones",
+                "{{mvZoneId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "MV-9a Limpieza: eliminar sub-escenario",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 204', () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/venues/{{mvSubVenueId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "venues",
+                "{{mvSubVenueId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "MV-9b Limpieza: eliminar escenario",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 204', () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/venues/{{mvVenueId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "venues",
+                "{{mvVenueId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "MV-9z El escenario eliminado ya no existe (404)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 404', () => pm.response.to.have.status(404));",
+                  "pm.test('errorCase NOT_FOUND', () => pm.expect(pm.response.json().errorCase).to.eql('NOT_FOUND'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/venues/{{mvVenueId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "venues",
+                "{{mvVenueId}}"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
       "name": "99 Cleanup",
       "item": [
         {

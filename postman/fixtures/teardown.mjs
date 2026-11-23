@@ -16,7 +16,28 @@ const tournamentIds = `(SELECT id FROM (SELECT id FROM tournaments WHERE ${TEST_
 const phaseIds = ids('phases', `tournament_id IN ${tournamentIds}`);
 const matchIds = `(SELECT id FROM (SELECT id FROM matches WHERE phase_id IN ${phaseIds} OR home_team_id IN ${teamIds} OR away_team_id IN ${teamIds}) x)`;
 
+const QA_FAN = "email COLLATE utf8mb4_bin REGEXP '^qa[0-9]'";
+const QA_BALL = "serial_number COLLATE utf8mb4_bin REGEXP '^QA[0-9]'";
+const venueIds = ids('venues', TEST_DATA);
+const fanIds = ids('fans', QA_FAN);
+const methodIds = ids('payment_methods', TEST_DATA);
+const ballIds = ids('balls', QA_BALL);
+const fanMethodIds = `(SELECT id FROM (SELECT id FROM fan_payment_methods WHERE fan_id IN ${fanIds} OR payment_method_id IN ${methodIds}) x)`;
+const zoneIds = `(SELECT id FROM (SELECT id FROM seating_zones WHERE venue_id IN ${venueIds}) x)`;
+
 const removed = {
+  spatial_positions: await count(`DELETE FROM spatial_positions WHERE ball_id IN ${ballIds} OR player_id IN ${playerIds}`),
+  balls: await count(`DELETE FROM balls WHERE id IN ${ballIds}`),
+  bets: await count(`DELETE FROM bets WHERE fan_id IN ${fanIds} OR fan_payment_method_id IN ${fanMethodIds}`),
+  tickets: await count(`DELETE FROM tickets WHERE fan_id IN ${fanIds} OR seating_zone_id IN ${zoneIds}`),
+  fan_payment_methods: await count(`DELETE FROM fan_payment_methods WHERE id IN ${fanMethodIds}`),
+  payment_methods: await count(`DELETE FROM payment_methods WHERE id IN ${methodIds}`),
+  fan_teams: await count(`DELETE FROM fan_teams WHERE fan_id IN ${fanIds}`),
+  fans: await count(`DELETE FROM fans WHERE id IN ${fanIds}`),
+  tournament_venues: await count(`DELETE FROM tournament_venues WHERE venue_id IN ${venueIds}`),
+  seating_zones: await count(`DELETE FROM seating_zones WHERE id IN ${zoneIds}`),
+  sub_venues: await count(`DELETE FROM venues WHERE parent_venue_id IS NOT NULL AND ${TEST_DATA}`),
+  venues: await count(`DELETE FROM venues WHERE ${TEST_DATA}`),
   scoring_events: await count(
     `DELETE FROM scoring_events WHERE match_id IN ${matchIds} OR team_id IN ${teamIds} OR player_id IN ${playerIds}`,
   ),

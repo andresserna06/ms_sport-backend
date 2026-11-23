@@ -2520,6 +2520,1470 @@
           }
         }
       ]
+    },
+    {
+      "name": "Modelo completo (estructura básica)",
+      "description": "Entidades del diagrama de clases con CRUD básico y sin reglas de negocio todavía: escenarios, localidades, aficionados, boletos, apuestas, pelotas y posiciones espaciales. Se recorre de arriba hacia abajo; las eliminaciones están al final de esta carpeta.",
+      "item": [
+        {
+          "name": "Escenarios",
+          "item": [
+            {
+              "name": "Crear escenarios",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "// Saves the id so the next requests use it.",
+                      "if (pm.response.code >= 200 && pm.response.code < 300) { pm.collectionVariables.set('venueId', pm.response.json().id); }"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\"name\":\"Estadio Metropolitano {{$timestamp}}\",\"city\":\"Barranquilla\",\"address\":\"Vía 40\",\"capacity\":46000,\"parentVenueId\":null}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/venues",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "venues"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Listar venues",
+              "event": [],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/venues",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "venues"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Detalle de escenarios",
+              "event": [],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/venues/{{venueId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "venues",
+                    "{{venueId}}"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Actualizar escenarios (reemplazo total)",
+              "event": [],
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\"name\":\"Estadio Metropolitano {{$timestamp}}\",\"city\":\"Barranquilla\",\"address\":\"Vía 40\",\"capacity\":46000,\"parentVenueId\":null}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/venues/{{venueId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "venues",
+                    "{{venueId}}"
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Localidades",
+          "item": [
+            {
+              "name": "Crear localidades",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "// Saves the id so the next requests use it.",
+                      "if (pm.response.code >= 200 && pm.response.code < 300) { pm.collectionVariables.set('seatingZoneId', pm.response.json().id); }"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\"venueId\":{{venueId}},\"name\":\"Oriental {{$timestamp}}\",\"capacity\":8000,\"price\":120000}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/seating-zones",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "seating-zones"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Listar seating-zones",
+              "event": [],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/seating-zones",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "seating-zones"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Detalle de localidades",
+              "event": [],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/seating-zones/{{seatingZoneId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "seating-zones",
+                    "{{seatingZoneId}}"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Actualizar localidades (reemplazo total)",
+              "event": [],
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\"venueId\":{{venueId}},\"name\":\"Oriental {{$timestamp}}\",\"capacity\":8000,\"price\":120000}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/seating-zones/{{seatingZoneId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "seating-zones",
+                    "{{seatingZoneId}}"
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Escenarios por torneo",
+          "item": [
+            {
+              "name": "Crear escenarios por torneo",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "// Saves the id so the next requests use it.",
+                      "if (pm.response.code >= 200 && pm.response.code < 300) { pm.collectionVariables.set('tournamentVenueId', pm.response.json().id); }"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\"tournamentId\":{{tournamentId}},\"venueId\":{{venueId}}}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/tournament-venues",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "tournament-venues"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Listar tournament-venues",
+              "event": [],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/tournament-venues",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "tournament-venues"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Detalle de escenarios por torneo",
+              "event": [],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/tournament-venues/{{tournamentVenueId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "tournament-venues",
+                    "{{tournamentVenueId}}"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Actualizar escenarios por torneo (reemplazo total)",
+              "event": [],
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\"tournamentId\":{{tournamentId}},\"venueId\":{{venueId}}}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/tournament-venues/{{tournamentVenueId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "tournament-venues",
+                    "{{tournamentVenueId}}"
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Aficionados",
+          "item": [
+            {
+              "name": "Crear aficionados",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "// Saves the id so the next requests use it.",
+                      "if (pm.response.code >= 200 && pm.response.code < 300) { pm.collectionVariables.set('fanId', pm.response.json().id); }"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\"name\":\"Carlos Pérez\",\"email\":\"carlos{{$timestamp}}@example.com\"}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/fans",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "fans"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Listar fans",
+              "event": [],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/fans",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "fans"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Detalle de aficionados",
+              "event": [],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/fans/{{fanId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "fans",
+                    "{{fanId}}"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Actualizar aficionados (reemplazo total)",
+              "event": [],
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\"name\":\"Carlos Pérez\",\"email\":\"carlos{{$timestamp}}@example.com\"}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/fans/{{fanId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "fans",
+                    "{{fanId}}"
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Equipos de un aficionado",
+          "item": [
+            {
+              "name": "Crear equipos de un aficionado",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "// Saves the id so the next requests use it.",
+                      "if (pm.response.code >= 200 && pm.response.code < 300) { pm.collectionVariables.set('fanTeamId', pm.response.json().id); }"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\"fanId\":{{fanId}},\"teamId\":{{teamId}}}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/fan-teams",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "fan-teams"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Listar fan-teams",
+              "event": [],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/fan-teams",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "fan-teams"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Detalle de equipos de un aficionado",
+              "event": [],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/fan-teams/{{fanTeamId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "fan-teams",
+                    "{{fanTeamId}}"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Actualizar equipos de un aficionado (reemplazo total)",
+              "event": [],
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\"fanId\":{{fanId}},\"teamId\":{{teamId}}}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/fan-teams/{{fanTeamId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "fan-teams",
+                    "{{fanTeamId}}"
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Métodos de pago",
+          "item": [
+            {
+              "name": "Crear métodos de pago",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "// Saves the id so the next requests use it.",
+                      "if (pm.response.code >= 200 && pm.response.code < 300) { pm.collectionVariables.set('paymentMethodId', pm.response.json().id); }"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\"name\":\"Transferencia {{$timestamp}}\"}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/payment-methods",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "payment-methods"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Listar payment-methods",
+              "event": [],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/payment-methods",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "payment-methods"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Detalle de métodos de pago",
+              "event": [],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/payment-methods/{{paymentMethodId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "payment-methods",
+                    "{{paymentMethodId}}"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Actualizar métodos de pago (reemplazo total)",
+              "event": [],
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\"name\":\"Transferencia {{$timestamp}}\"}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/payment-methods/{{paymentMethodId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "payment-methods",
+                    "{{paymentMethodId}}"
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Métodos de pago de un aficionado",
+          "item": [
+            {
+              "name": "Crear métodos de pago de un aficionado",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "// Saves the id so the next requests use it.",
+                      "if (pm.response.code >= 200 && pm.response.code < 300) { pm.collectionVariables.set('fanPaymentMethodId', pm.response.json().id); }"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\"fanId\":{{fanId}},\"paymentMethodId\":{{paymentMethodId}},\"alias\":\"Cuenta principal\"}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/fan-payment-methods",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "fan-payment-methods"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Listar fan-payment-methods",
+              "event": [],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/fan-payment-methods",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "fan-payment-methods"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Detalle de métodos de pago de un aficionado",
+              "event": [],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/fan-payment-methods/{{fanPaymentMethodId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "fan-payment-methods",
+                    "{{fanPaymentMethodId}}"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Actualizar métodos de pago de un aficionado (reemplazo total)",
+              "event": [],
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\"fanId\":{{fanId}},\"paymentMethodId\":{{paymentMethodId}},\"alias\":\"Cuenta principal\"}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/fan-payment-methods/{{fanPaymentMethodId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "fan-payment-methods",
+                    "{{fanPaymentMethodId}}"
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Boletos",
+          "item": [
+            {
+              "name": "Crear boletos",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "// Saves the id so the next requests use it.",
+                      "if (pm.response.code >= 200 && pm.response.code < 300) { pm.collectionVariables.set('ticketId', pm.response.json().id); }"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\"fanId\":{{fanId}},\"matchId\":{{matchId}},\"seatingZoneId\":{{seatingZoneId}},\"price\":120000}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/tickets",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "tickets"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Listar tickets",
+              "event": [],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/tickets",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "tickets"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Detalle de boletos",
+              "event": [],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/tickets/{{ticketId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "tickets",
+                    "{{ticketId}}"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Actualizar boletos (reemplazo total)",
+              "event": [],
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\"fanId\":{{fanId}},\"matchId\":{{matchId}},\"seatingZoneId\":{{seatingZoneId}},\"price\":120000}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/tickets/{{ticketId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "tickets",
+                    "{{ticketId}}"
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Apuestas",
+          "item": [
+            {
+              "name": "Crear apuestas",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "// Saves the id so the next requests use it.",
+                      "if (pm.response.code >= 200 && pm.response.code < 300) { pm.collectionVariables.set('betId', pm.response.json().id); }"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\"fanId\":{{fanId}},\"matchId\":{{matchId}},\"fanPaymentMethodId\":{{fanPaymentMethodId}},\"amount\":50000}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/bets",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "bets"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Listar bets",
+              "event": [],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/bets",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "bets"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Detalle de apuestas",
+              "event": [],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/bets/{{betId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "bets",
+                    "{{betId}}"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Actualizar apuestas (reemplazo total)",
+              "event": [],
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\"fanId\":{{fanId}},\"matchId\":{{matchId}},\"fanPaymentMethodId\":{{fanPaymentMethodId}},\"amount\":50000}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/bets/{{betId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "bets",
+                    "{{betId}}"
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Pelotas",
+          "item": [
+            {
+              "name": "Crear pelotas",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "// Saves the id so the next requests use it.",
+                      "if (pm.response.code >= 200 && pm.response.code < 300) { pm.collectionVariables.set('ballId', pm.response.json().id); }"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\"matchId\":{{finalMatchId}},\"serialNumber\":\"BALL-{{$timestamp}}\"}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/balls",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "balls"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Listar balls",
+              "event": [],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/balls",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "balls"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Detalle de pelotas",
+              "event": [],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/balls/{{ballId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "balls",
+                    "{{ballId}}"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Actualizar pelotas (reemplazo total)",
+              "event": [],
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\"matchId\":{{finalMatchId}},\"serialNumber\":\"BALL-{{$timestamp}}\"}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/balls/{{ballId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "balls",
+                    "{{ballId}}"
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Posiciones espaciales",
+          "item": [
+            {
+              "name": "Crear posiciones espaciales",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "// Saves the id so the next requests use it.",
+                      "if (pm.response.code >= 200 && pm.response.code < 300) { pm.collectionVariables.set('spatialPositionId', pm.response.json().id); }"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\"ballId\":{{ballId}},\"playerId\":{{playerId}},\"x\":10.5,\"y\":-4.25,\"recordedAt\":\"2027-07-10T16:05:00.000Z\"}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/spatial-positions",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "spatial-positions"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Listar spatial-positions",
+              "event": [],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/spatial-positions",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "spatial-positions"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Detalle de posiciones espaciales",
+              "event": [],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/spatial-positions/{{spatialPositionId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "spatial-positions",
+                    "{{spatialPositionId}}"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Actualizar posiciones espaciales (reemplazo total)",
+              "event": [],
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\"ballId\":{{ballId}},\"playerId\":{{playerId}},\"x\":10.5,\"y\":-4.25,\"recordedAt\":\"2027-07-10T16:05:00.000Z\"}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/spatial-positions/{{spatialPositionId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "spatial-positions",
+                    "{{spatialPositionId}}"
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Eliminar (hacerlo al final)",
+          "description": "En orden de dependencias.",
+          "item": [
+            {
+              "name": "Eliminar posición espacial",
+              "event": [],
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/spatial-positions/{{spatialPositionId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "spatial-positions",
+                    "{{spatialPositionId}}"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Eliminar pelota",
+              "event": [],
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/balls/{{ballId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "balls",
+                    "{{ballId}}"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Eliminar apuesta",
+              "event": [],
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/bets/{{betId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "bets",
+                    "{{betId}}"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Eliminar boleto",
+              "event": [],
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/tickets/{{ticketId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "tickets",
+                    "{{ticketId}}"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Eliminar método de pago del aficionado",
+              "event": [],
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/fan-payment-methods/{{fanPaymentMethodId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "fan-payment-methods",
+                    "{{fanPaymentMethodId}}"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Eliminar método de pago",
+              "event": [],
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/payment-methods/{{paymentMethodId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "payment-methods",
+                    "{{paymentMethodId}}"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Eliminar equipo de un aficionado",
+              "event": [],
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/fan-teams/{{fanTeamId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "fan-teams",
+                    "{{fanTeamId}}"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Eliminar aficionado",
+              "event": [],
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/fans/{{fanId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "fans",
+                    "{{fanId}}"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Eliminar escenario de un torneo",
+              "event": [],
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/tournament-venues/{{tournamentVenueId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "tournament-venues",
+                    "{{tournamentVenueId}}"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Eliminar localidad",
+              "event": [],
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/seating-zones/{{seatingZoneId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "seating-zones",
+                    "{{seatingZoneId}}"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Eliminar escenario",
+              "event": [],
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/venues/{{venueId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "venues",
+                    "{{venueId}}"
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      ]
     }
   ],
   "variable": [
