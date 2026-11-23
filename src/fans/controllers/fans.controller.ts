@@ -3,6 +3,7 @@ import {
   Controller,
   Delete,
   Get,
+  Headers,
   HttpCode,
   HttpStatus,
   Post,
@@ -19,8 +20,11 @@ export class FansController {
   constructor(private readonly service: FansService) {}
 
   @Post()
-  create(@Body() dto: CreateFanDto) {
-    return this.service.create(dto);
+  create(
+    @Body() dto: CreateFanDto,
+    @Headers('authorization') authorizationHeader?: string,
+  ) {
+    return this.service.create(dto, authorizationHeader);
   }
 
   @Get()

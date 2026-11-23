@@ -11,13 +11,17 @@ import { UpdateFanDto } from '../dtos/update-fan.dto';
 import { Fan } from '../entities/fan.entity';
 import { FanMapper } from '../mappers/fan.mapper';
 import {
+  FAN_ROLE_ASSIGNER,
+  type FanRoleAssigner,
+} from '../ports/fan-role-assigner.port';
+import {
   FANS_REPOSITORY,
   type FanRepository,
 } from '../repositories/fan.repository';
 
 const MESSAGES: PersistenceMessages = {
   singular: 'el aficionado',
-  duplicate: 'Ya existe un aficionado con ese correo',
+  duplicate: 'Ya existe un aficionado asociado a ese usuario',
   references: {},
 };
 
@@ -25,11 +29,17 @@ const MESSAGES: PersistenceMessages = {
 export class FansService {
   constructor(
     @Inject(FANS_REPOSITORY) private readonly repository: FanRepository,
+    @Inject(FAN_ROLE_ASSIGNER)
+    private readonly fanRoleAssigner: FanRoleAssigner,
     private readonly mapper: FanMapper,
   ) {}
 
-  async create(dto: CreateFanDto): Promise<FanResponseDto> {
+  async create(
+    dto: CreateFanDto,
+    authorizationHeader?: string,
+  ): Promise<FanResponseDto> {
     const saved = await this.save(this.mapper.toEntity(dto));
+    await this.fanRoleAssigner.assignFanRole(saved.userId, authorizationHeader);
     return this.mapper.toResponseDto(saved);
   }
 
