@@ -221,7 +221,7 @@ describe('TournamentsService', () => {
 
     it('reads phases, then matches of those phases, then their events', async () => {
       overviewReader.findPhases.mockResolvedValue([
-        { id: 10, name: 'Grupos', order: 1, phaseType: 'GROUP' },
+        { id: 10, name: 'Grupos', order: 1, phaseType: 'GROUP', finalRound: null },
       ]);
       overviewReader.findMatches.mockResolvedValue([
         {

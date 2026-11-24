@@ -85,6 +85,7 @@ export class TournamentOverviewMapper {
       dto.teams = teams;
       dto.standings = this.toStandings(teams, matches);
     } else {
+      dto.finalRound = phase.finalRound;
       dto.bracket = matches.map((match) => this.toBracketMatch(match));
     }
 

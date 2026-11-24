@@ -1,3 +1,4 @@
+import type { FinalRound } from '../../phases/base/entities/phase.entity';
 import { TournamentResponseDto } from './tournament-response.dto';
 
 export class OverviewTeamDto {
@@ -60,7 +61,9 @@ export class OverviewPhaseDto {
   // Only in GROUP_STAGE phases.
   teams?: OverviewTeamDto[];
   standings?: OverviewStandingDto[];
-  // Only in KNOCKOUT phases.
+  // Only in KNOCKOUT phases: the round of the bracket (null if it was not set)
+  // and its crossings.
+  finalRound?: FinalRound | null;
   bracket?: OverviewBracketMatchDto[];
   matches!: OverviewMatchDto[];
 }

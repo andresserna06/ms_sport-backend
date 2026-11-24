@@ -1,3 +1,5 @@
+import type { FinalRound } from '../../phases/base/entities/phase.entity';
+
 export const TOURNAMENT_OVERVIEW_READER = Symbol('TOURNAMENT_OVERVIEW_READER');
 
 export interface OverviewPhaseRow {
@@ -5,6 +7,8 @@ export interface OverviewPhaseRow {
   name: string;
   order: number;
   phaseType: 'GROUP' | 'FINAL';
+  // Round of a final phase (ROUND_OF_16, QUARTERFINAL...); null in group phases.
+  finalRound: FinalRound | null;
 }
 
 export interface OverviewMatchRow {

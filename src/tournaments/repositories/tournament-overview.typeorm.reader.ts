@@ -27,6 +27,7 @@ export class TournamentOverviewTypeOrmReader implements TournamentOverviewReader
       name: phase.name,
       order: phase.order,
       phaseType: phase.phaseType,
+      finalRound: phase.finalRound ?? null,
     }));
   }
 

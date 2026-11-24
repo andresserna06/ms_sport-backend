@@ -164,7 +164,7 @@ alcance). Están implementadas, pero el grupo debe confirmarlas.
   y los cruces de cada ronda son sus partidos (por fecha). Implementado en el overview de GC-08.
 - El ganador se muestra solo si el partido está `FINISHED` y no terminó empatado.
 - No hay `bracketPosition` ni relación entre cruces: la llave se muestra por rondas, sin conexiones.
-- Cuando se mergee `feature/phases-rules`, `finalRound` (octavos, cuartos, semifinal,
-  tercer puesto, final) se agrega como etiqueta de la ronda.
+- `finalRound` (octavos, cuartos, semifinal, tercer puesto, final) es la etiqueta de la
+  ronda; si una fase final no la tiene, se muestra su nombre.
 - [PENDIENTE] ¿Cómo se resuelve un empate en fase final (penales, partido extra)?
   Mientras no se decida, un empate queda sin ganador (`winner: null`).

@@ -1,3 +1,4 @@
+import { FinalRound } from '../../phases/base/entities/phase.entity';
 import { TournamentResponseDto } from '../dtos/tournament-response.dto';
 import {
   OverviewGroupTeamRow,
@@ -21,12 +22,14 @@ const groupPhase: OverviewPhaseRow = {
   name: 'Fase de grupos',
   order: 1,
   phaseType: 'GROUP',
+  finalRound: null,
 };
 const finalPhase: OverviewPhaseRow = {
   id: 11,
   name: 'Final',
   order: 2,
   phaseType: 'FINAL',
+  finalRound: FinalRound.FINAL,
 };
 
 const match = (
@@ -240,6 +243,13 @@ describe('TournamentOverviewMapper', () => {
 
   describe('bracket of a knockout phase', () => {
     const final = (overrides: Partial<OverviewMatchRow>) => match({ phaseId: 11, ...overrides });
+
+    it('exposes the round of the knockout phase', () => {
+      const [group, knockout] = mapper.toOverview(tournament, [groupPhase, finalPhase], [], []).phases;
+
+      expect(knockout.finalRound).toBe(FinalRound.FINAL);
+      expect(group.finalRound).toBeUndefined();
+    });
 
     it('shows the winner of a finished match', () => {
       const [phase] = mapper.toOverview(tournament, [finalPhase], [final({ id: 90 })], []).phases;
