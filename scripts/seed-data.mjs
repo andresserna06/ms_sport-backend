@@ -200,9 +200,9 @@ await match(groupPhase, '2027-03-06 17:30:00', 'FINISHED', america, deportivoCal
 await match(groupPhase, '2027-03-13 15:00:00', 'SCHEDULED', junior, santaFe, null, null);
 await match(finalPhase, '2027-04-03 16:00:00', 'SCHEDULED', null, null, null, null);
 
-const strikerNacional = await player(900001, 'SEED-1001', 'Delantero', 9);
-const midfielderNacional = await player(900002, 'SEED-1002', 'Mediocampista', 10);
-const strikerMillonarios = await player(900003, 'SEED-2001', 'Delantero', 11);
+const strikerNacional = await player(900001, '1036845210', 'Delantero', 9);
+const midfielderNacional = await player(900002, '1020734516', 'Mediocampista', 10);
+const strikerMillonarios = await player(900003, '1143856207', 'Delantero', 11);
 await goal(played1, strikerNacional, nacional, 12);
 await goal(played1, strikerMillonarios, millonarios, 40);
 await goal(played1, midfielderNacional, nacional, 78);

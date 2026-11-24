@@ -46900,7 +46900,7 @@
                 "type": "text/javascript",
                 "exec": [
                   "pm.test('Status 200', () => pm.response.to.have.status(200));",
-                  "const p = pm.response.json().find((x) => x.document === 'SEED-1001'); pm.test('seed player exists', () => pm.expect(p).to.exist); pm.collectionVariables.set('mvPlayerId', p ? p.id : 'setup-failed');"
+                  "const p = pm.response.json().find((x) => x.document === '1036845210'); pm.test('seed player exists', () => pm.expect(p).to.exist); pm.collectionVariables.set('mvPlayerId', p ? p.id : 'setup-failed');"
                 ]
               }
             }

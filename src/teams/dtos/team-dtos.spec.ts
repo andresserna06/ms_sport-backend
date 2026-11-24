@@ -63,6 +63,30 @@ describe('CreateTeamDto / UpdateTeamDto', () => {
     });
   });
 
+  it('accepts an image data URL as logo', async () => {
+    const logo = 'data:image/webp;base64,UklGRhoAAABXRUJQ';
+    const dto = (await body({ ...validTeam, logo })) as CreateTeamDto;
+
+    expect(dto.logo).toBe(logo);
+  });
+
+  it.each([
+    ['a plain URL', 'https://example.com/logo.png'],
+    ['a non image data URL', 'data:text/html;base64,PGgxPg=='],
+  ])('rejects %s as logo', async (_case, logo) => {
+    await expectFields(body({ ...validTeam, logo }), {
+      logo: 'El logo debe ser una imagen PNG, JPG, WEBP o GIF',
+    });
+  });
+
+  it('rejects a logo over 500 KB', async () => {
+    const logo = `data:image/png;base64,${'A'.repeat(700_000)}`;
+
+    await expectFields(body({ ...validTeam, logo }), {
+      logo: 'El logo no puede superar los 500 KB',
+    });
+  });
+
   it('rejects a founded year before 1800', async () => {
     await expectFields(body({ ...validTeam, foundedYear: 1700 }), {
       foundedYear: 'El año de fundación no puede ser anterior a 1800',

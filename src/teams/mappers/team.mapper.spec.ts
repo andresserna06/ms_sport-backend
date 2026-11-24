@@ -74,9 +74,28 @@ describe('TeamMapper', () => {
       city: 'B',
       contactEmail: 'c@d.co',
       foundedYear: null,
+      logo: null,
       active: true,
     };
     expect(mapper.toResponseDto(entity)).toEqual(expected);
     expect(mapper.toResponseDtoList([entity])).toEqual([expected]);
+  });
+
+  it('keeps the logo and clears it when a PUT omits it', () => {
+    const logo = 'data:image/png;base64,iVBORw0KGgo=';
+    const created = mapper.toEntity({
+      name: 'A',
+      city: 'B',
+      contactEmail: 'c@d.co',
+      logo,
+    });
+    expect(created.logo).toBe(logo);
+
+    const replaced = mapper.replaceEntity(created, {
+      name: 'A',
+      city: 'B',
+      contactEmail: 'c@d.co',
+    });
+    expect(replaced.logo).toBeNull();
   });
 });

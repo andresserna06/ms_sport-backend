@@ -13,16 +13,18 @@ export class TeamMapper {
     entity.city = dto.city;
     entity.contactEmail = dto.contactEmail.toLowerCase();
     entity.foundedYear = dto.foundedYear ?? null;
+    entity.logo = dto.logo ?? null;
     entity.active = true;
     return entity;
   }
 
-  // PUT replaces every field; an omitted foundedYear clears it.
+  // PUT replaces every field; an omitted foundedYear or logo clears it.
   replaceEntity(entity: Team, dto: UpdateTeamDto): Team {
     entity.name = dto.name;
     entity.city = dto.city;
     entity.contactEmail = dto.contactEmail.toLowerCase();
     entity.foundedYear = dto.foundedYear ?? null;
+    entity.logo = dto.logo ?? null;
     return entity;
   }
 
@@ -33,6 +35,7 @@ export class TeamMapper {
       city: entity.city,
       contactEmail: entity.contactEmail,
       foundedYear: entity.foundedYear,
+      logo: entity.logo ?? null,
       active: entity.active,
     };
   }

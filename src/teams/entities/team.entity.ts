@@ -34,6 +34,10 @@ export class Team {
   @Column({ name: 'founded_year', type: 'int', nullable: true })
   foundedYear!: number | null;
 
+  // Team crest as an image data URL (base64), like the profile photo of ms_security.
+  @Column({ type: 'longtext', nullable: true })
+  logo!: string | null;
+
   @Column({ default: true })
   active!: boolean;
 
