@@ -36,16 +36,26 @@ export class MatchNotificationsService implements MatchNotifier {
 
   async notifyMatchCreated(payload: MatchCreatedNotificationPayload): Promise<void> {
     const enabled =
-      String(process.env.NOTIFICATIONS_MATCH_CREATED_ENABLED ?? 'false').toLowerCase() ===
+      String(process.env.NOTIFICATIONS_MATCH_CREATED_ENABLED ?? 'true').toLowerCase() ===
       'true';
     if (!enabled) {
-      this.logger.log(
-        `Notificación de creación de partido #${payload.matchId} omitida: NOTIFICATIONS_MATCH_CREATED_ENABLED=false`,
-      );
       return;
     }
     const { subject, htmlContent } = buildMatchCreatedEmail(payload);
-    await this.dispatchToMatchRecipients(payload.matchId, subject, htmlContent);
+    const teamIds = [payload.homeTeamId, payload.awayTeamId].filter(
+      (teamId): teamId is number => typeof teamId === 'number',
+    );
+    await this.dispatchToRecipients(
+      payload.matchId,
+      () =>
+        this.recipientsProvider.getPreviousMatchAttendeeEmails(
+          payload.matchId,
+          teamIds,
+          payload.authorizationHeader,
+        ),
+      subject,
+      htmlContent,
+    );
   }
 
   async notifyScoringEventCreated(
@@ -144,12 +154,27 @@ export class MatchNotificationsService implements MatchNotifier {
     htmlContent: string,
     authorizationHeader?: string,
   ): Promise<void> {
+    await this.dispatchToRecipients(
+      matchId,
+      () =>
+        this.recipientsProvider.getMatchRecipientEmails(
+          matchId,
+          authorizationHeader,
+        ),
+      subject,
+      htmlContent,
+    );
+  }
+
+  private async dispatchToRecipients(
+    matchId: number,
+    resolveRecipients: () => Promise<(string | null)[]>,
+    subject: string,
+    htmlContent: string,
+  ): Promise<void> {
     let rawEmails: (string | null)[];
     try {
-      rawEmails = await this.recipientsProvider.getMatchRecipientEmails(
-        matchId,
-        authorizationHeader,
-      );
+      rawEmails = await resolveRecipients();
     } catch (error) {
       this.logger.warn(
         `No se pudieron resolver destinatarios para partido #${matchId}: ${String(error)}`,

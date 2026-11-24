@@ -6,9 +6,11 @@ import { HttpNotificationClient } from './clients/http-notification.client';
 import { HttpSecurityUserClient } from './clients/http-security-user.client';
 import { MATCH_NOTIFICATION_RECIPIENTS_PROVIDER } from './ports/match-notification-recipients.port';
 import { MATCH_NOTIFIER } from './ports/match-notifier.port';
+import { MATCH_PREVIOUS_ATTENDEES_REPOSITORY } from './ports/match-previous-attendees.repository';
 import { NOTIFICATION_CLIENT } from './ports/notification-client.port';
 import { SECURITY_USER_CLIENT } from './ports/security-user-client.port';
 import { TypeOrmMatchNotificationRecipientsProvider } from './repositories/match-notification-recipients.typeorm.provider';
+import { MatchPreviousAttendeesTypeOrmRepository } from './repositories/match-previous-attendees.typeorm.repository';
 import { MatchNotificationsService } from './services/match-notifications.service';
 
 @Module({
@@ -26,6 +28,10 @@ import { MatchNotificationsService } from './services/match-notifications.servic
     {
       provide: MATCH_NOTIFICATION_RECIPIENTS_PROVIDER,
       useClass: TypeOrmMatchNotificationRecipientsProvider,
+    },
+    {
+      provide: MATCH_PREVIOUS_ATTENDEES_REPOSITORY,
+      useClass: MatchPreviousAttendeesTypeOrmRepository,
     },
     {
       provide: SECURITY_USER_CLIENT,

@@ -36,7 +36,9 @@ describe('MatchesService', () => {
     phasesService = { findOneEntity: jest.fn() };
     groupService = { assertTeamBelongsToGroup: jest.fn() };
     registrationsService = { assertTeamRegisteredInTournament: jest.fn() };
-    teamsService = { findOneEntity: jest.fn() };
+    teamsService = {
+      findOneEntity: jest.fn().mockImplementation(async (id: number) => ({ id, name: `Team ${id}`, active: true })),
+    };
     matchMapper = {
       toEntity: jest.fn().mockReturnValue({}),
       mergeEntity: jest.fn().mockImplementation((m) => m),
@@ -100,7 +102,7 @@ describe('MatchesService', () => {
 
   it('does not fail create when match created notification fails', async () => {
     phasesService.findOneEntity.mockResolvedValue(phase);
-    teamsService.findOneEntity.mockImplementation(async (id: number) => ({ id, active: true }));
+    teamsService.findOneEntity.mockImplementation(async (id: number) => ({ id, name: `Team ${id}`, active: true }));
     registrationsService.assertTeamRegisteredInTournament.mockResolvedValue(undefined);
     groupService.assertTeamBelongsToGroup.mockResolvedValue(undefined);
     matchesRepository.save.mockResolvedValue({ id: 5 });
@@ -108,6 +110,16 @@ describe('MatchesService', () => {
     matchNotifier.notifyMatchCreated.mockRejectedValue(new Error('smtp down'));
 
     await expect(service.create(10, { scheduledAt: '2030-01-01T10:00:00Z', homeTeamId: 100, awayTeamId: 200 } as any)).resolves.toMatchObject({ id: 5 });
+    expect(matchNotifier.notifyMatchCreated).toHaveBeenCalledWith(
+      expect.objectContaining({
+        matchId: 5,
+        phaseId: 10,
+        homeTeamId: 100,
+        awayTeamId: 200,
+        homeTeamName: 'Team 100',
+        awayTeamName: 'Team 200',
+      }),
+    );
   });
 
   describe('venue (proposal)', () => {

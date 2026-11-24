@@ -11,7 +11,10 @@ describe('MatchNotificationsService', () => {
 
   beforeEach(() => {
     client = { sendEmail: jest.fn() };
-    recipientsProvider = { getMatchRecipientEmails: jest.fn() };
+    recipientsProvider = {
+      getMatchRecipientEmails: jest.fn(),
+      getPreviousMatchAttendeeEmails: jest.fn(),
+    };
     securityUserClient = {
       findUserNameById: jest.fn(),
       findUserEmailById: jest.fn(),
@@ -21,6 +24,10 @@ describe('MatchNotificationsService', () => {
       recipientsProvider,
       securityUserClient,
     );
+  });
+
+  afterEach(() => {
+    delete process.env.NOTIFICATIONS_MATCH_CREATED_ENABLED;
   });
 
   it('should resolve player name from ms_seguridad and deduplicate recipient emails', async () => {
@@ -55,6 +62,50 @@ describe('MatchNotificationsService', () => {
     expect(html).toContain("42'");
     expect(html).toContain('Leones FC');
     expect(html).toContain('Carlos Bacca');
+  });
+
+  it('should notify previous match attendees when match creation notifications are enabled by default', async () => {
+    delete process.env.NOTIFICATIONS_MATCH_CREATED_ENABLED;
+    recipientsProvider.getPreviousMatchAttendeeEmails.mockResolvedValue([
+      'fan1@correo.com',
+      'FAN1@correo.com',
+      null,
+    ]);
+    client.sendEmail.mockResolvedValue();
+
+    await service.notifyMatchCreated({
+      matchId: 7,
+      phaseId: 3,
+      homeTeamId: 10,
+      awayTeamId: 20,
+      homeTeamName: 'Leones FC',
+      awayTeamName: 'Tigres FC',
+      scheduledAt: '2030-01-01T10:00:00.000Z',
+    });
+
+    expect(recipientsProvider.getPreviousMatchAttendeeEmails).toHaveBeenCalledWith(7, [10, 20], undefined);
+    expect(recipientsProvider.getMatchRecipientEmails).not.toHaveBeenCalled();
+    expect(client.sendEmail).toHaveBeenCalledTimes(1);
+    expect(client.sendEmail).toHaveBeenCalledWith(
+      'fan1@correo.com',
+      'Nuevo partido para tu equipo favorito',
+      expect.stringContaining('Leones FC'),
+    );
+  });
+
+  it('should skip match creation notification when feature flag is disabled', async () => {
+    process.env.NOTIFICATIONS_MATCH_CREATED_ENABLED = 'false';
+
+    await service.notifyMatchCreated({
+      matchId: 7,
+      phaseId: 3,
+      homeTeamId: 10,
+      awayTeamId: 20,
+      scheduledAt: '2030-01-01T10:00:00.000Z',
+    });
+
+    expect(recipientsProvider.getPreviousMatchAttendeeEmails).not.toHaveBeenCalled();
+    expect(client.sendEmail).not.toHaveBeenCalled();
   });
 
   it('should fall back to player document when ms_seguridad does not return a name and not throw on email failure', async () => {
