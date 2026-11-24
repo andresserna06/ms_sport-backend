@@ -10,6 +10,11 @@ export interface MatchNotificationRecipientsProvider {
     matchId: number,
     authorizationHeader?: string,
   ): Promise<(string | null)[]>;
+  getPreviousMatchAttendeeEmails(
+    matchId: number,
+    teamIds: number[],
+    authorizationHeader?: string,
+  ): Promise<(string | null)[]>;
 }
 
 @Injectable()
@@ -20,6 +25,17 @@ export class EnvMatchNotificationRecipientsProvider
 
   async getMatchRecipientEmails(
     _matchId: number,
+    _authorizationHeader?: string,
+  ): Promise<(string | null)[]> {
+    const testEmail = this.configService
+      .get<string>('NOTIFICATIONS_TEST_EMAIL')
+      ?.trim();
+    return testEmail ? [testEmail] : [];
+  }
+
+  async getPreviousMatchAttendeeEmails(
+    _matchId: number,
+    _teamIds: number[],
     _authorizationHeader?: string,
   ): Promise<(string | null)[]> {
     const testEmail = this.configService

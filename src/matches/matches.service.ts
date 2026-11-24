@@ -40,14 +40,18 @@ export class MatchesService {
     private readonly tournamentVenuesService: TournamentVenuesService,
   ) {}
 
-  async create(phaseId: number, dto: CreateMatchDto): Promise<MatchResponseDto> {
+  async create(
+    phaseId: number,
+    dto: CreateMatchDto,
+    authorizationHeader?: string,
+  ): Promise<MatchResponseDto> {
     const phase = await this.getPhaseOrFail(phaseId);
     this.assertScheduledAtAfterTournamentStart(phase, dto.scheduledAt);
     await this.validateTeamsForPhase(phase, dto.homeTeamId, dto.awayTeamId);
     await this.assertVenueUsable(dto.venueId, phase.tournament!.id);
     const saved = await this.matchesRepository.save(this.matchMapper.toEntity(dto, phase));
     const created = await this.findOne(saved.id);
-    await this.notifyMatchCreated(created, phase.id);
+    await this.notifyMatchCreated(created, phase.id, authorizationHeader);
     return created;
   }
 
@@ -259,19 +263,40 @@ export class MatchesService {
     }
   }
 
-  private async notifyMatchCreated(match: MatchResponseDto, phaseId: number): Promise<void> {
+  private async notifyMatchCreated(
+    match: MatchResponseDto,
+    phaseId: number,
+    authorizationHeader?: string,
+  ): Promise<void> {
     try {
+      const [homeTeamName, awayTeamName] = await Promise.all([
+        this.resolveTeamName(match.homeTeamId),
+        this.resolveTeamName(match.awayTeamId),
+      ]);
       await this.matchNotifier.notifyMatchCreated({
         matchId: match.id,
         phaseId,
-        homeTeamName: match.homeTeamId ? `Equipo ${match.homeTeamId}` : undefined,
-        awayTeamName: match.awayTeamId ? `Equipo ${match.awayTeamId}` : undefined,
+        homeTeamId: match.homeTeamId,
+        awayTeamId: match.awayTeamId,
+        homeTeamName,
+        awayTeamName,
         scheduledAt: new Date(match.scheduledAt).toISOString(),
+        authorizationHeader,
       });
     } catch (error) {
       this.logger.warn(
         `No se pudo enviar la notificación de creación del partido #${match.id}: ${String(error)}`,
       );
+    }
+  }
+
+  private async resolveTeamName(teamId: number | null): Promise<string | undefined> {
+    if (teamId === null) return undefined;
+    try {
+      const team = await this.teamsService.findOneEntity(teamId);
+      return team?.name ?? `Equipo ${teamId}`;
+    } catch {
+      return `Equipo ${teamId}`;
     }
   }
 }

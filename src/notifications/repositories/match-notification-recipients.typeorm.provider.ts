@@ -6,6 +6,10 @@ import { Bet } from '../../bets/entities/bet.entity';
 import { Ticket } from '../../tickets/entities/ticket.entity';
 import { type MatchNotificationRecipientsProvider } from '../ports/match-notification-recipients.port';
 import {
+  MATCH_PREVIOUS_ATTENDEES_REPOSITORY,
+  type MatchPreviousAttendeesRepository,
+} from '../ports/match-previous-attendees.repository';
+import {
   SECURITY_USER_CLIENT,
   type SecurityUserClient,
 } from '../ports/security-user-client.port';
@@ -19,6 +23,8 @@ export class TypeOrmMatchNotificationRecipientsProvider
     private readonly ticketRepository: Repository<Ticket>,
     @InjectRepository(Bet)
     private readonly betRepository: Repository<Bet>,
+    @Inject(MATCH_PREVIOUS_ATTENDEES_REPOSITORY)
+    private readonly previousAttendeesRepository: MatchPreviousAttendeesRepository,
     @Inject(SECURITY_USER_CLIENT)
     private readonly securityUserClient: SecurityUserClient,
     private readonly configService: ConfigService,
@@ -60,6 +66,31 @@ export class TypeOrmMatchNotificationRecipientsProvider
 
     return Promise.all(
       Array.from(uniqueUserIds).map((userId) =>
+        this.securityUserClient.findUserEmailById(userId, authorizationHeader),
+      ),
+    );
+  }
+
+  async getPreviousMatchAttendeeEmails(
+    matchId: number,
+    teamIds: number[],
+    authorizationHeader?: string,
+  ): Promise<(string | null)[]> {
+    const userIds =
+      await this.previousAttendeesRepository.findActiveFanUserIdsByPreviousTeamMatches(
+        matchId,
+        teamIds,
+      );
+
+    if (userIds.length === 0) {
+      const testEmail = this.configService
+        .get<string>('NOTIFICATIONS_TEST_EMAIL')
+        ?.trim();
+      return testEmail ? [testEmail] : [];
+    }
+
+    return Promise.all(
+      Array.from(new Set(userIds)).map((userId) =>
         this.securityUserClient.findUserEmailById(userId, authorizationHeader),
       ),
     );

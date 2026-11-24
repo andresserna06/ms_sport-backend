@@ -1,0 +1,813 @@
+{
+  "info": {
+    "name": "GC-06 Notificaci?n al crear partido (paso a paso)",
+    "description": "Colecci?n dedicada para probar el correo de GC-06: se notifica a aficionados con boleto en partidos anteriores de los equipos enfrentados. Requisitos: ms_sport-backend activo, ms_security activo (para userId/email del fan), ms_notificaciones activo en :8000 y .env con NOTIFICATIONS_SERVICE_URL=http://localhost:8000 y NOTIFICATIONS_MATCH_CREATED_ENABLED=true. La operaci?n de crear partido no falla si ms_notificaciones est? ca?do; el correo se valida en log/buz?n de ms_notificaciones.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3001",
+      "type": "string"
+    },
+    {
+      "key": "securityBaseUrl",
+      "value": "http://localhost:8181",
+      "type": "string"
+    },
+    {
+      "key": "fanUserId",
+      "value": "1",
+      "type": "string",
+      "description": "ID de usuario existente en ms_security. Debe tener email para recibir notificaci?n."
+    },
+    {
+      "key": "sportId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "teamAId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "teamBId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "tournamentId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "venueId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "tournamentVenueId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "seatingZoneId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "groupId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "fanId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "previousMatchId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "ticketId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "newMatchId",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "0. Prerrequisitos (leer)",
+      "item": [
+        {
+          "name": "Verificar servicios",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                ""
+              ]
+            },
+            "description": "Antes de ejecutar: 1) ms_security corriendo ({{securityBaseUrl}}). 2) ms_sport-backend corriendo ({{baseUrl}}). 3) ms_notificaciones corriendo en http://localhost:8000. 4) En .env de ms_sport-backend: NOTIFICATIONS_SERVICE_URL=http://localhost:8000 y NOTIFICATIONS_MATCH_CREATED_ENABLED=true. 5) Definir fanUserId con un usuario real de ms_security que tenga email."
+          }
+        }
+      ]
+    },
+    {
+      "name": "1. Deporte",
+      "item": [
+        {
+          "name": "Crear deporte",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('201/200',()=>pm.expect(pm.response.code).to.be.oneOf([200,201]));",
+                  "const b=pm.response.json(); if(b.id) pm.collectionVariables.set('sportId', b.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Futbol GC06 {{$timestamp}}\",\n  \"description\": \"Deporte para prueba de notificaci?n\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/sports",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "sports"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Equipos",
+      "item": [
+        {
+          "name": "Crear equipo A",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('201/200',()=>pm.expect(pm.response.code).to.be.oneOf([200,201]));",
+                  "const b=pm.response.json(); if(b.id) pm.collectionVariables.set('teamAId', b.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Leones GC06 {{$timestamp}}\",\n  \"city\": \"Manizales\",\n  \"contactEmail\": \"leones{{$timestamp}}@test.com\",\n  \"foundedYear\": 2000\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/teams",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "teams"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Crear equipo B",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('201/200',()=>pm.expect(pm.response.code).to.be.oneOf([200,201]));",
+                  "const b=pm.response.json(); if(b.id) pm.collectionVariables.set('teamBId', b.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Tigres GC06 {{$timestamp}}\",\n  \"city\": \"Manizales\",\n  \"contactEmail\": \"tigres{{$timestamp}}@test.com\",\n  \"foundedYear\": 2001\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/teams",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "teams"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Asociar equipos al deporte",
+      "item": [
+        {
+          "name": "Asociar equipo A al deporte",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/teams/{{teamAId}}/sports/{{sportId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "teams",
+                "{{teamAId}}",
+                "sports",
+                "{{sportId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Asociar equipo B al deporte",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/teams/{{teamBId}}/sports/{{sportId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "teams",
+                "{{teamBId}}",
+                "sports",
+                "{{sportId}}"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. Torneo",
+      "item": [
+        {
+          "name": "Crear torneo",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('201/200',()=>pm.expect(pm.response.code).to.be.oneOf([200,201]));",
+                  "const b=pm.response.json(); if(b.id) pm.collectionVariables.set('tournamentId', b.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Torneo GC06 {{$timestamp}}\",\n  \"sportId\": {{sportId}},\n  \"startDate\": \"2027-01-01\",\n  \"enrollmentDeadline\": \"2026-12-01\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/tournaments",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tournaments"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "5. Inscripciones",
+      "item": [
+        {
+          "name": "Inscribir equipo A en torneo",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"teamId\": {{teamAId}}\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/tournaments/{{tournamentId}}/registrations",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tournaments",
+                "{{tournamentId}}",
+                "registrations"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Inscribir equipo B en torneo",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"teamId\": {{teamBId}}\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/tournaments/{{tournamentId}}/registrations",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tournaments",
+                "{{tournamentId}}",
+                "registrations"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "6. Fase de grupos",
+      "item": [
+        {
+          "name": "Crear grupo/fase",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('201/200',()=>pm.expect(pm.response.code).to.be.oneOf([200,201]));",
+                  "const b=pm.response.json(); if(b.id) pm.collectionVariables.set('groupId', b.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Grupo Notificaci?n {{$timestamp}}\",\n  \"order\": 1,\n  \"tournamentId\": {{tournamentId}}\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/groups",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "groups"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Asignar equipo A al grupo",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/groups/{{groupId}}/teams/{{teamAId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "groups",
+                "{{groupId}}",
+                "teams",
+                "{{teamAId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Asignar equipo B al grupo",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/groups/{{groupId}}/teams/{{teamBId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "groups",
+                "{{groupId}}",
+                "teams",
+                "{{teamBId}}"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "7. Escenario y localidad (para boleto)",
+      "item": [
+        {
+          "name": "Crear escenario (venue)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('201/200',()=>pm.expect(pm.response.code).to.be.oneOf([200,201]));",
+                  "const b=pm.response.json(); if(b.id) pm.collectionVariables.set('venueId', b.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Estadio GC06 {{$timestamp}}\",\n  \"city\": \"Manizales\",\n  \"address\": \"Calle 1\",\n  \"capacity\": 1000,\n  \"active\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/venues",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "venues"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Asociar escenario al torneo",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const b=pm.response.json(); if(b && b.id) pm.collectionVariables.set('tournamentVenueId', b.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tournamentId\": {{tournamentId}},\n  \"venueId\": {{venueId}}\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/tournament-venues",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tournament-venues"
+              ]
+            },
+            "description": "Necesario para que el partido pueda usar venueId."
+          }
+        },
+        {
+          "name": "Crear localidad asociada al escenario",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('201/200',()=>pm.expect(pm.response.code).to.be.oneOf([200,201]));",
+                  "const b=pm.response.json(); if(b.id) pm.collectionVariables.set('seatingZoneId', b.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"venueId\": {{venueId}},\n  \"name\": \"Norte {{$timestamp}}\",\n  \"capacity\": 100,\n  \"price\": 50000\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/seating-zones",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "seating-zones"
+              ]
+            },
+            "description": "Aqu? se asocia la localidad al escenario mediante venueId."
+          }
+        }
+      ]
+    },
+    {
+      "name": "8. Aficionado (ms_security userId)",
+      "item": [
+        {
+          "name": "Crear aficionado",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('201/200',()=>pm.expect(pm.response.code).to.be.oneOf([200,201]));",
+                  "const b=pm.response.json(); if(b.id) pm.collectionVariables.set('fanId', b.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": {{fanUserId}},\n  \"active\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/fans",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "fans"
+              ]
+            },
+            "description": "fanUserId debe existir en ms_security. Ese usuario debe tener email; ms_sports consulta el email en ms_security para enviar la notificaci?n."
+          }
+        }
+      ]
+    },
+    {
+      "name": "9. Partido anterior + boleto (historial)",
+      "item": [
+        {
+          "name": "Crear partido anterior (mismos equipos)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('201/200',()=>pm.expect(pm.response.code).to.be.oneOf([200,201]));",
+                  "const b=pm.response.json(); if(b.id) pm.collectionVariables.set('previousMatchId', b.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"scheduledAt\": \"2027-06-01T16:00:00.000Z\",\n  \"homeTeamId\": {{teamAId}},\n  \"awayTeamId\": {{teamBId}},\n  \"venueId\": {{venueId}}\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/phases/{{groupId}}/matches",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "phases",
+                "{{groupId}}",
+                "matches"
+              ]
+            },
+            "description": "Partido previo existente. El aficionado debe haber comprado boleto en este partido para recibir notificaci?n cuando se cree un partido nuevo con esos equipos."
+          }
+        },
+        {
+          "name": "Comprar boleto del partido anterior",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('201/200',()=>pm.expect(pm.response.code).to.be.oneOf([200,201]));",
+                  "const b=pm.response.json(); if(b.id) pm.collectionVariables.set('ticketId', b.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fanId\": {{fanId}},\n  \"matchId\": {{previousMatchId}},\n  \"seatingZoneId\": {{seatingZoneId}},\n  \"price\": 50000\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/tickets",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tickets"
+              ]
+            },
+            "description": "Crea el historial: aficionado con boleto en partido anterior de los equipos enfrentados."
+          }
+        }
+      ]
+    },
+    {
+      "name": "10. Crear NUEVO partido (dispara notificaci?n GC-06)",
+      "item": [
+        {
+          "name": "Crear partido nuevo - debe notificar",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Partido creado 201/200',()=>pm.expect(pm.response.code).to.be.oneOf([200,201]));",
+                  "const b=pm.response.json(); if(b.id) pm.collectionVariables.set('newMatchId', b.id);",
+                  "pm.test('Tiene id',()=>pm.expect(b.id).to.be.ok);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"scheduledAt\": \"2027-07-10T16:00:00.000Z\",\n  \"homeTeamId\": {{teamAId}},\n  \"awayTeamId\": {{teamBId}},\n  \"venueId\": {{venueId}}\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/phases/{{groupId}}/matches",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "phases",
+                "{{groupId}}",
+                "matches"
+              ]
+            },
+            "description": "DISPARADOR GC-06. Si NOTIFICATIONS_MATCH_CREATED_ENABLED=true, ms_sports buscar? fans con ticket en partidos previos de teamA/teamB, resolver? email en ms_security y enviar? POST /send-email a ms_notificaciones. Si ms_notificaciones est? ca?do, la creaci?n igual responde 201 y queda warning en log."
+          }
+        }
+      ]
+    }
+  ]
+}

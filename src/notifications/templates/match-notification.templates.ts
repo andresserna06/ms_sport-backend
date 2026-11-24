@@ -1,9 +1,12 @@
 export interface MatchCreatedNotificationPayload {
   matchId: number;
   phaseId: number;
+  homeTeamId?: number | null;
+  awayTeamId?: number | null;
   homeTeamName?: string;
   awayTeamName?: string;
   scheduledAt: string;
+  authorizationHeader?: string;
 }
 
 export interface ScoringEventNotificationPayload {
@@ -88,17 +91,28 @@ export function buildMatchCreatedEmail(data: MatchCreatedNotificationPayload): {
 } {
   const home = data.homeTeamName ? escapeHtml(data.homeTeamName) : 'Por definir';
   const away = data.awayTeamName ? escapeHtml(data.awayTeamName) : 'Por definir';
-  const subject = `Nuevo partido programado #${data.matchId}`;
+  const scheduledAt = formatMatchDate(data.scheduledAt);
+  const subject = 'Nuevo partido para tu equipo favorito';
   const htmlContent = [
     `<h2>Nuevo partido programado</h2>`,
-    `<p>Se ha creado el <strong>partido #${data.matchId}</strong> en la fase #${data.phaseId}.</p>`,
+    `<p>Se ha programado un nuevo partido en el que participa uno de tus equipos favoritos.</p>`,
     `<ul>`,
     `<li><strong>Local:</strong> ${home}</li>`,
     `<li><strong>Visitante:</strong> ${away}</li>`,
-    `<li><strong>Fecha programada:</strong> ${escapeHtml(data.scheduledAt)}</li>`,
+    `<li><strong>Fecha programada:</strong> ${escapeHtml(scheduledAt)}</li>`,
     `</ul>`,
   ].join('');
   return { subject, htmlContent };
+}
+
+function formatMatchDate(value: string): string {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+  return new Intl.DateTimeFormat('es-CO', {
+    dateStyle: 'full',
+    timeStyle: 'short',
+    timeZone: 'America/Bogota',
+  }).format(date);
 }
 
 export function buildMatchFinishedEmail(data: MatchFinishedEmailData): {
