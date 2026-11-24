@@ -133,6 +133,7 @@ describe('MatchResultsService', () => {
       minute: 30,
       type: 'GOL',
     });
+    expect(matchesService.updateResult).toHaveBeenCalledWith(7, 2, 0);
     expect(matchNotifier.notifyScoringEventCreated).toHaveBeenCalledWith({
       matchId: 7,
       playerUserId: 50,
@@ -210,13 +211,20 @@ describe('MatchResultsService', () => {
     });
   });
 
-  it('should remove a scoring event without deleting player or match', async () => {
-    const existing = Object.assign(new ScoringEvent(), { id: 10, matchId: 7 });
+  it('should remove a scoring event without deleting player or match and decrement score', async () => {
+    const existing = Object.assign(new ScoringEvent(), {
+      id: 10,
+      matchId: 7,
+      teamId: 1,
+      type: 'GOL',
+    });
     repository.findById.mockResolvedValue(existing);
+    matchesService.findOne.mockResolvedValue(sampleMatch);
 
     await service.removeScoringEvent(10);
 
     expect(repository.remove).toHaveBeenCalledWith(existing);
+    expect(matchesService.updateResult).toHaveBeenCalledWith(7, 0, 0);
   });
 
   it('should throw NOT_FOUND when removing a non-existent scoring event', async () => {

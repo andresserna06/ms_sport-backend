@@ -93,11 +93,18 @@ export class MatchResultsService {
     dto: CreateScoringEventDto,
     authorizationHeader?: string,
   ): Promise<ScoringEventResponseDto> {
-    const { playerUserId, playerDocument, teamName } =
+    const { match, playerUserId, playerDocument, teamName } =
       await this.validateScoringEventReferencesAndRules(matchId, dto);
 
     const entity = this.scoringEventMapper.toEntity(matchId, dto);
     const saved = await this.scoringEventRepository.save(entity);
+
+    const points = this.getPointsForEventType(saved.type);
+    await this.adjustMatchScore(
+      match,
+      saved.teamId === match.homeTeamId ? points : 0,
+      saved.teamId === match.awayTeamId ? points : 0,
+    );
 
     void this.matchNotifier.notifyScoringEventCreated({
       matchId,
@@ -132,10 +139,29 @@ export class MatchResultsService {
       );
     }
 
-    await this.validateScoringEventReferencesAndRules(existing.matchId, dto);
+    const previousTeamId = existing.teamId;
+    const previousPoints = this.getPointsForEventType(existing.type);
+
+    const { match } = await this.validateScoringEventReferencesAndRules(
+      existing.matchId,
+      dto,
+    );
 
     const updated = this.scoringEventMapper.mergeEntity(existing, dto);
     const saved = await this.scoringEventRepository.save(updated);
+
+    const nextPoints = this.getPointsForEventType(saved.type);
+    const deltaHome =
+      (saved.teamId === match.homeTeamId ? nextPoints : 0) -
+      (previousTeamId === match.homeTeamId ? previousPoints : 0);
+    const deltaAway =
+      (saved.teamId === match.awayTeamId ? nextPoints : 0) -
+      (previousTeamId === match.awayTeamId ? previousPoints : 0);
+
+    if (deltaHome !== 0 || deltaAway !== 0) {
+      await this.adjustMatchScore(match, deltaHome, deltaAway);
+    }
+
     return this.scoringEventMapper.toResponseDto(saved);
   }
 
@@ -148,13 +174,33 @@ export class MatchResultsService {
       );
     }
 
+    const { matchId, teamId, type } = existing;
     await this.scoringEventRepository.remove(existing);
+
+    const match = await this.matchesService.findOne(matchId);
+    if (
+      match.status !== MatchStatus.CANCELLED &&
+      match.homeTeamId !== null &&
+      match.awayTeamId !== null
+    ) {
+      const points = this.getPointsForEventType(type);
+      await this.adjustMatchScore(
+        match,
+        teamId === match.homeTeamId ? -points : 0,
+        teamId === match.awayTeamId ? -points : 0,
+      );
+    }
   }
 
   private async validateScoringEventReferencesAndRules(
     matchId: number,
     dto: CreateScoringEventDto,
-  ): Promise<{ playerUserId: number; playerDocument: string; teamName: string }> {
+  ): Promise<{
+    match: MatchResponseDto;
+    playerUserId: number;
+    playerDocument: string;
+    teamName: string;
+  }> {
     const match = await this.matchesService.findOne(matchId);
     const player = await this.playerService.findOne(dto.playerId);
     const team = await this.getTeamOrFail(dto.teamId);
@@ -196,10 +242,36 @@ export class MatchResultsService {
     }
 
     return {
+      match,
       playerUserId: player.userId,
       playerDocument: player.document,
       teamName: team.name,
     };
+  }
+
+  private getPointsForEventType(type: string): number {
+    const normalized = type.trim().toUpperCase();
+    if (normalized === 'TRIPLE') {
+      return 3;
+    }
+    if (normalized === 'DOBLE') {
+      return 2;
+    }
+    return 1;
+  }
+
+  private async adjustMatchScore(
+    match: MatchResponseDto,
+    deltaHome: number,
+    deltaAway: number,
+  ): Promise<void> {
+    const nextHomeScore = Math.max(0, (match.homeScore ?? 0) + deltaHome);
+    const nextAwayScore = Math.max(0, (match.awayScore ?? 0) + deltaAway);
+    await this.matchesService.updateResult(
+      match.id,
+      nextHomeScore,
+      nextAwayScore,
+    );
   }
 
   private async getTeamOrFail(teamId: number): Promise<TeamResponseDto> {
