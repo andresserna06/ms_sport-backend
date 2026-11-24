@@ -145,6 +145,27 @@ describe('MatchResultsService', () => {
     });
   });
 
+  it('should throw INVALID_STATE when match is still SCHEDULED', async () => {
+    matchesService.findOne.mockResolvedValue({
+      ...sampleMatch,
+      status: MatchStatus.SCHEDULED,
+    });
+    playerService.findOne.mockResolvedValue(samplePlayer);
+    teamsService.findOne.mockResolvedValue(homeTeam);
+
+    await expect(
+      service.createScoringEvent(7, {
+        playerId: 5,
+        teamId: 1,
+        minute: 12,
+        type: 'GOL',
+      }),
+    ).rejects.toMatchObject({
+      errorCase: ErrorCase.INVALID_STATE,
+    });
+    expect(repository.save).not.toHaveBeenCalled();
+  });
+
   it('should throw INVALID_STATE when teamId does not participate in the match', async () => {
     matchesService.findOne.mockResolvedValue(sampleMatch);
     playerService.findOne.mockResolvedValue(samplePlayer);

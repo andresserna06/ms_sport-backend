@@ -205,10 +205,15 @@ export class MatchResultsService {
     const player = await this.playerService.findOne(dto.playerId);
     const team = await this.getTeamOrFail(dto.teamId);
 
-    if (match.status === MatchStatus.CANCELLED) {
+    if (
+      match.status !== MatchStatus.IN_PROGRESS &&
+      match.status !== MatchStatus.FINISHED
+    ) {
       throw new ApplicationException(
         ErrorCase.INVALID_STATE,
-        `No se pueden registrar anotaciones en el partido #${matchId} porque está cancelado`,
+        match.status === MatchStatus.CANCELLED
+          ? `No se pueden registrar anotaciones en el partido #${matchId} porque está cancelado`
+          : `No se pueden registrar anotaciones en el partido #${matchId} porque aún no ha iniciado`,
       );
     }
 

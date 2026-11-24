@@ -45866,6 +45866,55 @@
           ]
         },
         {
+          "name": "TC-GC07-09b Intentar anotar en partido SCHEDULED sin iniciar (409 INVALID_STATE)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 409 Conflict\", () => pm.response.to.have.status(409));",
+                  "pm.test(\"errorCase es INVALID_STATE\", () => pm.expect(pm.response.json().errorCase).to.eql(\"INVALID_STATE\"));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/matches/{{gcMatchId}}/scoring-events",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"playerId\": {{gcPlayerId1}},\n  \"teamId\": {{gcTeamId1}},\n  \"minute\": 15,\n  \"type\": \"GOL\"\n}"
+            }
+          }
+        },
+        {
+          "name": "TC-GC07-09c Setup - Iniciar partido (200 IN_PROGRESS)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200 OK\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Estado cambia a IN_PROGRESS\", () => pm.expect(pm.response.json().status).to.eql(\"IN_PROGRESS\"));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": "{{baseUrl}}/matches/{{gcMatchId}}/start"
+          }
+        },
+        {
           "name": "TC-GC07-10 Registrar anotación 1 - jugador local (201)",
           "request": {
             "method": "POST",
